@@ -1,0 +1,1 @@
+# delete_os_tenant_resources
