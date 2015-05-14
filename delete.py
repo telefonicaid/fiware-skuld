@@ -31,30 +31,32 @@ import glance
 import cinder
 import neutron
 
-"""Warning: this methods destroy all the resources of the tenant!!!!!!"""
+"""Warning: this methods destroy all the tenant's resources!!!!!!"""
 def delete_tenant_resources():
     nova.delete_user_keypairs()
+
+    # Snapshots must be deleted before the volumes, because a spanpshot depends
+    # of a volume. A pause is required.
+    cinder.delete_tenant_volume_snapshots()
     nova.delete_tenant_vms()
 
     # VM must be deleted before purging the security groups
-    time.sleep(3)
+    while cinder.get_tenant_volume_snapshots():
+        time.sleep(1)
     nova.delete_tenant_security_groups()
     # TODO: remove rules from default secgroup. This secgroup cannot be deleted.
 
     glance.delete_tenant_images()
 
-    # Snapshots must be deleted before the volumes, because a spanpshot depends
-    # of a volume.
-    cinder.delete_tenant_volume_snapshots()
     cinder.delete_tenant_volumes()
     cinder.delete_tenant_backup_volumes()
 
-    #neutron.delete_tenant_subnets()
     neutron.delete_tenant_ports()
+    neutron.delete_tenant_securitygroups()
     neutron.delete_tenant_floatingips()
+    neutron.delete_tenant_subnets()
     neutron.delete_tenant_networks()
     neutron.delete_tenant_routers()
-    neutron.delete_tenant_securitygroups()
 
 
 # delete_tenant_resources()

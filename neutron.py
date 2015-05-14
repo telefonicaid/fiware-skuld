@@ -154,7 +154,11 @@ def delete_tenant_ports(tenant_id=None):
     for port in neutron.list_ports()['ports']:
         if port['tenant_id'] != tenant_id:
             continue
-        #if port['device_owner'] == 'network:router_interface':
-        #    neutron.remove_interface_router(router=port['device_id'], )
+        if port['device_owner'] == 'network:router_interface':
+            subnet = port['fixed_ips'][0]['subnet_id']
+            body = {'subnet_id': subnet}
+            neutron.remove_interface_router(
+                router=port['device_id'], body=body)
+
         else:
             neutron.delete_port(port['id'])

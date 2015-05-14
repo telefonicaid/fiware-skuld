@@ -44,7 +44,7 @@ print nova.get_tenant_security_groups()
 print 'Tenant images:'
 print glance.get_tenant_images()
 
-print 'Tenant snapshots:'
+print 'Tenant volume snapshots:'
 print cinder.get_tenant_volume_snapshots()
 
 print 'Tenant volumes:'
