@@ -10,11 +10,11 @@ This is a script to list/delete the resources of a tenant (and also the keypairs
 
 It uses the OpenStack Pythons API:
 
-pip install python-keystoneclient
-pip install python-novaclient
-pip install python-glanceclient
-pip install python-cinderclient
-pip install python-neutronclient
+* python-keystoneclient
+* python-novaclient
+* python-glanceclient
+* python-cinderclient
+* python-neutronclient
 
 Components
 ----------
