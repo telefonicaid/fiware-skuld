@@ -60,7 +60,7 @@ def get_user_keypairs(tenant_id=None):
         tenant_id = osclients.get_session().get_project_id()
 
     for keypair in novaclient.keypairs.list():
-        keypairs.append(keypair.uuid)
+        keypairs.append(keypair.id)
     return keypairs
 
 def delete_user_keypairs(tenant_id=None):

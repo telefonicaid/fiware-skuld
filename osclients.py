@@ -32,37 +32,54 @@ from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
 from neutronclient.v2_0 import client as neutronclient
-import novaclient.v1_1.client as novaclient
+from novaclient import client as novaclient
 from cinderclient.v2 import client as cinderclient
 from glanceclient import client as glanceclient
 
 
-_session = None
+_session_v2 = None
 _session_v3 = None
 
 def get_session():
-    global _session
-    if _session:
-        return _session
+    return get_session_v3()
 
+def get_session_v2():
+    global _session_v2
+    if _session_v2:
+        return _session_v2
+
+    auth_url = env['OS_AUTH_URL']
+    if auth_url.endswith('/v3/'):
+       auth_url = auth_url[0:-2] + '2.0'
+    elif auth_url.endswith('/v3'):
+       auth_url = auth_url[0:-1] + '2.0'
+
+    print auth_url
     auth = v2.Password(
-        auth_url=env['OS_AUTH_URL'],
+        auth_url=auth_url,
         username=env['OS_USERNAME'],
         password=env['OS_PASSWORD'],
         tenant_name=env['OS_TENANT_NAME'])
-    _session = session.Session(auth=auth)
-    return _session
+    _session_v2 = session.Session(auth=auth)
+    return _session_v2
 
 def get_session_v3():
     global _session_v3
     if _session_v3:
         return _session_v3
 
+    auth_url = env['OS_AUTH_URL']
+    if auth_url.endswith('/v2.0/'):
+       auth_url = auth_url[0:-4] + '3'
+    elif auth_url.endswith('/v2.0'):
+       auth_url = auth_url[0:-3] + '3'
+
     auth = v3.Password(
-        auth_url=env['OS_AUTH_URL'],
-        user_id=env['OS_USERNAME'],
+        auth_url= auth_url,
+        username=env['OS_USERNAME'],
         password=env['OS_PASSWORD'],
-        project_id=env['OS_TENANT_NAME'])
+        project_name=env['OS_TENANT_NAME'],
+        project_domain_name='default',user_domain_name='default')
     _session_v3 = session.Session(auth=auth)
     return _session_v3
 
@@ -78,12 +95,7 @@ def get_novaclient():
     if 'OS_REGION_NAME' in env:
         region = env['OS_REGION_NAME']
     return novaclient.Client(
-        env['OS_USERNAME'], env['OS_PASSWORD'], env['OS_TENANT_NAME'],
-        env['OS_AUTH_URL'], region_name=region,
-        service_type='compute')
-    # According to documentation, this should work,
-    # return novaclient.Client(
-    #    '2', region_name=env['OS_REGION_NAME'], session=get_session())
+        2, region_name=env['OS_REGION_NAME'], session=get_session())
 
 def get_cinderclient():
     region = None
@@ -101,7 +113,7 @@ def get_glanceclient():
     return glanceclient.Client(version='1', endpoint=endpoint, token=token)
 
 def get_keystoneclient():
-    session = get_session()
+    session = get_session_v2()
     return keystonev2.Client(session=session)
 
 def get_keystoneclientv3():
