@@ -31,7 +31,9 @@ import glance
 import cinder
 import neutron
 
-"""Warning: this methods destroy all the tenant's resources!!!!!!"""
+"""Warning: these method destroy all the tenant's resources!!!!!!"""
+
+
 def delete_tenant_resources():
     nova.delete_user_keypairs()
 
@@ -44,7 +46,8 @@ def delete_tenant_resources():
     while cinder.get_tenant_volume_snapshots():
         time.sleep(1)
     nova.delete_tenant_security_groups()
-    # TODO: remove rules from default secgroup. This secgroup cannot be deleted.
+
+    # TODO: remove rules from default secgroup. It cannot be deleted.
 
     glance.delete_tenant_images()
 

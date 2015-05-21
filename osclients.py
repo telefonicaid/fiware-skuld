@@ -40,8 +40,10 @@ from glanceclient import client as glanceclient
 _session_v2 = None
 _session_v3 = None
 
+
 def get_session():
     return get_session_v3()
+
 
 def get_session_v2():
     global _session_v2
@@ -50,9 +52,9 @@ def get_session_v2():
 
     auth_url = env['OS_AUTH_URL']
     if auth_url.endswith('/v3/'):
-       auth_url = auth_url[0:-2] + '2.0'
+        auth_url = auth_url[0:-2] + '2.0'
     elif auth_url.endswith('/v3'):
-       auth_url = auth_url[0:-1] + '2.0'
+        auth_url = auth_url[0:-1] + '2.0'
 
     print auth_url
     auth = v2.Password(
@@ -63,6 +65,7 @@ def get_session_v2():
     _session_v2 = session.Session(auth=auth)
     return _session_v2
 
+
 def get_session_v3():
     global _session_v3
     if _session_v3:
@@ -70,18 +73,19 @@ def get_session_v3():
 
     auth_url = env['OS_AUTH_URL']
     if auth_url.endswith('/v2.0/'):
-       auth_url = auth_url[0:-4] + '3'
+        auth_url = auth_url[0:-4] + '3'
     elif auth_url.endswith('/v2.0'):
-       auth_url = auth_url[0:-3] + '3'
+        auth_url = auth_url[0:-3] + '3'
 
     auth = v3.Password(
-        auth_url= auth_url,
+        auth_url=auth_url,
         username=env['OS_USERNAME'],
         password=env['OS_PASSWORD'],
         project_name=env['OS_TENANT_NAME'],
-        project_domain_name='default',user_domain_name='default')
+        project_domain_name='default', user_domain_name='default')
     _session_v3 = session.Session(auth=auth)
     return _session_v3
+
 
 def get_neutronclient():
     region = None
@@ -90,6 +94,7 @@ def get_neutronclient():
     return neutronclient.Client(
         session=get_session(), region_name=region)
 
+
 def get_novaclient():
     region = None
     if 'OS_REGION_NAME' in env:
@@ -97,11 +102,13 @@ def get_novaclient():
     return novaclient.Client(
         2, region_name=env['OS_REGION_NAME'], session=get_session())
 
+
 def get_cinderclient():
     region = None
     if 'OS_REGION_NAME' in env:
         region = env['OS_REGION_NAME']
     return cinderclient.Client(session=get_session(), region_name=region)
+
 
 def get_glanceclient():
     session = get_session()
@@ -112,9 +119,15 @@ def get_glanceclient():
     endpoint = session.get_endpoint(service_type='image', region_name=region)
     return glanceclient.Client(version='1', endpoint=endpoint, token=token)
 
+
 def get_keystoneclient():
+    return get_keystoneclient_v3()
+
+
+def get_keystoneclientv2():
     session = get_session_v2()
     return keystonev2.Client(session=session)
+
 
 def get_keystoneclientv3():
     session = get_session_v3()

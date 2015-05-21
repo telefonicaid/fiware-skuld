@@ -28,8 +28,8 @@ author = 'chema'
 
 import osclients
 
-# instantáneas de VM se listan como imágenes, no necesitamos tratarlas de
-# forma especial.
+# snapshots are listed as images. Don't need special treatment.
+
 
 def get_all_images():
     public_images = dict()
@@ -45,6 +45,7 @@ def get_all_images():
                 private_images[image.owner] = list()
             private_images[image.owner].append(image.id)
     return (private_images, public_images)
+
 
 def get_tenant_images(tenant_id=None):
     if not tenant_id:
@@ -79,9 +80,8 @@ def delete_tenant_images(also_shared=False, tenant_id=None):
         else:
             glance.images.delete(image.id)
 
+
 def delete_image_list(images):
     glance = osclients.get_glanceclient()
     for image in images:
         glance.images.delete(image.id)
-
-

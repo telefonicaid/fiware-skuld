@@ -28,6 +28,7 @@ import osclients
 
 cinder = osclients.get_cinderclient()
 
+
 def get_all_volumes():
     volumes_by_tenant = dict()
     for volume in cinder.volumes.list(search_opts={'all_tenants': 1}):
@@ -37,6 +38,7 @@ def get_all_volumes():
         volumes_by_tenant[tenant].append(volume.id, volume.user_id)
     return volumes_by_tenant
 
+
 def get_all_backup_volumes():
     volumes_by_tenant = dict()
     for volume in cinder.backups.list(search_opts={'all_tenants': 1}):
@@ -45,6 +47,7 @@ def get_all_backup_volumes():
             volumes_by_tenant[tenant] = list()
         volumes_by_tenant[tenant].append(volume.id, volume.user_id)
     return volumes_by_tenant
+
 
 def get_all_snapshots():
     volumes_by_tenant = dict()
@@ -65,12 +68,14 @@ def get_tenant_volumes(tenant_id=None):
         volumes.append((volume.id, volume.user_id))
     return volumes
 
+
 def delete_tenant_volumes(tenant_id=None):
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
     for volume in cinder.volumes.list():
         volume.delete()
+
 
 def get_tenant_backup_volumes(tenant_id=None):
     if not tenant_id:
@@ -81,12 +86,14 @@ def get_tenant_backup_volumes(tenant_id=None):
         volumes.append((volume.id, volume.user_id))
     return volumes
 
+
 def delete_tenant_backup_volumes(tenant_id=None):
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
     for volume in cinder.backups.list():
         volume.delete()
+
 
 def get_tenant_volume_snapshots(tenant_id=None):
     if not tenant_id:
@@ -96,6 +103,7 @@ def get_tenant_volume_snapshots(tenant_id=None):
     for snapshot in cinder.volume_snapshots.list():
         snapshots.append(snapshot.id)
     return snapshots
+
 
 def delete_tenant_volume_snapshots(tenant_id=None):
     if not tenant_id:

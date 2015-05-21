@@ -31,7 +31,6 @@ this includes the shared resources of other tenants"""
 neutron = osclients.get_neutronclient()
 
 
-
 def get_tenant_floatingips(tenant_id=None):
     floatingips = list()
     if not tenant_id:
@@ -43,6 +42,7 @@ def get_tenant_floatingips(tenant_id=None):
         floatingips.append(floatingip['id'])
     return floatingips
 
+
 def delete_tenant_floatingips(tenant_id=None):
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -51,6 +51,7 @@ def delete_tenant_floatingips(tenant_id=None):
             continue
 
         neutron.delete_floatingip(floatingip['id'])
+
 
 def get_tenant_networks(tenant_id=None):
     networks = list()
@@ -63,6 +64,7 @@ def get_tenant_networks(tenant_id=None):
         networks.append((net['id'], net['shared']))
     return networks
 
+
 def delete_tenant_networks(tenant_id=None):
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -71,6 +73,7 @@ def delete_tenant_networks(tenant_id=None):
             continue
 
         neutron.delete_network(net['id'])
+
 
 def get_tenant_subnets(tenant_id=None):
     subnets = list()
@@ -82,6 +85,7 @@ def get_tenant_subnets(tenant_id=None):
 
         subnets.append((subnet['tenant_id'], subnet['id']))
     return subnets
+
 
 def delete_tenant_subnets(tenant_id=None):
     if not tenant_id:
@@ -103,6 +107,7 @@ def get_tenant_routers(tenant_id=None):
 
         routers.append(router['id'])
     return routers
+
 
 def delete_tenant_routers(tenant_id=None):
     if not tenant_id:
@@ -127,6 +132,7 @@ def get_tenant_securitygroups(tenant_id=None):
         securitygroups.append(security_group['id'])
     return securitygroups
 
+
 def delete_tenant_securitygroups(tenant_id=None):
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -138,6 +144,7 @@ def delete_tenant_securitygroups(tenant_id=None):
 
         neutron.delete_security_group(security_group['id'])
 
+
 def get_tenant_ports(tenant_id=None):
     ports = list()
     if not tenant_id:
@@ -147,6 +154,7 @@ def get_tenant_ports(tenant_id=None):
             continue
         ports.append(port['id'])
     return ports
+
 
 def delete_tenant_ports(tenant_id=None):
     if not tenant_id:
@@ -159,6 +167,5 @@ def delete_tenant_ports(tenant_id=None):
             body = {'subnet_id': subnet}
             neutron.remove_interface_router(
                 router=port['device_id'], body=body)
-
         else:
             neutron.delete_port(port['id'])

@@ -34,7 +34,7 @@ nova = osclients.get_novaclient()
 
 volume = cinder.volumes.create(name='cindervolume', size=1)
 
-external_net=None
+external_net = None
 for net in neutron.list_networks()['networks']:
     if net['router:external']:
         external_net = net['id']
@@ -57,8 +57,8 @@ network = neutron.create_network(
 
 subnet = neutron.create_subnet(
     {'subnet': {'name': 'testsubnet', 'network_id': network['id'],
-    'ip_version': 4, 'cidr': '192.168.1.0/24',
-    'dns_nameservers': ['8.8.8.8']}})['subnet']
+                'ip_version': 4, 'cidr': '192.168.1.0/24',
+                'dns_nameservers': ['8.8.8.8']}})['subnet']
 
 neutron.add_interface_router(router['id'], {'subnet_id': subnet['id']})
 neutron.add_gateway_router(router['id'], {'network_id': external_net})
