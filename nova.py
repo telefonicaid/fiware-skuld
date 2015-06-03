@@ -26,11 +26,11 @@ author = 'chema'
 
 import osclients
 
-novaclient = osclients.get_novaclient()
 
 
 def get_all_vms():
     """This function is for admin users"""
+    novaclient = osclients.get_novaclient()
     tenants = dict()
     for vm in novaclient.servers.list(search_opts={'all_tenants': 1}):
         if vm.tenant_id not in tenants:
@@ -40,6 +40,7 @@ def get_all_vms():
 
 
 def get_tenant_vms(tenant_id=None):
+    novaclient = osclients.get_novaclient()
     vms = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -50,6 +51,7 @@ def get_tenant_vms(tenant_id=None):
 
 
 def delete_tenant_vms(tenant_id=None):
+    novaclient = osclients.get_novaclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -59,6 +61,7 @@ def delete_tenant_vms(tenant_id=None):
 
 def get_user_keypairs(tenant_id=None):
     """Only is possible to obtain the keypairs of the user"""
+    novaclient = osclients.get_novaclient()
     keypairs = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -69,6 +72,7 @@ def get_user_keypairs(tenant_id=None):
 
 
 def delete_user_keypairs(tenant_id=None):
+    novaclient = osclients.get_novaclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -78,6 +82,7 @@ def delete_user_keypairs(tenant_id=None):
 
 def get_tenant_security_groups(tenant_id=None):
     """Only is possible to obtain the security groups of the tenant"""
+    novaclient = osclients.get_novaclient()
     security_groups = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -91,6 +96,7 @@ def get_tenant_security_groups(tenant_id=None):
 
 
 def delete_tenant_security_groups(tenant_id=None):
+    novaclient = osclients.get_novaclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 

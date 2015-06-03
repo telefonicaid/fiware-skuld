@@ -28,10 +28,10 @@ import osclients
 
 """All data is obtained for all the tenants that has access (for a normal user
 this includes the shared resources of other tenants"""
-neutron = osclients.get_neutronclient()
 
 
 def get_tenant_floatingips(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     floatingips = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -44,6 +44,7 @@ def get_tenant_floatingips(tenant_id=None):
 
 
 def delete_tenant_floatingips(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for floatingip in neutron.list_floatingips()['floatingips']:
@@ -54,6 +55,7 @@ def delete_tenant_floatingips(tenant_id=None):
 
 
 def get_tenant_networks(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     networks = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -66,6 +68,7 @@ def get_tenant_networks(tenant_id=None):
 
 
 def delete_tenant_networks(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for net in neutron.list_networks()['networks']:
@@ -76,6 +79,7 @@ def delete_tenant_networks(tenant_id=None):
 
 
 def get_tenant_subnets(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     subnets = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -88,6 +92,7 @@ def get_tenant_subnets(tenant_id=None):
 
 
 def delete_tenant_subnets(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for subnet in neutron.list_subnets()['subnets']:
@@ -98,6 +103,7 @@ def delete_tenant_subnets(tenant_id=None):
 
 
 def get_tenant_routers(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     routers = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -110,6 +116,7 @@ def get_tenant_routers(tenant_id=None):
 
 
 def delete_tenant_routers(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for router in neutron.list_routers()['routers']:
@@ -121,6 +128,7 @@ def delete_tenant_routers(tenant_id=None):
 
 
 def get_tenant_securitygroups(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     securitygroups = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -134,6 +142,7 @@ def get_tenant_securitygroups(tenant_id=None):
 
 
 def delete_tenant_securitygroups(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for security_group in neutron.list_security_groups()['security_groups']:
@@ -146,6 +155,7 @@ def delete_tenant_securitygroups(tenant_id=None):
 
 
 def get_tenant_ports(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     ports = list()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
@@ -157,6 +167,7 @@ def get_tenant_ports(tenant_id=None):
 
 
 def delete_tenant_ports(tenant_id=None):
+    neutron = osclients.get_neutronclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
     for port in neutron.list_ports()['ports']:

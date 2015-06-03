@@ -26,10 +26,10 @@ author = 'chema'
 
 import osclients
 
-cinder = osclients.get_cinderclient()
 
 
 def get_all_volumes():
+    cinder = osclients.get_cinderclient()
     volumes_by_tenant = dict()
     for volume in cinder.volumes.list(search_opts={'all_tenants': 1}):
         tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
@@ -40,6 +40,7 @@ def get_all_volumes():
 
 
 def get_all_backup_volumes():
+    cinder = osclients.get_cinderclient()
     volumes_by_tenant = dict()
     for volume in cinder.backups.list(search_opts={'all_tenants': 1}):
         tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
@@ -50,6 +51,7 @@ def get_all_backup_volumes():
 
 
 def get_all_snapshots():
+    cinder = osclients.get_cinderclient()
     volumes_by_tenant = dict()
     for volume in cinder.volume_snapshots.list(search_opts={'all_tenants': 1}):
         tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
@@ -60,6 +62,7 @@ def get_all_snapshots():
 
 
 def get_tenant_volumes(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -70,6 +73,7 @@ def get_tenant_volumes(tenant_id=None):
 
 
 def delete_tenant_volumes(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -78,6 +82,7 @@ def delete_tenant_volumes(tenant_id=None):
 
 
 def get_tenant_backup_volumes(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -88,6 +93,7 @@ def get_tenant_backup_volumes(tenant_id=None):
 
 
 def delete_tenant_backup_volumes(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -96,6 +102,7 @@ def delete_tenant_backup_volumes(tenant_id=None):
 
 
 def get_tenant_volume_snapshots(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
@@ -106,6 +113,7 @@ def get_tenant_volume_snapshots(tenant_id=None):
 
 
 def delete_tenant_volume_snapshots(tenant_id=None):
+    cinder = osclients.get_cinderclient()
     if not tenant_id:
         tenant_id = osclients.get_session().get_project_id()
 
