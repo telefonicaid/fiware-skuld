@@ -40,6 +40,20 @@ from glanceclient import client as glanceclient
 _session_v2 = None
 _session_v3 = None
 
+__username = None
+__password = None
+__tenant = None
+
+
+def set_credential(username, password, tenant):
+    global __username, __password, __tenant
+    global _session_v2, _session_v3
+    __username = username
+    __password = password
+    __tenant = tenant
+    # clear sessions
+    _session_v2 = None
+    _session_v3 = None
 
 def get_session():
     return get_session_v3()
@@ -57,11 +71,18 @@ def get_session_v2():
         auth_url = auth_url[0:-1] + '2.0'
 
     print auth_url
-    auth = v2.Password(
-        auth_url=auth_url,
-        username=env['OS_USERNAME'],
-        password=env['OS_PASSWORD'],
-        tenant_name=env['OS_TENANT_NAME'])
+    if __username and __password and __tenant:
+        auth = v2.Password(
+            auth_url=auth_url,
+            username=__username,
+            password=__password,
+            tenant_name=__tenant)
+    else:
+        auth = v2.Password(
+            auth_url=auth_url,
+            username=env['OS_USERNAME'],
+            password=env['OS_PASSWORD'],
+            tenant_name=env['OS_TENANT_NAME'])
     _session_v2 = session.Session(auth=auth)
     return _session_v2
 
@@ -77,12 +98,20 @@ def get_session_v3():
     elif auth_url.endswith('/v2.0'):
         auth_url = auth_url[0:-3] + '3'
 
-    auth = v3.Password(
-        auth_url=auth_url,
-        username=env['OS_USERNAME'],
-        password=env['OS_PASSWORD'],
-        project_name=env['OS_TENANT_NAME'],
-        project_domain_name='default', user_domain_name='default')
+    if __username and __password and __tenant:
+        auth = v3.Password(
+            auth_url=auth_url,
+            username=__username,
+            password=__password,
+            project_name=__tenant,
+            project_domain_name='default', user_domain_name='default')
+    else:
+        auth = v3.Password(
+            auth_url=auth_url,
+            username=env['OS_USERNAME'],
+            password=env['OS_PASSWORD'],
+            project_name=env['OS_TENANT_NAME'],
+            project_domain_name='default', user_domain_name='default')
     _session_v3 = session.Session(auth=auth)
     return _session_v3
 
@@ -120,10 +149,6 @@ def get_glanceclient():
     return glanceclient.Client(version='1', endpoint=endpoint, token=token)
 
 
-def get_keystoneclient():
-    return get_keystoneclient_v3()
-
-
 def get_keystoneclientv2():
     session = get_session_v2()
     return keystonev2.Client(session=session)
@@ -132,3 +157,7 @@ def get_keystoneclientv2():
 def get_keystoneclientv3():
     session = get_session_v3()
     return keystonev3.Client(session=session)
+
+def get_keystoneclient():
+    return get_keystoneclientv3()
+
