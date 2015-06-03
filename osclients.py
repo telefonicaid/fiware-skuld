@@ -39,7 +39,8 @@ from glanceclient import client as glanceclient
 
 _session_v2 = None
 _session_v3 = None
-
+_saved_session_v2 = None
+_saved_session_v3 = None
 __username = None
 __password = None
 __tenant = None
@@ -52,9 +53,33 @@ def set_credential(username, password, tenant):
     __password = password
     __tenant = tenant
     # clear sessions
-    _session_v2 = None
-    _session_v3 = None
+    if _session_v2:
+        _session_v2.invalidate()
+        _session_v2 = None
+    if _session_v3:
+        _session_v3.invalidate()
+        _session_v3 = None
 
+def preserve_session():
+    global _session_v2, _session_v3
+    global _saved_session_v2, _saved_session_v3
+
+    _saved_session_v2 = _session_v2
+    _saved_session_v3 = _session_v3
+    _session_v2 = None
+    _session_v3 = None 
+
+def restore_session():
+    global _session_v2, _session_v3
+    global _saved_session_v2, _saved_session_v3
+
+    if _session_v2 and _session_v2 != _saved_session_v2:
+        _session_v2.invalidate()
+    if _session_v3 and _session_v3 != _saved_session_v3:
+        _session_v3.invalidate()
+    _session_v2 = _saved_session_v2
+    _session_v3 = _saved_session_v3 
+        
 def get_session():
     return get_session_v3()
 
