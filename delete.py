@@ -25,11 +25,15 @@
 author = 'chema'
 
 import time
+import base64
 
 import nova
 import glance
 import cinder
 import neutron
+
+import osclients
+from change_identity import change_identity
 
 """Warning: these method destroy all the tenant's resources!!!!!!"""
 
@@ -61,5 +65,10 @@ def delete_tenant_resources():
     neutron.delete_tenant_networks()
     neutron.delete_tenant_routers()
 
-
+def delete_users_resources(usernames):
+    for user in usernames:
+        change_identity(user)
+        delete_tenant_resources()
+        restore_session()
+ 
 # delete_tenant_resources()
