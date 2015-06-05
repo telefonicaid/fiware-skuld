@@ -40,9 +40,10 @@ for net in neutron.list_networks()['networks']:
         external_net = net['id']
         break
 
+properties={ 'key1': 'value1'}
 image = glance.images.create(
     container_format='bare', name='testimage1', disk_format='qcow2',
-    data='aaaaa')
+    data='aaaaa', properties=properties)
 
 keypair = nova.keypairs.create(name='testpublickey')
 secgroup = nova.security_groups.create('testsecgroup',
