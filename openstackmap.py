@@ -142,7 +142,8 @@ def get_and_save_neutron():
 def load_neutron():
     global networks, subnets, routers, floatingips 
     global security_groups, ports
-    global security_groups_by_id
+    global security_groups_by_id, routers_by_id, networks_by_id
+    global subnets_by_id
 
     if not os.path.exists(persistence_dir + '/networks.pickle'):    
         get_and_save_neutron()
@@ -151,6 +152,9 @@ def load_neutron():
     networks = load('networks')
     subnets = load('subnetworks')
     routers = load('routers')
+    routers_by_id = dict( (r['id'], r) for r in routers)
+    networks_by_id = dict( (n['id'], n) for n in networks)
+    subnets_by_id = dict( (s['id'], s) for s in subnets)
     floatingips = load('floatingips')
     security_groups = load('securitygroups')
     security_groups_by_id = dict( (sec['id'], sec) for sec in security_groups)
