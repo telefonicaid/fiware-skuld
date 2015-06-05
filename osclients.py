@@ -44,14 +44,22 @@ _saved_session_v3 = None
 __username = None
 __password = None
 __tenant = None
+__tenant_id = None
 
+use_keystone_v3_session = True
 
-def set_credential(username, password, tenant):
-    global __username, __password, __tenant
+def set_credential(username, password, tenant, tenant_is_name=True):
+    global __username, __password, __tenant, __tenant_id
     global _session_v2, _session_v3
     __username = username
     __password = password
-    __tenant = tenant
+    if tenant_is_name:
+	__tenant = tenant
+        __tenant_id = None
+    else:
+        __tenant_id = tenant
+        __tenant = None
+
     # clear sessions
     if _session_v2:
         _session_v2.invalidate()
@@ -60,6 +68,16 @@ def set_credential(username, password, tenant):
         _session_v3.invalidate()
         _session_v3 = None
 
+def set_credential_env():
+    global __username, __password, __tenant, __tenant_id
+
+    __username = env['OS_USERNAME']
+    __password = env['OS_PASSWORD']
+    if 'OS_TENANT_NAME' in env:
+        __tenant = env['OS_TENANT_NAME']
+    else:
+        __tenant_id = env['OS_TENANT_ID']
+    
 def preserve_session():
     global _session_v2, _session_v3
     global _saved_session_v2, _saved_session_v3
@@ -81,8 +99,10 @@ def restore_session():
     _session_v3 = _saved_session_v3 
         
 def get_session():
-    return get_session_v3()
-
+    if use_keystone_v3_session:
+	return get_session_v3()
+    else:
+        return get_session_v2()
 
 def get_session_v2():
     global _session_v2
@@ -95,8 +115,10 @@ def get_session_v2():
     elif auth_url.endswith('/v3'):
         auth_url = auth_url[0:-1] + '2.0'
 
-    print auth_url
-    if __username and __password and __tenant:
+    if not __username:
+        set_credential_env()
+
+    if __tenant:
         auth = v2.Password(
             auth_url=auth_url,
             username=__username,
@@ -105,9 +127,9 @@ def get_session_v2():
     else:
         auth = v2.Password(
             auth_url=auth_url,
-            username=env['OS_USERNAME'],
-            password=env['OS_PASSWORD'],
-            tenant_name=env['OS_TENANT_NAME'])
+            username=__username,
+            password=__password,
+            tenant_id=__tenant_id)
     _session_v2 = session.Session(auth=auth)
     return _session_v2
 
@@ -123,7 +145,10 @@ def get_session_v3():
     elif auth_url.endswith('/v2.0'):
         auth_url = auth_url[0:-3] + '3'
 
-    if __username and __password and __tenant:
+    if not __username:
+        set_credential_env()
+
+    if __tenant:
         auth = v3.Password(
             auth_url=auth_url,
             username=__username,
@@ -133,9 +158,9 @@ def get_session_v3():
     else:
         auth = v3.Password(
             auth_url=auth_url,
-            username=env['OS_USERNAME'],
-            password=env['OS_PASSWORD'],
-            project_name=env['OS_TENANT_NAME'],
+            username=__username,
+            password=__password,
+            project_id=__tenant_id,
             project_domain_name='default', user_domain_name='default')
     _session_v3 = session.Session(auth=auth)
     return _session_v3
@@ -184,5 +209,8 @@ def get_keystoneclientv3():
     return keystonev3.Client(session=session)
 
 def get_keystoneclient():
-    return get_keystoneclientv3()
+    if use_keystone_v3_session:
+        return get_keystoneclientv3()
+    else:
+        return get_keystoneclientv2()
 
