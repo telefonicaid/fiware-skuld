@@ -28,11 +28,17 @@ import osclients
 import cPickle as pickle
 import sys
 import os.path
-
-persistence_dir = os.path.expanduser('~/persistence')
-
+import os
 
 use_wrapper = True
+
+persistence_dir = os.path.expanduser('~/persistence')
+pers_keystone = persistence_dir + '/keystone'
+if 'OS_REGION_NAME' in os.environ:
+    pers_region = persistence_dir + '/' + os.environ['OS_REGION_NAME']   
+else:
+    pers_region = persistence_dir + '/region'   
+
 
 class __D(dict):
     def __init__(self, d=dict()):
@@ -41,28 +47,35 @@ class __D(dict):
 
 
 def load(name):
-    objects = pickle.load(open(persistence_dir + '/' + name + '.pickle', 'rb'))
+    objects = pickle.load(open(pers_region + '/' + name + '.pickle', 'rb'))
     if use_wrapper:
        objects = list(__D(object) for object in objects)
     return objects
+
+def load_fkeystone(name):
+    objects = pickle.load(open(pers_keystone + '/' + name + '.pickle', 'rb'))
+    if use_wrapper:
+       objects = list(__D(object) for object in objects)
+    return objects
+
     
-def get_and_save_keystone():
+def refresh_keystone():
     global users, roles, tenants, roles_a 
 
     keystone = osclients.get_keystoneclientv3()
-    with open(persistence_dir + '/roles.pickle', 'wb') as f:
+    with open(pers_keystone + '/roles.pickle', 'wb') as f:
         roles = list(role.to_dict() for role in keystone.roles.list())
         pickle.dump(roles, f, protocol=-1)
 
-    with open(persistence_dir + '/users.pickle', 'wb') as f:
+    with open(pers_keystone + '/users.pickle', 'wb') as f:
         users = list(user.to_dict() for user in keystone.users.list())
         pickle.dump(users, f, protocol=-1)
 
-    with open(persistence_dir + '/tenants.pickle', 'wb') as f:
+    with open(pers_keystone + '/tenants.pickle', 'wb') as f:
         tenants = list(tenant.to_dict() for tenant in keystone.projects.list())
         pickle.dump(tenants, f, protocol=-1)
 
-    with open(persistence_dir + '/asignments.pickle', 'wb') as f:
+    with open(pers_keystone + '/asignments.pickle', 'wb') as f:
         a = list(asig.to_dict() for asig in keystone.role_assignments.list())
         roles_a = a
         pickle.dump(roles_a, f, protocol=-1)
@@ -72,13 +85,13 @@ def load_keystone():
     global roles_by_user, roles_by_project
     global users, roles, tenants, roles_a 
 
-    if not os.path.exists(persistence_dir + '/users.pickle'):
-        get_and_save_keystone()
+    if not os.path.exists(pers_keystone + '/users.pickle'):
+        refresh_keystone()
     else: 
-        users = load('users')
-        tenants = load('tenants')
-        roles_a = load('asignments')
-        roles = load('roles')
+        users = load_fkeystone('users')
+        tenants = load_fkeystone('tenants')
+        roles_a = load_fkeystone('asignments')
+        roles = load_fkeystone('roles')
 
     users_by_email = dict()
     users_by_id = dict()
@@ -110,32 +123,32 @@ def load_keystone():
         roles_by_user[userid].append((rolesdict[roleid], projectid))
         roles_by_project[projectid].append((rolesdict[roleid], userid))
 
-def get_and_save_neutron():
+def refresh_neutron():
     neutron = osclients.get_neutronclient()
     global networks, subnets, routers, floatingips 
     global security_groups, ports
 
-    with open(persistence_dir + '/networks.pickle', 'wb') as f:
+    with open(pers_region + '/networks.pickle', 'wb') as f:
         networks = neutron.list_networks()['networks']
         pickle.dump(networks, f, protocol=-1)
 
-    with open(persistence_dir + 'subnetworks.pickle', 'wb') as f:
+    with open(pers_region + '/subnetworks.pickle', 'wb') as f:
         subnets = neutron.list_subnets()['subnets']
         pickle.dump(subnets, f, protocol=-1)
 
-    with open(persistence_dir + 'routers.pickle', 'wb') as f:
+    with open(pers_region + '/routers.pickle', 'wb') as f:
         routers = neutron.list_routers()['routers']
         pickle.dump(routers, f, protocol=-1)
 
-    with open(persistence_dir + 'floatingips.pickle', 'wb') as f:
+    with open(pers_region + '/floatingips.pickle', 'wb') as f:
         floatingips = neutron.list_floatingips()['floatingips']
         pickle.dump(floatingips, f, protocol=-1)
 
-    with open(persistence_dir + 'securitygroups.pickle', 'wb') as f:
+    with open(pers_region + '/securitygroups.pickle', 'wb') as f:
         security_groups = neutron.list_security_groups()['security_groups']
         pickle.dump(security_groups, f, protocol=-1)
 
-    with open(persistence_dir + 'ports.pickle', 'wb') as f:
+    with open(pers_region + '/ports.pickle', 'wb') as f:
         ports = neutron.list_ports()['ports']
         pickle.dump(ports, f, protocol=-1)
 
@@ -145,13 +158,13 @@ def load_neutron():
     global security_groups_by_id, routers_by_id, networks_by_id
     global subnets_by_id
 
-    if not os.path.exists(persistence_dir + '/networks.pickle'):    
-        get_and_save_neutron()
-        return
+    if not os.path.exists(pers_region + '/networks.pickle'):    
+        refresh_neutron()
+    else:
+        networks = load('networks')
+        subnets = load('subnetworks')
+        routers = load('routers')
 
-    networks = load('networks')
-    subnets = load('subnetworks')
-    routers = load('routers')
     routers_by_id = dict( (r['id'], r) for r in routers)
     networks_by_id = dict( (n['id'], n) for n in networks)
     subnets_by_id = dict( (s['id'], s) for s in subnets)
@@ -161,12 +174,12 @@ def load_neutron():
     ports = load('ports')
 
 
-def get_and_save_nova():
+def refresh_nova():
     global vms
 
     nova = osclients.get_novaclient()
 
-    with open(persistence_dir + '/vms.pickle', 'wb') as f:
+    with open(pers_region + '/vms.pickle', 'wb') as f:
         vm_list = nova.servers.list(search_opts={'all_tenants': 1})
         vms =list(vm.to_dict() for vm in vm_list)
         pickle.dump(vms, f, protocol=-1)
@@ -176,20 +189,19 @@ def load_nova():
     global vms_by_id
     vms_by_id = dict()
 
-    if not os.path.exists(persistence_dir + '/vms.pickle'):
-        get_and_save_nova()
-        return 
+    if not os.path.exists(pers_region + '/vms.pickle'):
+        refresh_nova()
+    else:
+        vms = load('vms') 
 
-    #vms = pickle.load(open(persistence_dir + '/vms.pickle', 'rb'))
-    vms = load('vms')
     vms_by_id = dict( (vm['id'], vm) for vm in vms)
 
-def get_and_save_cinder():
+def refresh_cinder():
     global volumes, backup_volumes, snapshot_cinder    
 
     cinder = osclients.get_cinderclient()
 
-    with open(persistence_dir + '/volumes.pickle', 'wb') as f:
+    with open(pers_region + '/volumes.pickle', 'wb') as f:
         volumes = list (volume.__dict__ for volume in cinder.volumes.list(search_opts={'all_tenants': 1}))
         pickle.dump(volumes, f, protocol=-1)
 
@@ -197,35 +209,59 @@ def load_cinder():
     global volumes
     global volumes_by_id
 
-    if not os.path.exists(persistence_dir + '/volumes.pickle'):
-        get_and_save_cinder()
+    if not os.path.exists(pers_region + '/volumes.pickle'):
+        refresh_cinder()
     else:
         volumes = load('volumes')
 
     volumes_by_id = dict( (volume['id'], volume) for volume in volumes)
 
-def get_and_save_glance():
+def refresh_glance():
     global images
     
     glance = osclients.get_glanceclient()
-    with open(persistence_dir + '/images.pickle', 'wb') as f:
+    with open(pers_region + '/images.pickle', 'wb') as f:
         images = list(image.to_dict() for image in  glance.images.findall())
         pickle.dump(images, f, protocol=-1)
 
 def load_glance():
     global images, images_by_id
-    if not os.path.exists(persistence_dir + '/images.pickle'):
-        get_and_save_glance()
+    if not os.path.exists(pers_region + '/images.pickle'):
+        refresh_glance()
     else:
         images = load('images')
     images_by_id = dict( (image['id'], image) for image in images)
 
 def load_all():
+    load_keystone()
     load_neutron()
     load_nova()
-    load_keystone()
     load_glance()
     load_cinder()
 
+def refresh_all(also_keystone=True):
+    if also_keystone:
+	refresh_keystone()    
+    refresh_neutron()
+    refresh_nova()
+    refresh_glance()
+    refresh_cinder()
+
+def change_region(new_region):
+    global pers_region
+    pers_region = persistence_dir + '/' + new_region
+    if not os.path.exists(pers_region):
+        os.mkdir(pers_region)
+    os.environ['OS_REGION_NAME'] = new_region
+    load_all()
+
 if not os.path.exists(persistence_dir):
     os.mkdir(persistence_dir)
+
+if not os.path.exists(pers_keystone):
+    os.mkdir(pers_keystone)
+
+if not os.path.exists(pers_region):
+    os.mkdir(pers_region)
+
+
