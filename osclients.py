@@ -54,7 +54,7 @@ def set_credential(username, password, tenant, tenant_is_name=True):
     __username = username
     __password = password
     if tenant_is_name:
-	__tenant = tenant
+        __tenant = tenant
         __tenant_id = None
     else:
         __tenant_id = tenant
@@ -100,7 +100,7 @@ def restore_session():
         
 def get_session():
     if use_keystone_v3_session:
-	return get_session_v3()
+        return get_session_v3()
     else:
         return get_session_v2()
 
