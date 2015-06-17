@@ -179,7 +179,7 @@ def get_novaclient():
     if 'OS_REGION_NAME' in env:
         region = env['OS_REGION_NAME']
     return novaclient.Client(
-        2, region_name=env['OS_REGION_NAME'], session=get_session())
+        2, region_name=region, session=get_session())
 
 
 def get_cinderclient():
