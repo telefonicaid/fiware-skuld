@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class ExpiredUsers:
-    def __init__(self):
+    def __init__(self, tenant=None, username=None, password=None):
         """ Initialize the class with the appropriate parameters.
         """
         self.TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
@@ -18,9 +18,9 @@ class ExpiredUsers:
         self.listUsers = []
         self.MAX_NUMBER_OF_DAYS = 14  # days
         self.finalList = []
-        self.__tenant = ""
-        self.__username = ""
-        self.__password = ""
+        self.__tenant = tenant
+        self.__username = username
+        self.__password = password
 
     def get_admin_token(self):
         """
@@ -41,7 +41,7 @@ class ExpiredUsers:
 
         self.token = rjson['access']['token']['id']
 
-        print "Admin token requested: " + self.token
+        print("Admin token requested: {}".format(self.token))
 
     def get_list_trial_users(self):
         """
@@ -60,7 +60,7 @@ class ExpiredUsers:
         for item in role_assignments:
             self.listUsers.append(item['user']['id'])
 
-        print "Number of Trial users detected: " + str(len(self.listUsers))
+        print("Number of Trial users detected: {}".format(len(self.listUsers)))
 
     def get_list_expired_users(self):
         """
@@ -86,7 +86,8 @@ class ExpiredUsers:
                 # If true means that the user trial period has expired
                 self.finalList.append(user_id)
 
-        print len(self.finalList)
+        print("Number of expired users found: {}".format(len(self.finalList)))
+
         return self.finalList
 
     def check_time(self, trial_started_at):
@@ -116,7 +117,7 @@ class ExpiredUsers:
 
     def __check_credentials(self):
         """Check if we have the credentials of the admin user"""
-        if self.__tenant == "" or self.__username == "" or self.__password == "":
+        if self.__tenant == None or self.__username == None or self.__password == None:
             # We need to have a admin token in order to proceed.
             raise ValueError("Error, you need to define the credentials of the admin user. "
                              "Please, execute the setCredentials() method previously.")
@@ -127,7 +128,25 @@ class ExpiredUsers:
     def gerlisttrialusers(self):
         return self.listUsers
 
-    def set_credentials(self, tenant, username, password):
-        self.__tenant = "tenant"
-        self.__username = "username"
-        self.__password = "password"
+    #def set_credentials(self, tenant, username, password):
+    #    self.__tenant = "tenant"
+    #    self.__username = "username"
+    #    self.__password = "password"
+
+    def getlistusers(self):
+        """
+        Global method that call the rest of internal one in order to recover the information of
+        the expired users.
+        :return: Lists of Expired Users id who have Trial role and expired, example:
+                    ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a']
+        """
+        # Get the securoty token
+        self.get_admin_token()
+
+        # Get the list of Trial users
+        self.get_list_trial_users()
+
+        # Get the list of expired trial users
+        listusers = self.get_list_expired_users()
+
+        return listusers
