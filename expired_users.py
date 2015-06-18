@@ -175,3 +175,17 @@ class ExpiredUsers:
         listusers = self.get_list_expired_users()
 
         return listusers
+
+    def set_keystone_endpoint(self,serviceendpoint):
+        """ Set the service endpoint corresponding to the Keystone Service
+        :param serviceendpoint: The Kesytone service endpoint
+        :return: None
+        """
+        self.KEYSTONE_ENDPOINT = serviceendpoint
+
+    def get_keystone_endpoint(self):
+        """ Get the Keystone service endpoint.
+        :return:
+        """
+        return self.KEYSTONE_ENDPOINT
+

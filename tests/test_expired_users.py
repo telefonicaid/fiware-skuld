@@ -253,3 +253,27 @@ class TestExpiredUsers(TestCase):
         expectedresult = False
 
         self.assertEqual(expectedresult, result)
+
+    def testkeystonegetter(self, m):
+        """ Test the obtention of appropriate value of the Keystone service endpoint.
+        """
+        expiredusers = ExpiredUsers()
+
+        result = expiredusers.get_keystone_endpoint()
+
+        expectedresult = "http://cloud.lab.fiware.org:4730/"
+
+        self.assertEqual(expectedresult, result)
+
+    def testkeystonesetter(self, m):
+        """ Test the setter method to fis the Keystone service endpoint
+        """
+        expiredusers = ExpiredUsers()
+
+        expectedresult = "any url"
+
+        expiredusers.set_keystone_endpoint(expectedresult)
+
+        result = expiredusers.get_keystone_endpoint()
+
+        self.assertEqual(expectedresult, result)
