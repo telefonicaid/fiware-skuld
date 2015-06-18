@@ -47,7 +47,8 @@ class ExpiredUsers:
 
     def get_admin_token(self):
         """
-        Return the admin token for a administrador user
+        Return the admin token for a administrator user, this value is
+        maintained in the internal attribute "token" of the class.
         :return: The admin token to be used in the X-Auth-Token header
         """
 
@@ -66,9 +67,12 @@ class ExpiredUsers:
 
         print("Admin token requested: {}".format(self.token))
 
+        return self.token
+
     def get_list_trial_users(self):
         """
-        Return the list of users which have the Trial Role defined
+        Return the list of users which have the Trial Role defined. This value is
+        maintained in the internal attribute "listUsers" of the class.
         :return: Lists of users id who have Trial role
         """
         self.__check_token()
@@ -85,11 +89,14 @@ class ExpiredUsers:
 
         print("Number of Trial users detected: {}".format(len(self.listUsers)))
 
+        return self.listUsers
+
     def get_list_expired_users(self):
         """
         For each users id that have the Trial role, we need to check
         if the time from their creation (trial_created_at) have
-        expired
+        expired. This value is maintained in the internal attribute
+        "finalList" of the class.
         :return: Lists of Users id who have Trial role and expired
         """
 
@@ -150,11 +157,6 @@ class ExpiredUsers:
 
     def gerlisttrialusers(self):
         return self.listUsers
-
-    #def set_credentials(self, tenant, username, password):
-    #    self.__tenant = "tenant"
-    #    self.__username = "username"
-    #    self.__password = "password"
 
     def getlistusers(self):
         """
