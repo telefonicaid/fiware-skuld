@@ -46,6 +46,27 @@ class TestExpiredUsers(TestCase):
 
         self.assertEqual(expectedToken, resultToken)
 
+    def testwrongadmintoken(self, m):
+        """testworngadmintoken check that we have a worg credential data"""
+        response = {
+            "error":
+                {
+                    "message": "The request you have made requires authentication.",
+                    "code": 401,
+                    "title": "Unauthorized"
+                }
+        }
+
+        m.post(requests_mock.ANY, json=response, status_code=401)
+
+        expiredUsers = ExpiredUsers('wrong tenant', 'any username', 'any password')
+
+        try:
+            expiredUsers.get_admin_token()
+        except Exception as e:
+            assert e.message == 'The request you have made requires authentication.'
+
+
     def testadmintokenWithoutCredentials(self, m):
         """Test the obtention of admin token without credentials"""
         expiredUsers = ExpiredUsers()

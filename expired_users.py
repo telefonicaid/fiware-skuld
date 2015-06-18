@@ -63,9 +63,13 @@ class ExpiredUsers:
 
         rjson = json.loads(r.text)
 
-        self.token = rjson['access']['token']['id']
+        if r.status_code == 200:
 
-        print("Admin token requested: {}".format(self.token))
+            self.token = rjson['access']['token']['id']
+
+            print("Admin token requested: {}".format(self.token))
+        else:
+            raise Exception(rjson['error']['message'])
 
         return self.token
 
