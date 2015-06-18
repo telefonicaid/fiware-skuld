@@ -29,3 +29,4 @@ KEYSTONE_URL = 'http://cloud.lab.fiware.org:4730/'
 TENANT_NAME = ''
 USERNAME = ''
 PASSWORD = ''
+TOKEN_LENGTH = 32

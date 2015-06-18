@@ -6,14 +6,10 @@ Feature: Get the list of expired users from the IdM.
 
 
     @scenario_01
-    Scenario Outline: 01: Verify the obtention of administrator token
+    Scenario: 01: Verify the obtention of administrator token
       Given a valid tenantName, username and password
-      And a connectivity to the Keystone service with the "<ServiceEndpoint>"
+      And a connectivity to the Keystone service
       When I request a token to the Keystone
       Then the keystone return me a json message with a valid token
 
-      Examples:
-      | serviceendpoint                      |
-      | http://cloud.lab.fiware.org:4730/    |
- 
 

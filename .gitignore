@@ -53,3 +53,6 @@ target/
 
 # IDE
 .idea/
+
+# Acceptance test result folder
+tests/acceptance_tests/testreport/

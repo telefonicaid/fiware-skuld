@@ -30,5 +30,7 @@ Folder for acceptance tests of the FIWARE Trial Users Management.
 
 - Change to the tests/acceptance_tests folder of the project if not already on it
 
+- Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
+
 - Run lettuce_tools with appropriate params (see available ones with the -h option)
 

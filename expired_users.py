@@ -37,7 +37,7 @@ class ExpiredUsers:
         self.KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
         self.v20 = "v2.0/"
         self.v30 = "v3/"
-        self.token = ""
+        self.token = None
         self.listUsers = []
         self.MAX_NUMBER_OF_DAYS = 14  # days
         self.finalList = []

@@ -26,8 +26,9 @@ __author__ = 'fla'
 
 # -*- coding: utf-8 -*-
 from lettuce import step, world, before
-from commons.configuration import TENANT_NAME, USERNAME, PASSWORD
+from commons.configuration import TENANT_NAME, USERNAME, PASSWORD, KEYSTONE_URL, TOKEN_LENGTH
 from expired_users import ExpiredUsers
+import requests
 
 @before.each_feature
 def setup_feature(feature):
@@ -36,23 +37,34 @@ def setup_feature(feature):
 
 @before.each_scenario
 def setup(scenario):
+    pass
 
-    # Do nothing
-    print "do nothing"
+@step(u'a connectivity to the Keystone service')
+def set_keystone_service_endpoint(step):
 
-@step(u'a connectivity to the Keystone service with the "([^"]*)"')
-def set_keystone_service_endpoint(step, keystoneurl):
+    world.expiredusers.set_keystone_endpoint(KEYSTONE_URL)
 
-    world.expiredusers.set_keystone_endpoint(keystoneurl)
+    try:
+        _ = requests.get(world.expiredusers.get_keystone_endpoint(), timeout=5)
+        print("True")
+    except requests.ConnectionError:
+        assert False, 'Expected True but \n Obtained Connection exception'
 
 @step(u'I request a token to the Keystone')
 def get_admin_token(step):
 
     world.expiredusers.get_admin_token()
+    assert world.expiredusers.getadmintoken() is not None, 'Expected not None value \n Obtained None'
+
+@step(u'Given a valid tenantName, username and password')
+def given_a_valid_tenantname_username_and_password(step):
+    pass
 
 @step(u'the keystone return me a json message with a valid token')
 def check_admin_token(step):
     result = world.expiredusers.getadmintoken()
 
-    print result
+    # We need to validate the token 937ed33c72d74d9492d0e18bf20be599
+
+    assert len(result) == TOKEN_LENGTH, 'Expected a token with length: 32 \n Obtained a token with length: {}'.format(len(retulst))
 
