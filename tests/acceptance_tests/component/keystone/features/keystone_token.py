@@ -111,8 +111,4 @@ def given_a_wrong_tenant_username_and_password(step, tenantname, username, passw
 
 @step(u'the component return an exception with the message "([^"]*)"')
 def then_the_component_return_an_exception_with_the_message_group1(step, group1):
-    print
-    print world.message
-    print
-
     assert world.message == 'The request you have made requires authentication.'
