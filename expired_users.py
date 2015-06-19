@@ -26,20 +26,22 @@ __author__ = 'fla'
 import json
 import requests
 from datetime import datetime
+from settings import settings
+from utils.log import logger
 
 
 class ExpiredUsers:
     def __init__(self, tenant=None, username=None, password=None):
         """ Initialize the class with the appropriate parameters.
         """
-        self.TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
-        self.BASIC_ROLE_ID = "0bcb7fa6e85046cb9e89ded5656b192b"
-        self.KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
+        self.TRIAL_ROLE_ID = settings.TRIAL_ROLE_ID
+        self.BASIC_ROLE_ID = settings.BASIC_ROLE_ID
+        self.KEYSTONE_ENDPOINT = settings.KEYSTONE_ENDPOINT
         self.v20 = "v2.0/"
         self.v30 = "v3/"
         self.token = None
         self.listUsers = []
-        self.MAX_NUMBER_OF_DAYS = 14  # days
+        self.MAX_NUMBER_OF_DAYS = settings.MAX_NUMBER_OF_DAYS
         self.finalList = []
         self.__tenant = tenant
         self.__username = username
@@ -67,7 +69,7 @@ class ExpiredUsers:
 
             self.token = rjson['access']['token']['id']
 
-            print("Admin token requested: {}".format(self.token))
+            logger.info("Admin token requested: %s", self.token)
         else:
             raise Exception(rjson['error']['message'])
 
@@ -91,7 +93,7 @@ class ExpiredUsers:
         for item in role_assignments:
             self.listUsers.append(item['user']['id'])
 
-        print("Number of Trial users detected: {}".format(len(self.listUsers)))
+        logger.info("Number of Trial users detected: %d", len(self.listUsers))
 
         return self.listUsers
 
@@ -120,11 +122,17 @@ class ExpiredUsers:
                 # If true means that the user trial period has expired
                 self.finalList.append(user_id)
 
-        print("Number of expired users found: {}".format(len(self.finalList)))
+        logger.info("Number of expired users found: %d", len(self.finalList))
 
         return self.finalList
 
     def check_time(self, trial_started_at):
+        """
+        Check the time of the trial user in order to see if it is expired.
+        :param trial_started_at: the date in which the trial user was created
+        :return: True if the trial period was expired (greater than settings.MAX_NUMBER_OF_DAYS).
+                 False anyway
+        """
 
         formatter_string = "%Y-%m-%d"
 
@@ -157,16 +165,24 @@ class ExpiredUsers:
                              "Please, execute the setCredentials() method previously.")
 
     def getadmintoken(self):
+        """
+        Get the current admin token
+        :return: The Keystone admin token
+        """
         return self.token
 
     def gerlisttrialusers(self):
+        """
+        Get the list of trial users
+        :return: List of Trial users.
+        """
         return self.listUsers
 
     def getlistusers(self):
         """
         Global method that call the rest of internal one in order to recover the information of
         the expired users.
-        :return: Lists of Expired Users id who have Trial role and expired, example:
+        :return: List of Expired Users id who have Trial role and expired, example:
                     ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a']
         """
         # Get the securoty token
@@ -180,16 +196,16 @@ class ExpiredUsers:
 
         return listusers
 
-    def set_keystone_endpoint(self,serviceendpoint):
+    def set_keystone_endpoint(self, serviceendpoint):
         """ Set the service endpoint corresponding to the Keystone Service
-        :param serviceendpoint: The Kesytone service endpoint
+        :param serviceendpoint: The Keystone service endpoint
         :return: None
         """
         self.KEYSTONE_ENDPOINT = serviceendpoint
 
     def get_keystone_endpoint(self):
         """ Get the Keystone service endpoint.
-        :return:
+        :return: The Keystone service endpoint
         """
         return self.KEYSTONE_ENDPOINT
 

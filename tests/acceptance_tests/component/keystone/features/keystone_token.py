@@ -49,7 +49,6 @@ def set_keystone_service_endpoint(step):
 
     try:
         _ = requests.get(world.expiredusers.get_keystone_endpoint(), timeout=5)
-        print("True")
     except requests.ConnectionError:
         assert False, 'Expected True but \n Obtained Connection exception'
 

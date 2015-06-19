@@ -5,4 +5,6 @@ python-neutronclient==2.5.0
 python-novaclient==2.25.0
 requests==2.6.0
 requests-mock==0.6.0
+json=2.0.9
+re=2.2.1
 

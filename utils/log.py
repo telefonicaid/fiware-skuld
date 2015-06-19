@@ -23,11 +23,25 @@
 # contact with opensource@tid.es
 #
 __author__ = 'fla'
+from settings import settings
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
-KEYSTONE_URL = 'http://cloud.lab.fiware.org:4730/'
-FAKE_TENANT_NAME = 'afake'
-TENANT_NAME = ''
-USERNAME = ''
-PASSWORD = ''
-TOKEN_LENGTH = 32
+#LOGFILE = settings.LOGGING_PATH + '/TrialUserManagement.log'
+LOGFILE = 'TrialUserManagement.log'
+
+if not os.path.exists(settings.LOGGING_PATH):
+    os.makedirs(settings.LOGGING_PATH)
+
+log_handler = RotatingFileHandler(LOGFILE, maxBytes=1048576, backupCount=5)
+
+formatter = logging.Formatter('%(asctime)s %(levelname)s TrialUserManagement [-] %(message)s')
+log_handler.setFormatter(formatter)
+
+logger.addHandler(log_handler)
+logger.setLevel(logging.DEBUG)
+

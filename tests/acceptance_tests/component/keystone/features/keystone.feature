@@ -5,7 +5,7 @@ Feature: Get the list of expired users from the IdM.
     so that I can delete the resources associated to them.
 
 
-    @basic
+    @happy_path
     Scenario: 01: Verify the obtention of administrator token
       Given a valid tenantName, username and password
       And a connectivity to the Keystone service
