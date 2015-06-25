@@ -30,3 +30,10 @@ TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
 BASIC_ROLE_ID = "0bcb7fa6e85046cb9e89ded5656b192b"
 KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
 MAX_NUMBER_OF_DAYS = 14  # days
+DONT_DELETE_DOMAINS = set((
+   'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu',
+   'gatv.ssr.upm.es', 'thalesgroup.com', 'atos.net', 'uth.gr', 'bth.se',
+   'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch',
+   'it-innovation.soton.ac.uk', 'cesnet.cz', 'rt.cesnet.cz', 'rt3.cesnet.cz',
+   'fokus.fraunhofer.de'))
+

@@ -24,17 +24,38 @@
 #
 author = 'chema'
 
-from expired_users import ExpiredUsers
+import logging
 from os import environ as env
+
+from expired_users import ExpiredUsers
+from settings import settings
+from osclients import OpenStackClients
 
 expired_users = ExpiredUsers(
     username=env['OS_USERNAME'], password=['OS_PASSWORD'],
     tenant=['OS_TENANT_NAME'])
 
+dont_delete_domains = settings.DONT_DELETE_DOMAINS
+keystone = OpenStackClients().get_keystoneclientv3()
+
 expired_users.get_list_trial_users()
 users = expired_users.get_list_expired_users()
-fich = users_to_delete = open('users_to_delete.txt', 'w')
-for user in users:
-    print >>fich, user
+fich = open('users_to_delete.txt', 'w')
+
+# build users map
+users_by_id = dict()
+for user in keystone.users.list():
+    users_by_id[user.id] = user
+
+for user_id in users:
+    user = users_by_id[user_id]
+    print user
+    domain = user.name.partition('@')[2]
+    if domain != '' and domain in dont_delete_domains:
+        msg = 'User with name {1} should not be deleted because the domain'
+        logging.warning(msg.format(user.name))
+    else:
+        print >>fich, user_id
+
 fich.close()
 
