@@ -24,7 +24,7 @@
 #
 author = 'chema'
 
-import osclients
+from osclients import osclients
 import cPickle as pickle
 import sys
 import os.path
