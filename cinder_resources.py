@@ -24,72 +24,58 @@
 #
 author = 'chema'
 
+
 class CinderResources(object):
+    """This class represent the cinder resources of a tenant. It includes
+    methods to delete and query the resources"""
+
     def __init__(self, openstackclients):
-         self.cinder = openstackclients.get_cinderclient()
-         self.tenant_id = openstackclients.get_session().get_project_id()
+        """Constructor. It requires an OpenStackClients object
 
-    def get_all_volumes(self):
-        volumes_by_tenant = dict()
-        for volume in self.cinder.volumes.list(search_opts={'all_tenants': 1}):
-            tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
-            if tenant not in volumes_by_tenant:
-                volumes_by_tenant[tenant] = list()
-            volumes_by_tenant[tenant].append(volume.id, volume.user_id)
-        return volumes_by_tenant
-
-
-    def get_all_backup_volumes(self):
-        volumes_by_tenant = dict()
-        for volume in self.cinder.backups.list(search_opts={'all_tenants': 1}):
-            tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
-            if tenant not in volumes_by_tenant:
-                volumes_by_tenant[tenant] = list()
-            volumes_by_tenant[tenant].append(volume.id, volume.user_id)
-        return volumes_by_tenant
-
-    def get_all_snapshots(self):
-        volumes_by_tenant = dict()
-        for volume in self.cinder.volume_snapshots.list(
-                search_opts={'all_tenants': 1}):
-            tenant = volume.__dict__['os-vol-tenant-attr:tenant_id']
-            if tenant not in volumes_by_tenant:
-                volumes_by_tenant[tenant] = list()
-            volumes_by_tenant[tenant].append(volume.id, volume.user_id)
-        return volumes_by_tenant
-
+        :param openstackclients: an OpenStackClients method (module osclients)
+        :return: nothing
+        """
+        self.cinder = openstackclients.get_cinderclient()
+        self.tenant_id = openstackclients.get_session().get_project_id()
 
     def get_tenant_volumes(self):
+        """Return a list with all the volumes of the tenant
+        :return: a list of tuples (volume_id, user_id)
+        """
         volumes = list()
         for volume in self.cinder.volumes.list():
             volumes.append((volume.id, volume.user_id))
         return volumes
-
 
     def delete_tenant_volumes(self):
+        """Delete all the tenant's volumes"""
         for volume in self.cinder.volumes.list():
             volume.delete()
 
-
     def get_tenant_backup_volumes(self):
+        """Return a list with all the volume backups of the tenant
+        :return: a list of tuples (volume_id, user_id)
+        """
         volumes = list()
         for volume in self.cinder.backups.list():
             volumes.append((volume.id, volume.user_id))
         return volumes
 
-
     def delete_tenant_backup_volumes(self):
+        """Delete all the volume backups of the tenant"""
         for volume in self.cinder.backups.list():
             volume.delete()
 
-
     def get_tenant_volume_snapshots(self):
+        """Return a list with all the volume backups of the tenant
+        :return: a list of snaphost ids.
+        """
         snapshots = list()
         for snapshot in self.cinder.volume_snapshots.list():
             snapshots.append(snapshot.id)
         return snapshots
 
-
     def delete_tenant_volume_snapshots(self):
+        """Delete all volume snapshot of the tenant"""
         for snapshot in self.cinder.volume_snapshots.list():
             snapshot.delete()

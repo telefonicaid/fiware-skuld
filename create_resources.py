@@ -31,9 +31,27 @@ from osclients import OpenStackClients
 
 image_name = 'debian7'
 
+
 class ResourcePopulator(object):
-    """This class create resources to test that all of them are deleted"""
+    """This class create resources to test that all of them are deleted by
+    the code.
+
+    It creates:
+    *a volume
+    *an image
+    *a router
+    *a network and subnetwork
+    *an interface in the router
+    *an IP
+    *a security group
+    *a keypair
+    *a VM
+    *an association of a floating ip with the VM
+    *a snapshot of the volume
+    """
+
     def __init__(self):
+        """constructor"""
         osclients = OpenStackClients()
         neutron = osclients.get_neutronclient()
         cinder = osclients.get_cinderclient()
@@ -48,7 +66,7 @@ class ResourcePopulator(object):
                 external_net = net['id']
                 break
 
-        properties={ 'key1': 'value1'}
+        properties = {'key1': 'value1'}
 
         image = glance.images.create(
             container_format='bare', name='testimage1', disk_format='qcow2',
@@ -80,13 +98,12 @@ class ResourcePopulator(object):
         snapshot = cinder.volume_snapshots.create(volume.id)
 
         image_id = glance.images.find(name=image_name)
-        tiny=nova.flavors.find(name='m1.tiny')
-        small=nova.flavors.find(name='m1.small')
-        nic= {'net-id' : network['id']}
+        tiny = nova.flavors.find(name='m1.tiny')
+        small = nova.flavors.find(name='m1.small')
+        nic = {'net-id': network['id']}
         server = nova.servers.create(
-            'chema',flavor=tiny, image=image_id, key_name='testpublickey',
+            'chema', flavor=tiny, image=image_id, key_name='testpublickey',
             security_groups=['default'], nics=[nic])
-        #, files=files, config_drive=True)
+        # , files=files, config_drive=True)
         time.sleep(2)
         server.add_floating_ip(floatingip.ip)
-

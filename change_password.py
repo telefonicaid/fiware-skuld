@@ -16,8 +16,14 @@ class PasswordChanger(object):
         for user in self.keystone.users.list():
             self.users_by_id[user.id] = user
 
-
     def change_password(self, userobj, newpassword):
+        """
+        change the password of the user.
+        :param userobj: a user, this object may be obtained with get_userbyid
+          or get_userbyname methods
+        :param newpassword: the new password
+        :return: Nothing
+        """
         userid = userobj.id
         (resp, user) = self.keystone.users.client.get('/users/' + userid)
         if not resp.ok:
@@ -29,17 +35,39 @@ class PasswordChanger(object):
             raise Exception(str(resp.status_code) + ' ' + resp.reason)
 
     def reset_password(self, userobj):
+        """
+        Set a new, random password and return it.
+
+        The password length is 21 characters, it may contain a-zA-Z0-9!. It is
+        the equivalent to a 128 bits key.
+
+        :param userobj: a user, this object may be obtained with get_userbyid
+          or get_userbyname methods
+        :return: the new password
+        """
         rand = open('/dev/urandom')
         password = base64.b64encode(rand.read(16), '.!')[:21]
         self.change_password(userobj, password)
         return password
 
     def get_user_byid(self, userid):
-        # Does not work: find(id=userid)
-        # return self.keystone.users.find(id=userid)
+        """
+        Return a user object from its userid. This object may be used with
+         methods change_password and reset_password
+        :param userid: the UUID of the user
+        :return: a user object
+        """
+        # Does not work:
+        #   return self.keystone.users.find(id=userid)
         return self.users_by_id[userid]
 
     def get_user_byname(self, username):
+        """
+        Return a user object from its username. This object may be used with
+         methods change_password and reset_password
+        :param userid: the UUID of the user
+        :return: a user object
+        """
         return self.keystone.users.find(name=username)
 
     def get_list_users_with_cred(self, list_user_ids):
@@ -66,4 +94,3 @@ if __name__ == '__main__':
     manager = PasswordChanger()
     usr = manager.get_user_byname(meta.username)
     manager.change_password(usr, meta.newpassword)
-

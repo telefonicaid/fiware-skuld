@@ -45,4 +45,3 @@ for line in users_credentials.readlines():
     print 'Deleting resources of user ' + user
     user_resources = UserResources(user, password, tenant_id)
     user_resources.delete_tenant_resources()
-

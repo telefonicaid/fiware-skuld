@@ -32,6 +32,7 @@ from glance_resources import GlanceResources
 from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
 
+
 class UserResources(object):
     """Class to list, delete user resources. Also provides a method to stop all
     the VM of the tenant.
@@ -53,6 +54,8 @@ class UserResources(object):
         self.neutron = NeutronResources(self.clients)
 
     def delete_tenant_resources(self):
+        """Delete all the resources of the tenant, and also the keypairs of the
+        user"""
         self.nova.delete_user_keypairs()
 
         # Snapshots must be deleted before the volumes, because a spanpshot
@@ -81,9 +84,11 @@ class UserResources(object):
         self.neutron.delete_tenant_routers()
 
     def stop_tenant_vms(self):
+        """Stop all the active vms of the tenant"""
         self.nova.stop_tenant_vms()
 
     def print_tenant_resources(self):
+        """print all the tenant's resources"""
         print 'Tenant id is: ' + self.clients.get_session().get_project_id()
         print 'User id is: ' + self.clients.get_session().get_user_id()
         print 'User keypairs:'
@@ -117,4 +122,3 @@ class UserResources(object):
         print self.neutron.get_tenant_subnets()
         print 'Tenant ports'
         print self.neutron.get_tenant_ports()
-

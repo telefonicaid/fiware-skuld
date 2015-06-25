@@ -56,4 +56,3 @@ for user_id in expired_users:
         print >>fich, user_id
 
 fich.close()
-

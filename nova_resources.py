@@ -26,11 +26,21 @@ author = 'chema'
 
 
 class NovaResources(object):
+    """This class represent the Nova resources of a tenant. It includes
+    methods to delete and query the resources"""
     def __init__(self, osclients):
+        """Constructor. It requires an OpenStackClients object
+
+        :param openstackclients: an OpenStackClients method (module osclients)
+        :return: nothing
+        """
         self.novaclient = osclients.get_novaclient()
         self.tenant_id = osclients.get_session().get_project_id()
 
     def get_tenant_vms(self):
+        """return all the tenant's vms
+        :return: a list of VMs UUID
+        """
         vms = list()
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
@@ -38,33 +48,52 @@ class NovaResources(object):
         return vms
 
     def stop_tenant_vms(self):
+        """stop all the tenant's which are in ACTIVE state."""
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
             if vm.status == 'ACTIVE':
                 vm.stop()
 
     def delete_tenant_vms(self):
+        """delete all the tenant's vms."""
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
             vm.delete()
 
     def get_user_keypairs(self):
-        """Only is possible to obtain the keypairs of the user"""
+        """return a list with the user's keypairs
+
+        The keypair is a very particular case: is the only resource owned
+        by the user, not by the tenant. And it is also the only resource that
+        does not have a unique id, the name is only unique among the user's
+        keypairs. In other way, only the user can obtain the list of keypairs.
+        :return: a list of keypairs. The ids are only unique among the user's
+           keypairs.
+        """
         keypairs = list()
         for keypair in self.novaclient.keypairs.list():
             keypairs.append(keypair.id)
         return keypairs
 
     def delete_user_keypairs(self):
+        """delete all the user's keypairs ."""
         for keypair in self.novaclient.keypairs.list():
             keypair.delete()
 
     def get_tenant_security_groups(self):
-        """Only is possible to obtain the security groups of the tenant"""
+        """return a list with the tenant's security groups (nova)
+
+
+        With current API, only the tenant can obtain the list of their
+        security groups (this situation is changed in a new version).
+
+        However, if using neutron, the ids are the same and an administrator
+        in neutron can list all the security groups.
+        :return: a list of security group ids.
+        """
         security_groups = list()
 
         for secgroup in self.novaclient.security_groups.list():
-            # print secgroup.tenant_id, secgroup.id
             if secgroup.name == 'default' \
                     or secgroup.tenant_id != self.tenant_id:
                 continue
@@ -72,6 +101,7 @@ class NovaResources(object):
         return security_groups
 
     def delete_tenant_security_groups(self):
+        """delete all the tenant's security groups (nova)"""
         for secgroup in self.novaclient.security_groups.findall():
             if secgroup.name == 'default' \
                     or secgroup.tenant_id != self.tenant_id:

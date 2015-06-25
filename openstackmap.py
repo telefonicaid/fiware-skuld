@@ -26,10 +26,10 @@ author = 'chema'
 
 from osclients import osclients
 import cPickle as pickle
-import sys
-import os.path
 import os
 
+# Use __D class instead of a dictionary
+# this allows using a['key'] or a.key but it is incompatible with pickle
 use_wrapper = True
 
 persistence_dir = os.path.expanduser('~/persistence')
@@ -202,7 +202,8 @@ def refresh_cinder():
     cinder = osclients.get_cinderclient()
 
     with open(pers_region + '/volumes.pickle', 'wb') as f:
-        volumes = list (volume.__dict__ for volume in cinder.volumes.list(search_opts={'all_tenants': 1}))
+        volumes = list(volume.__dict__ for volume in cinder.volumes.list(
+            search_opts={'all_tenants': 1}))
         pickle.dump(volumes, f, protocol=-1)
 
 def load_cinder():
@@ -241,7 +242,7 @@ def load_all():
 
 def refresh_all(also_keystone=True):
     if also_keystone:
-	refresh_keystone()    
+        refresh_keystone()
     refresh_neutron()
     refresh_nova()
     refresh_glance()
