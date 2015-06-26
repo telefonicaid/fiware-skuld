@@ -38,3 +38,4 @@ for cred in cred_list:
     print >>users_credentials, ','.join(cred)
 
 users_credentials.close()
+
