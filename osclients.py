@@ -37,180 +37,358 @@ from cinderclient.v2 import client as cinderclient
 from glanceclient import client as glanceclient
 
 
-_session_v2 = None
-_session_v3 = None
-_saved_session_v2 = None
-_saved_session_v3 = None
-__username = None
-__password = None
-__tenant = None
-__tenant_id = None
+class OpenStackClients(object):
+    """This class provides methods to obtains several openstack clients,
+    sharing the session:
+    keystone (v2 and v3), nova, glance, neutron, cinder
 
-use_keystone_v3_session = True
+    By default, the class use a keystone v3 session. To use a v2 session,
+    call set_keystone_version
+    """
 
-def set_credential(username, password, tenant, tenant_is_name=True):
-    global __username, __password, __tenant, __tenant_id
-    global _session_v2, _session_v3
-    __username = username
-    __password = password
-    if tenant_is_name:
-        __tenant = tenant
-        __tenant_id = None
-    else:
-        __tenant_id = tenant
-        __tenant = None
+    def __init__(self, auth_url=None):
+        """Constructor of the class. The Keystone URL may be provided,
+        otherwise it is obtained from the environment (OS_AUTH_URL)
 
-    # clear sessions
-    if _session_v2:
-        _session_v2.invalidate()
-        _session_v2 = None
-    if _session_v3:
-        _session_v3.invalidate()
-        _session_v3 = None
+        The fields with the user, password, tenant_id/tenant_name and region
+        are initialized with the environemnt variables if present, but they
+        can be set also with set_credential/set_region methods.
 
-def set_credential_env():
-    global __username, __password, __tenant, __tenant_id
+        :param auth_url: The keystone URL (OS_AUTH_URL if omitted)
+        :return: nothing
+        """
+        self.use_v3 = True
 
-    __username = env['OS_USERNAME']
-    __password = env['OS_PASSWORD']
-    if 'OS_TENANT_NAME' in env:
-        __tenant = env['OS_TENANT_NAME']
-    else:
-        __tenant_id = env['OS_TENANT_ID']
-    
-def preserve_session():
-    global _session_v2, _session_v3
-    global _saved_session_v2, _saved_session_v3
+        if auth_url:
+            self.auth_url = auth_url
+        else:
+            self.auth_url = env['OS_AUTH_URL']
 
-    _saved_session_v2 = _session_v2
-    _saved_session_v3 = _session_v3
-    _session_v2 = None
-    _session_v3 = None 
+        if not self.auth_url:
+            raise(
+                'auth_url parameter must be provided or OS_AHT_URL be defined')
 
-def restore_session():
-    global _session_v2, _session_v3
-    global _saved_session_v2, _saved_session_v3
+        self._session_v2 = None
+        self._session_v3 = None
+        self._saved_session_v2 = None
+        self._saved_session_v3 = None
 
-    if _session_v2 and _session_v2 != _saved_session_v2:
-        _session_v2.invalidate()
-    if _session_v3 and _session_v3 != _saved_session_v3:
-        _session_v3.invalidate()
-    _session_v2 = _saved_session_v2
-    _session_v3 = _saved_session_v3 
-        
-def get_session():
-    if use_keystone_v3_session:
-        return get_session_v3()
-    else:
-        return get_session_v2()
+        if 'OS_USERNAME' in env:
+            self.__username = env['OS_USERNAME']
+        else:
+            self.__username = None
 
-def get_session_v2():
-    global _session_v2
-    if _session_v2:
-        return _session_v2
+        if 'OS_PASSWORD' in env:
+            self.__password = env['OS_PASSWORD']
+        else:
+            self.__password = None
 
-    auth_url = env['OS_AUTH_URL']
-    if auth_url.endswith('/v3/'):
-        auth_url = auth_url[0:-2] + '2.0'
-    elif auth_url.endswith('/v3'):
-        auth_url = auth_url[0:-1] + '2.0'
+        if 'OS_TENANT_NAME' in env:
+            self.__tenant = env['OS_TENANT_NAME']
+        else:
+            self.__tenant = None
 
-    if not __username:
-        set_credential_env()
+        if 'OS_TENANT_ID' in env:
+            self.__tenant_id = env['OS_TENANT_ID']
+        else:
+            self.__tenant_id = None
 
-    if __tenant:
-        auth = v2.Password(
-            auth_url=auth_url,
-            username=__username,
-            password=__password,
-            tenant_name=__tenant)
-    else:
-        auth = v2.Password(
-            auth_url=auth_url,
-            username=__username,
-            password=__password,
-            tenant_id=__tenant_id)
-    _session_v2 = session.Session(auth=auth)
-    return _session_v2
+        if 'OS_REGION_NAME' in env:
+            self.__region = env['OS_REGION_NAME']
+        else:
+            self.__region = None
+
+    def set_credential(self, username, password, tenant, tenant_is_name=True):
+        """Set the credential to use in the session. If a session already
+        exists, it is invalidate. It is possible to save and then restore the
+        session with the methods preserve_session/restore_session.
+
+        This method must be called before invoking some of the get_ methods
+        unless the OS_USERNAME, OS_PASSWORD, OS_TENANT_NAME/OS_TENANT_ID are
+        defined.
+
+        The tenant may be a name (the default) or an id. In the last case, set
+        tenant_is_name to False.
+
+        :param username: the username of the user
+        :param password: the password of the user
+        :param tenant: the tenant name, but if tenat_is_name=False, this is
+               the tenant_id.
+        :param tenant_is_name: If true, the variable tenant is a name, if false
+         it is an id.
+        :return: Nothing.
+        """
+        self.__username = username
+        self.__password = password
+        if tenant_is_name:
+            self.__tenant = tenant
+            self.__tenant_id = None
+        else:
+            self.__tenant_id = tenant
+            self.__tenant = None
+
+        # clear sessions
+        if self._session_v2:
+            self._session_v2.invalidate()
+            self._session_v2 = None
+        if self._session_v3:
+            self._session_v3.invalidate()
+            self._session_v3 = None
+
+    def set_region(self, region):
+        """Set the region. By default this datum is filled in the constructor
+        using the environment variable OS_REGION_NAME.
+        :param region: the region name
+        :return: nothing
+        """
+        self.__region = region
+
+    def set_keystone_version(self, use_v3=True):
+        """By default, get_session and get_keystoneclient use the version v3
+        of the API. Call this method to use version v2
+
+        Be aware that there are explicit methods get_session_v2 and
+        get_keystoneclientv2, however, all the other clients call get_session
+        to build the client.
+        :param use_v3: True to use v3 version, False to use v2 version.
+        :return: nothing
+        """
+        self.use_v3 = use_v3
+
+    def get_session(self):
+        """Return the session object. This method is called automatically at
+        invoking get_novaclient, get_glanceclient, get_cinderclient,
+        get_keystoneclient*, get_neutronclient.
+
+        The session is cached between call. It is invalidated if called to
+        set_credential. The call 'set_region' does not affect the session,
+        because the credential is valid to access all the regions using the
+        same keystone.
+
+        This method invokes get_session_v3 or get_session_v2 depending of the
+        call to set_keystone_version
+
+        see also preserve_session and restore_session.
+
+        :return: a session object.
+        """
+
+        if self.use_v3:
+            return self.get_session_v3()
+        else:
+            return self.get_session_v2()
+
+    def get_session_v2(self):
+        """get a v2 session. See get_session for more details about sessions
+
+        :return: a session object
+        """
+        if self._session_v2:
+            return self._session_v2
+
+        if self.auth_url.endswith('/v3/'):
+            auth_url = self.auth_url[0:-2] + '2.0'
+        elif self.auth_url.endswith('/v3'):
+            auth_url = self.auth_url[0:-1] + '2.0'
+        else:
+            auth_url = self.auth_url
+
+        if not self.__username:
+            raise Exception('Username must be provided')
+
+        if self.__tenant:
+            auth = v2.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                tenant_name=self.__tenant)
+        else:
+            auth = v2.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                tenant_id=self.__tenant_id)
+        self._session_v2 = session.Session(auth=auth)
+        return self._session_v2
+
+    def get_session_v3(self):
+        """get a v3 session. See get_session for more details about sessions
+
+        :return: a session object
+        """
+
+        if self._session_v3:
+            return self._session_v3
+
+        if self.auth_url.endswith('/v2.0/'):
+            auth_url = self.auth_url[0:-4] + '3'
+        elif self.auth_url.endswith('/v2.0'):
+            auth_url = self.auth_url[0:-3] + '3'
+        else:
+            auth_url = self.auth_url
+
+        if not self.__username:
+            raise Exception('Username must be provided')
+
+        if self.__tenant:
+            auth = v3.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                project_name=self.__tenant,
+                project_domain_name='default', user_domain_name='default')
+        else:
+            auth = v3.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                project_id=self.__tenant_id,
+                project_domain_name='default', user_domain_name='default')
+        self._session_v3 = session.Session(auth=auth)
+        return self._session_v3
+
+    def get_neutronclient(self):
+        """Get a neutron client. A neutron client is different for each region
+        (although all clients share the same session and it is possible to have
+         simultaneously clients to several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a neutron client valid for a region.
+        """
+        return neutronclient.Client(
+            session=self.get_session(), region_name=self.__region)
+
+    def get_novaclient(self):
+        """Get a nova client. A client is different for each region
+        (although all clients share the same session and it is possible to have
+         simultaneously clients to several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a nova client valid for a region.
+        """
+        return novaclient.Client(
+            2, region_name=self.__region, session=self.get_session())
+
+    def get_cinderclient(self):
+        """Get a cinder client. A client is different for each region
+        (although all clients share the same session and it is possible to have
+         simultaneously clients to several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a cinder client valid for a region.
+        """
+        return cinderclient.Client(session=self.get_session(),
+                                   region_name=self.__region)
+
+    def get_glanceclient(self):
+        """Get a glance client. A client is different for each region
+        (although all clients share the same session and it is possible to have
+         simultaneously clients to several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a glance client valid for a region.
+        """
+
+        session = self.get_session()
+        token = session.get_token()
+        endpoint = session.get_endpoint(service_type='image',
+                                        region_name=self.__region)
+        return glanceclient.Client(version='1', endpoint=endpoint, token=token)
+
+    def get_keystoneclient(self):
+        """Get a keystoneclient. A keystone server can be shared among several
+        regions and therefore the same keystone client is valid for all this
+        regions.
+
+        The client may use v2 or v3 of the API. It depends of the value
+        of the call to set_keystone_version (the default is v3 version)
+
+        Before calling this method, the credential must be provided. The
+        constructor obtain the credential for environment variables if present
+        but also the method set_credential is available.
+
+        Be aware that calling the method set_credential invalidate the old
+        session if already existed and therefore can affect the old clients.
+
+        :return: a nova client valid for a region.
+        """
+        if self.use_v3:
+            return self.get_keystoneclientv3()
+        else:
+            return self.get_keystoneclientv2()
+
+    def get_keystoneclientv2(self):
+        """Get a v2 keystone client. See get_keystoneclient for more details.
+        :return: a keystone client"""
+        session = self.get_session_v2()
+        return keystonev2.Client(session=session)
+
+    def get_keystoneclientv3(self):
+        """Get a v3 keystone client. See get_keystoneclient for more details.
+        :return: a keystone client"""
+        session = self.get_session_v3()
+        return keystonev3.Client(session=session)
+
+    def preserve_session(self):
+        """Preserve the session (or sessions, v2 and v3) cached on the object.
+        This sessions can be restored with restore session.
+
+        This function is useful to avoid that the session is invalidated after
+        calling set_credential. A use case is to work with an admin credential
+        but temporary work with another user:
+
+          clients = OpenStackClient()
+          clients.set_credential(....admin_credential...)
+          keystoneadmin = clients.get_keystoneclient()
+          clients.preserve_session()
+          cleints.set_credential(....other user credential...)
+          userclient = clients.get_novaclient()
+          clients.restore_session()
+
+        """
+        self._saved_session_v2 = self._session_v2
+        self._saved_session_v3 = self._session_v3
+        self._session_v2 = None
+        self._session_v3 = None
+
+    def restore_session(self):
+        """Restore the session saved with preserve_session.
+
+        See preserve_session for more details"""
+
+        if self._session_v2 and self._session_v2 != self._saved_session_v2:
+            self._session_v2.invalidate()
+        if self._session_v3 and self._session_v3 != self._saved_session_v3:
+            self._session_v3.invalidate()
+        self._session_v2 = self._saved_session_v2
+        self._session_v3 = self._saved_session_v3
 
 
-def get_session_v3():
-    global _session_v3
-    if _session_v3:
-        return _session_v3
-
-    auth_url = env['OS_AUTH_URL']
-    if auth_url.endswith('/v2.0/'):
-        auth_url = auth_url[0:-4] + '3'
-    elif auth_url.endswith('/v2.0'):
-        auth_url = auth_url[0:-3] + '3'
-
-    if not __username:
-        set_credential_env()
-
-    if __tenant:
-        auth = v3.Password(
-            auth_url=auth_url,
-            username=__username,
-            password=__password,
-            project_name=__tenant,
-            project_domain_name='default', user_domain_name='default')
-    else:
-        auth = v3.Password(
-            auth_url=auth_url,
-            username=__username,
-            password=__password,
-            project_id=__tenant_id,
-            project_domain_name='default', user_domain_name='default')
-    _session_v3 = session.Session(auth=auth)
-    return _session_v3
-
-
-def get_neutronclient():
-    region = None
-    if 'OS_REGION_NAME' in env:
-        region = env['OS_REGION_NAME']
-    return neutronclient.Client(
-        session=get_session(), region_name=region)
-
-
-def get_novaclient():
-    region = None
-    if 'OS_REGION_NAME' in env:
-        region = env['OS_REGION_NAME']
-    return novaclient.Client(
-        2, region_name=region, session=get_session())
-
-
-def get_cinderclient():
-    region = None
-    if 'OS_REGION_NAME' in env:
-        region = env['OS_REGION_NAME']
-    return cinderclient.Client(session=get_session(), region_name=region)
-
-
-def get_glanceclient():
-    session = get_session()
-    token = session.get_token()
-    region = None
-    if 'OS_REGION_NAME' in env:
-        region = env['OS_REGION_NAME']
-    endpoint = session.get_endpoint(service_type='image', region_name=region)
-    return glanceclient.Client(version='1', endpoint=endpoint, token=token)
-
-
-def get_keystoneclientv2():
-    session = get_session_v2()
-    return keystonev2.Client(session=session)
-
-
-def get_keystoneclientv3():
-    session = get_session_v3()
-    return keystonev3.Client(session=session)
-
-def get_keystoneclient():
-    if use_keystone_v3_session:
-        return get_keystoneclientv3()
-    else:
-        return get_keystoneclientv2()
-
+# create an object. This allows using this methods easily with
+# from osclients import osclients
+# nova = osclients.get_novaclient()
+osclients = OpenStackClients()
