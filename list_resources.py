@@ -26,30 +26,14 @@ author = 'chema'
 
 from user_resources import UserResources
 from os import environ as env
-import os.path
-import cPickle as pickle
 
-# Ensure we are not using other credentials
-if 'OS_USERNAME' in env:
-    del env['OS_USERNAME']
-if 'OS_PASSWORD' in env:
-    del env['OS_PASSWORD']
+user = env['OS_USERNAME']
+password = env['OS_PASSWORD']
+user_resources = None
 if 'OS_TENANT_NAME' in env:
-    del env['OS_TENANT_NAME']
+    tenant = env['OS_TENANT_NAME']
+    user_resources = UserResources(user, password, tenant_name=tenant)
 if 'OS_TENANT_ID' in env:
-    del env['OS_TENANT_ID']
-
-
-users_credentials = open('users_credentials.txt')
-images_in_use = None
-if os.path.exists('imagesinuse.pickle'):
-    images_in_use = pickle.load(open('imagesinuse.pickle'))
-
-for line in users_credentials.readlines():
-    (user, password, tenant_id) = line.strip().split(',')
-    print 'Deleting resources of user ' + user
-    user_resources = UserResources(user, password, tenant_id)
-    if images_in_use:
-        user_resources.imagesinuse = images_in_use
-
-    user_resources.delete_tenant_resources()
+    tenant = env['OS_TENANT_ID']
+    user_resources = UserResources(user, password, tenant_id=tenant)
+user_resources.print_tenant_resources()

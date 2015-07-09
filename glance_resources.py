@@ -45,7 +45,9 @@ class GlanceResources(object):
         """ return a tuple with two list of images: the private images and the
         shared images. It is safe to delete the private images after killing
         the VMs, but the shared images requires more attention because they
-        may be in use by other tenants.
+        may be in use by other tenants. Deleting a image in use theoretically
+        does not affect the VM (even it is should be possible to rebuild the
+        image)
 
         :return: a tuple with the list of private images and the public images
         """
@@ -64,9 +66,6 @@ class GlanceResources(object):
         """delete all the private tenant's images. If alsa_shared is True,
         delete also the public images.
 
-        Be aware that it is better don't delete images in use by other tenants,
-        this is the reason because shared images by default are not deleted.
-
         :param also_shared: True to delete also the shared images
         :return:
         """
@@ -79,6 +78,23 @@ class GlanceResources(object):
             else:
                 self.glance.images.delete(image.id)
 
+    def delete_tenant_images_notinuse(self, images_in_use):
+        """delete all the tenant images, but check that they are not in the
+        set 'images_in_use'. If the image is in the set, activate flag
+        'orphan_image'.
+        :param images_in_use: a set of images ids that should not be deleted
+                              because other tenants are using them.
+        :return: nothing"""
+        for image in self.glance.images.findall(owner=self.tenant_id):
+            if image.owner != self.tenant_id:
+                continue
+
+            if image.id in images_in_use:
+                image.properties['orphan_image'] = True
+                image.update(is_public=False, properties=image.properties)
+            else:
+                self.glance.images.delete(image.id)
+
     def delete_image_list(self, images):
         """delete a list of images, provided by id.
         :param images: a list of image ids
@@ -86,3 +102,13 @@ class GlanceResources(object):
         """
         for image in images:
             self.glance.images.delete(image.id)
+
+    def unshare_images(self):
+        """Turn to private all the public images of the tenant
+        :return: nothing
+        """
+        for image in self.glance.images.findall(owner=self.tenant_id):
+            if image.owner != self.tenant_id:
+                continue
+            if image.is_public:
+                image.update(is_public=False)

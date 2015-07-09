@@ -94,9 +94,9 @@ class OpenStackClients(object):
             self.__tenant_id = None
 
         if 'OS_REGION_NAME' in env:
-            self.__region = env['OS_REGION_NAME']
+            self.region = env['OS_REGION_NAME']
         else:
-            self.__region = None
+            self.region = None
 
     def set_credential(self, username, password, tenant, tenant_is_name=True):
         """Set the credential to use in the session. If a session already
@@ -141,7 +141,7 @@ class OpenStackClients(object):
         :param region: the region name
         :return: nothing
         """
-        self.__region = region
+        self.region = region
 
     def set_keystone_version(self, use_v3=True):
         """By default, get_session and get_keystoneclient use the version v3
@@ -262,7 +262,7 @@ class OpenStackClients(object):
         :return: a neutron client valid for a region.
         """
         return neutronclient.Client(
-            session=self.get_session(), region_name=self.__region)
+            session=self.get_session(), region_name=self.region)
 
     def get_novaclient(self):
         """Get a nova client. A client is different for each region
@@ -279,7 +279,7 @@ class OpenStackClients(object):
         :return: a nova client valid for a region.
         """
         return novaclient.Client(
-            2, region_name=self.__region, session=self.get_session())
+            2, region_name=self.region, session=self.get_session())
 
     def get_cinderclient(self):
         """Get a cinder client. A client is different for each region
@@ -296,7 +296,7 @@ class OpenStackClients(object):
         :return: a cinder client valid for a region.
         """
         return cinderclient.Client(session=self.get_session(),
-                                   region_name=self.__region)
+                                   region_name=self.region)
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region
@@ -316,7 +316,7 @@ class OpenStackClients(object):
         session = self.get_session()
         token = session.get_token()
         endpoint = session.get_endpoint(service_type='image',
-                                        region_name=self.__region)
+                                        region_name=self.region)
         return glanceclient.Client(version='1', endpoint=endpoint, token=token)
 
     def get_keystoneclient(self):
@@ -352,6 +352,98 @@ class OpenStackClients(object):
         :return: a keystone client"""
         session = self.get_session_v3()
         return keystonev3.Client(session=session)
+
+    def get_catalog(self):
+        """Get the catalog from the credential
+        :return: a list of services. Each service is a dictionary with the
+        following keys:
+           * endpoints: the endpoints of the service. See get_endpoints
+           * name: the name of the service (e.g. nova)
+           * type: the type of the service (e.g. compute)
+        """
+        session = self.get_session()
+        return session.auth.get_access(session)['catalog']
+
+    def get_endpoints(self, service_type):
+        """Get the endpoints for a service.
+
+        :param service_type: The service type (e.g. compute, network...)
+        :return: a list a list of dictionaries, with the following keys:
+          *url: the url of the endpoint
+          *id: the internal id of the endpoint
+          *region: the region name of the endpoint
+          *region_id: the region id of the endpoint
+          *interface: this value usually is internal/external/admin
+       interface (private, public, admin) and other fields
+        """
+        for service in self.get_catalog():
+            if service['type'] == service_type:
+                return service['endpoints']
+        raise Exception('not found')
+
+    def get_interface_endpoint(self, service_type, interface, region=None):
+        """Get the URL of the region's public/internal/admin endpoint
+
+        :param service_type: the service type (e.g. identity, compute...)
+        :param interface: the type of endpoint (internal, public, admin...)
+        :param region:  the region. It may be None only if there is only one
+             region.
+
+        :return: a URL as a string
+        """
+        endpoints = self.get_endpoints(service_type)
+        url = None
+        for endpoint in endpoints:
+            if endpoint['interface'] != interface:
+                continue
+            if not region:
+                if url:
+                    raise Exception('A region must be specified')
+                else:
+                    url = endpoint['url']
+            else:
+                if endpoint['region'] == region:
+                    url = endpoint['url']
+                    break
+        if not url:
+            raise Exception('endpoint not found')
+        else:
+            return url
+
+    def get_internal_endpoint(self, service_type, region=None):
+        """See get_interface_endpoint"""
+        return self.get_interface_endpoint(service_type, 'internal', region)
+
+    def get_public_endpoint(self, service_type, region=None):
+        """See get_interface_endpoint"""
+        return self.get_interface_endpoint(service_type, 'public', region)
+
+    def get_admin_endpoint(self, service_type, region=None):
+        """See get_interface_endpoint"""
+        return self.get_interface_endpoint(service_type, 'admin', region)
+
+    def get_token(self):
+        """Get the token, useful if you connect with a no standard service
+        :return: the token from the session
+        """
+        return self.get_session().get_token()
+
+    def get_tenant_id(self):
+        """Get the tenant_id
+        :return: the tenant_id extracted from the session
+        """
+        return self.get_session().get_project_id()
+
+    def get_regions(self, service_type):
+        """Return a list of regions with endpoints in this service
+
+        :param service_type: the service type (e.g. compute, network...)
+        :return: a list of regions
+        """
+        regions = set()
+        for endpoint in self.get_endpoints(service_type):
+            regions.add(endpoint['region'])
+        return regions
 
     def preserve_session(self):
         """Preserve the session (or sessions, v2 and v3) cached on the object.
