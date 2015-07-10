@@ -50,7 +50,7 @@ invoked after, to delete the images with no VM anymore. This script requires
 the admin credential.
 
 *phase3: phase3_delete.py. This is the point of no return. Resources are
-removed and cannot be recover. This script does not require the admin
+removed and cannot be recovered. This script does not require the admin
 credential, because it applies the user's credential from users_credentials.txt.
 
 *phase4: phase4_change_category.py. Change the type of user from trial to basic
