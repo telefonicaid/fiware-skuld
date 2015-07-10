@@ -368,7 +368,7 @@ class OpenStackClients(object):
         """Get the endpoints for a service.
 
         :param service_type: The service type (e.g. compute, network...)
-        :return: a list a list of dictionaries, with the following keys:
+        :return: a list of dictionaries, with the following keys:
           *url: the url of the endpoint
           *id: the internal id of the endpoint
           *region: the region name of the endpoint

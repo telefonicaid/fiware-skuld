@@ -179,7 +179,7 @@ class ResourcePopulator(object):
 
 
 def download_images():
-    """auxualary function to download cirros images if they are not already
+    """auxiliary function to download Cirros images if they are not already
     download.
     """
     if not os.path.exists(img_name):

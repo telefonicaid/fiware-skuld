@@ -45,7 +45,7 @@ class GlanceResources(object):
         """ return a tuple with two list of images: the private images and the
         shared images. It is safe to delete the private images after killing
         the VMs, but the shared images requires more attention because they
-        may be in use by other tenants. Deleting a image in use theoretically
+        may be in use by other tenants. Deleting an image in use theoretically
         does not affect the VM (even it is should be possible to rebuild the
         image)
 
@@ -63,7 +63,7 @@ class GlanceResources(object):
         return (private_images, public_images)
 
     def delete_tenant_images(self, also_shared=False):
-        """delete all the private tenant's images. If alsa_shared is True,
+        """delete all the private tenant's images. If also_shared is True,
         delete also the public images.
 
         :param also_shared: True to delete also the shared images
