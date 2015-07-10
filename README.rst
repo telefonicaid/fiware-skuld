@@ -31,12 +31,12 @@ trial users. The output of the script is the file users_lists.txt. This script
 requires the admin credential.
 
 *phase1: phase1_resetpasswords.py. This scripts has as input the file
-users_list.txt. It set a new random password for each user and generate the file
+users_list.txt. It sets a new random password for each user and generates the file
 users_credentials.txt with the user, password and tenant for each user. This
-script also requires the admin credential
+script also requires the admin credential.
 
 *phase2: phase2_stopvms.py. This scripts does not delete anything, yet. It
-stops the VMs of the users and make private their shared images. The idea is
+stops the VMs of the users and makes private their shared images. The idea is
 to grant a grace period to users to detect that their resources are not
 available before they are beyond redemption. This script does not require the
 admin account, because it applies the user' credential from users_credentials.txt.
@@ -46,15 +46,15 @@ It generates the file imagesinuse.pickle.
 owned by the user, but in use by other tenants. Theoretically deleting a image
 in use by a VM doesn't break the VM, but if you prefer avoid deleting that
 images, invoke this script before phase3. The script purge_images.py may be
-invoked after, to delete the images with no VM anymore. This scripts requires
-an admin credential.
+invoked after, to delete the images with no VM anymore. This script requires
+the admin credential.
 
 *phase3: phase3_delete.py. This is the point of no return. Resources are
 removed and cannot be recover. This script does not require the admin
-credential, because it applies the user's credential from users_credentials.txt
+credential, because it applies the user's credential from users_credentials.txt.
 
 *phase4: phase4_change_category.py. Change the type of user from trial to basic
-This script requires the admin credential. It reads the file users_to_delete.txt
+This script requires the admin credential. It reads the file users_to_delete.txt.
 
 
 
