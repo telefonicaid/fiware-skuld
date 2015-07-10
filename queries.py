@@ -24,11 +24,25 @@
 #
 author = 'chema'
 import osclients
+from os import environ as env
 
 
 class Queries(object):
-    def __init__(self):
-        self.osclients = osclients.OpenStackClients()
+    """A helper class with several useful OpenStack queries"""
+
+    def __init__(self, openstackclient=None):
+        """constructor
+        :param openstackclient: an OpenStack object
+        """
+        if openstackclient:
+            self.osclients = openstackclient
+        else:
+            self.osclients = osclients.OpenStackClients()
+        if 'KEYSTONE_ADMIN_ENDPOINT' in env:
+             self.osclients.override_endpoint(
+                 'identity', self.osclients.region, 'admin',
+                 env['KEYSTONE_ADMIN_ENDPOINT'])
+
         self.glance = self.osclients.get_glanceclient()
         self.nova = self.osclients.get_novaclient()
 
@@ -131,3 +145,27 @@ class Queries(object):
         orphan_images = set(image.id for image in self.get_images().values()
                             if 'orphan_image' in image.properties)
         return orphan_images - images_in_use
+
+    def get_role_user_domain(self, user, domain='default'):
+        """Return the role of the specified user in the domain
+        :param user: the user id
+        :param domain: the domain
+        :return: the role-id of the user in the domain
+        """
+        keystone = self.osclients.get_keystoneclientv3()
+        role = keystone.role_assignments.list(user=user, domain=domain)[0].role
+        return role['id']
+
+    def get_type_fiware_user(self, user):
+        """Return the type of the user: trial, basic,
+
+        :param user: the user id
+        :return: a string describing the type of user
+        """
+        users = {'0bcb7fa6e85046cb9e89ded5656b192b': 'basic',
+                 '7698be72802342cdb2a78f89aa55d8ac': 'trial',
+                 '23a17930700f44bfa527818bd41765ef': 'community',
+                 'bcefc16468f344829a739512b96624df': 'admin',
+                 '24b85c710a1a4868935451a5ed9e4ecd': 'member'}
+        role_id = self.get_role_user_domain(user)
+        return users[role_id]

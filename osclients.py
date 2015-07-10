@@ -35,7 +35,7 @@ from neutronclient.v2_0 import client as neutronclient
 from novaclient import client as novaclient
 from cinderclient.v2 import client as cinderclient
 from glanceclient import client as glanceclient
-
+from swiftclient import client as swiftclient
 
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
@@ -174,9 +174,11 @@ class OpenStackClients(object):
         """
 
         if self.use_v3:
-            return self.get_session_v3()
+            session = self.get_session_v3()
         else:
-            return self.get_session_v2()
+            session = self.get_session_v2()
+
+        return session
 
     def get_session_v2(self):
         """get a v2 session. See get_session for more details about sessions
@@ -209,7 +211,10 @@ class OpenStackClients(object):
                 password=self.__password,
                 tenant_id=self.__tenant_id)
         self._session_v2 = session.Session(auth=auth)
+
+
         return self._session_v2
+
 
     def get_session_v3(self):
         """get a v3 session. See get_session for more details about sessions
@@ -319,6 +324,14 @@ class OpenStackClients(object):
                                         region_name=self.region)
         return glanceclient.Client(version='1', endpoint=endpoint, token=token)
 
+    def get_swiftclient(self):
+        session = self.get_session()
+        token = session.get_token()
+        endpoint = self.get_public_endpoint('object-store', self.region)
+        token = session.get_token()
+        return swiftclient.Connection(preauthurl=endpoint, preauthtoken=token)
+
+
     def get_keystoneclient(self):
         """Get a keystoneclient. A keystone server can be shared among several
         regions and therefore the same keystone client is valid for all this
@@ -422,17 +435,17 @@ class OpenStackClients(object):
         """See get_interface_endpoint"""
         return self.get_interface_endpoint(service_type, 'admin', region)
 
-    def get_token(self):
-        """Get the token, useful if you connect with a no standard service
-        :return: the token from the session
-        """
-        return self.get_session().get_token()
+    def override_endpoint(self, service_type, region, interface, url):
+        """Override the URL of a endpoint obtained in a request.
 
-    def get_tenant_id(self):
-        """Get the tenant_id
-        :return: the tenant_id extracted from the session
+        This is a hack, but it is useful for example when the admin
+        interface is an internal IP but there is also a tunnel to access
+        from outside. This is equivalent to Nova's bypass-url option.
         """
-        return self.get_session().get_project_id()
+        for endpoint in self.get_endpoints(service_type):
+            if endpoint['region'] == region and\
+               endpoint['interface'] == interface:
+                    endpoint['url'] = url
 
     def get_regions(self, service_type):
         """Return a list of regions with endpoints in this service
@@ -444,6 +457,18 @@ class OpenStackClients(object):
         for endpoint in self.get_endpoints(service_type):
             regions.add(endpoint['region'])
         return regions
+
+    def get_token(self):
+        """Get the token, useful if you connect with a no standard service
+        :return: the token from the session
+        """
+        return self.get_session().get_token()
+
+    def get_tenant_id(self):
+        """Get the tenant_id
+        :return: the tenant_id extracted from the session
+        """
+        return self.get_session().get_project_id()
 
     def preserve_session(self):
         """Preserve the session (or sessions, v2 and v3) cached on the object.

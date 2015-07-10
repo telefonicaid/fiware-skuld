@@ -31,6 +31,7 @@ from nova_resources import NovaResources
 from glance_resources import GlanceResources
 from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
+from blueprint_resources import BluePrintResources
 
 
 class UserResources(object):
@@ -52,6 +53,7 @@ class UserResources(object):
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
         self.neutron = NeutronResources(self.clients)
+        self.blueprints = BluePrintResources(self.clients)
         # Images in use is a set used to avoid deleting formerly glance images
         # in use by other tenants
         self.imagesinuse = set()
@@ -59,13 +61,18 @@ class UserResources(object):
     def delete_tenant_resources(self):
         """Delete all the resources of the tenant, and also the keypairs of the
         user"""
+
         self.nova.delete_user_keypairs()
 
-        # Snapshots must be deleted before the volumes, because a spanpshot
+        # Snapshots must be deleted before the volumes, because a snapshot
         # depends of a volume. A pause is required.
         self.cinder.delete_tenant_volume_snapshots()
         while self.cinder.get_tenant_volume_snapshots():
             time.sleep(1)
+
+        # Blueprint instances must be deleted before VMs
+        self.blueprints.delete_tenant_blueprints()
+        self.blueprints.delete_tenant_templates()
 
         # VM must be deleted before purging the security groups
         self.nova.delete_tenant_vms()
@@ -96,6 +103,12 @@ class UserResources(object):
         """print all the tenant's resources"""
         print 'Tenant id is: ' + self.clients.get_session().get_project_id()
         print 'User id is: ' + self.clients.get_session().get_user_id()
+
+        print 'Tenant blueprint instances: '
+        print self.blueprints.get_tenant_blueprints()
+        print 'Tenant blueprint templates: '
+        print self.blueprints.get_tenant_templates()
+
         print 'User keypairs:'
         print self.nova.get_user_keypairs()
         print 'Tenant VMs:'
@@ -108,10 +121,8 @@ class UserResources(object):
 
         print 'Tenant volume snapshots:'
         print self.cinder.get_tenant_volume_snapshots()
-
         print 'Tenant volumes:'
         print self.cinder.get_tenant_volumes()
-
         print 'Tenant backup volumes:'
         print self.cinder.get_tenant_backup_volumes()
 
@@ -127,3 +138,4 @@ class UserResources(object):
         print self.neutron.get_tenant_subnets()
         print 'Tenant ports'
         print self.neutron.get_tenant_ports()
+

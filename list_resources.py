@@ -27,6 +27,7 @@ author = 'chema'
 from user_resources import UserResources
 from os import environ as env
 
+
 user = env['OS_USERNAME']
 password = env['OS_PASSWORD']
 user_resources = None
