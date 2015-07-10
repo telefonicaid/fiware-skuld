@@ -52,6 +52,9 @@ class UserResources(object):
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
         self.neutron = NeutronResources(self.clients)
+        # Images in use is a set used to avoid deleting formerly glance images
+        # in use by other tenants
+        self.imagesinuse = set()
 
     def delete_tenant_resources(self):
         """Delete all the resources of the tenant, and also the keypairs of the
@@ -69,10 +72,8 @@ class UserResources(object):
 
         self.nova.delete_tenant_security_groups()
 
-        # TODO: remove rules from default secgroup. It cannot be deleted.
-
-        self.glance.delete_tenant_images()
-
+        # self.glance.delete_tenant_images()
+        self.glance.delete_tenant_images_notinuse(self.imagesinuse)
         self.cinder.delete_tenant_volumes()
         self.cinder.delete_tenant_backup_volumes()
 
@@ -86,6 +87,10 @@ class UserResources(object):
     def stop_tenant_vms(self):
         """Stop all the active vms of the tenant"""
         self.nova.stop_tenant_vms()
+
+    def unshare_images(self):
+        """Make private all the tenant public images"""
+        self.glance.unshare_images()
 
     def print_tenant_resources(self):
         """print all the tenant's resources"""

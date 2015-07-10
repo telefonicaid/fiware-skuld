@@ -24,30 +24,19 @@
 #
 author = 'chema'
 
+from queries import Queries
 import osclients
+import logging
 
-"""This functions obtains information about the endpoints, but using
-   the information included in the credential, instead of asking
-   directly by services and the endpoints. This is more efficient and
-   don't requiere access to admin server."""
+"""This scripts delete images with the metadata 'orphan_image' when there are
+no more VMs using it. It may be invoked by a cron script.
 
-
-def get_catalog():
-    session = osclients.get_session()
-    return session.auth.get_access(session)['catalog']
-
-
-def get_endpoints(service_type):
-    """Endpoinds is a list of dictionaries, with url, region,
-       interface (private, public, admin) and other fields"""
-    for service in get_catalog():
-        if service['type'] == service_type:
-            return service['endpoints']
-
-
-def get_regions(service_type):
-    endpoints = get_endpoints(service_type)
-    regions = set()
-    for endpoint in endpoints:
-        regions.add(endpoint['region'])
-    return regions
+An 'orphan image' is an image that was preserved when the other resources of
+the user was deleted, because it was in use by VMs of other tenants."""
+q = Queries()
+images = q.get_orphan_images_without_use()
+if images:
+    glance = osclients.OpenStackClients().get_glanceclient()
+    for image in images:
+        logging.info('Deleting image ' + image)
+        glance.images.delete(image)

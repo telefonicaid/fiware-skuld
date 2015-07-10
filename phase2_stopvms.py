@@ -45,3 +45,5 @@ for line in users_credentials.readlines():
     print 'Stopping active VMs of user ' + user
     user_resources = UserResources(user, password, tenant_id=tenant_id)
     user_resources.stop_tenant_vms()
+    print 'Unshare public images of user ' + user
+    user_resources.unshare_images()
