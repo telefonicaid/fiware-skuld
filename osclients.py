@@ -216,7 +216,7 @@ class OpenStackClients(object):
         return self._session_v2
 
     def get_session_v3(self):
-        """get a v3 session. See get_session for more details about sessions
+        """Get a v3 session. See get_session for more details about sessions
 
         :return: a session object
         """
