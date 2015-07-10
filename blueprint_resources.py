@@ -35,9 +35,9 @@ class BluePrintResources(object):
     """This class represent the BluePrint resources of a tenant. It includes
     methods to list and delete the templates"""
     def __init__(self, osclients):
-        """Constructor. It requires an OpenStackClients object
+        """Constructor. It requires an OpenStackClient object
 
-        :param openstackclients: an OpenStackClients method (module osclients)
+        :param osclients: an OpenStackClient object (module osclients)
         :return: nothing
         """
         self.osclients = osclients

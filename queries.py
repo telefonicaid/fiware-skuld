@@ -28,8 +28,16 @@ from os import environ as env
 
 
 class Queries(object):
-    def __init__(self):
-        self.osclients = osclients.OpenStackClients()
+    """A helper class with several useful OpenStack queries"""
+
+    def __init__(self, openstackclient=None):
+        """constructor
+        :param openstackclient: an OpenStack object
+        """
+        if openstackclient:
+            self.osclients = openstackclient
+        else:
+            self.osclients = osclients.OpenStackClients()
         if 'KEYSTONE_ADMIN_ENDPOINT' in env:
              self.osclients.override_endpoint(
                  'identity', self.osclients.region, 'admin',
