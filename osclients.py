@@ -37,6 +37,7 @@ from cinderclient.v2 import client as cinderclient
 from glanceclient import client as glanceclient
 from swiftclient import client as swiftclient
 
+
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
     sharing the session:
@@ -210,11 +211,9 @@ class OpenStackClients(object):
                 username=self.__username,
                 password=self.__password,
                 tenant_id=self.__tenant_id)
+
         self._session_v2 = session.Session(auth=auth)
-
-
         return self._session_v2
-
 
     def get_session_v3(self):
         """get a v3 session. See get_session for more details about sessions
@@ -330,7 +329,6 @@ class OpenStackClients(object):
         endpoint = self.get_public_endpoint('object-store', self.region)
         token = session.get_token()
         return swiftclient.Connection(preauthurl=endpoint, preauthtoken=token)
-
 
     def get_keystoneclient(self):
         """Get a keystoneclient. A keystone server can be shared among several

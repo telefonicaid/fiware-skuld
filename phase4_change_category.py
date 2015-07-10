@@ -38,6 +38,7 @@ q = queries.Queries()
 keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
 
+
 def change_user_keystone(user_id):
     """Change the user from trial to basic
     We use this on our testing environment
@@ -52,6 +53,7 @@ def change_user_keystone(user_id):
     keystone.role_assignments.client.put(path.format(user_id, basic))
     keystone.role_assignments.client.delete(path.format(user_id, trial))
 
+
 def change_user_via_idm(user_id):
     """Change the user from trial to basic
     This method must be used in production.
@@ -63,8 +65,8 @@ def change_user_via_idm(user_id):
     body = {'user_id': user_id, 'role_id': basic}
     headers = {'X-Auth-Token': q.osclients.get_token()}
     r = requests.post(settings.settings.HORIZON_ENDPOINT + '/account_category',
-                  json=body, headers=headers, verify=False)
-    if r.status_code not in (200,204):
+                      json=body, headers=headers, verify=False)
+    if r.status_code not in (200, 204):
         msg = 'The operation returned code {0}: {1}'
         logging.error(msg.format(r.status_code, r.reason))
 
@@ -73,5 +75,3 @@ for line in users.readlines():
     user_id = line.strip()
     print 'Changing user {0} from trial to basic'.format(user_id)
     change_user_via_idm(user_id)
-
-

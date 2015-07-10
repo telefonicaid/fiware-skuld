@@ -39,9 +39,9 @@ class Queries(object):
         else:
             self.osclients = osclients.OpenStackClients()
         if 'KEYSTONE_ADMIN_ENDPOINT' in env:
-             self.osclients.override_endpoint(
-                 'identity', self.osclients.region, 'admin',
-                 env['KEYSTONE_ADMIN_ENDPOINT'])
+            self.osclients.override_endpoint(
+                'identity', self.osclients.region, 'admin',
+                env['KEYSTONE_ADMIN_ENDPOINT'])
 
         self.glance = self.osclients.get_glanceclient()
         self.nova = self.osclients.get_novaclient()
