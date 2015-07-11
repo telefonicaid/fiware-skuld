@@ -138,4 +138,3 @@ class UserResources(object):
         print self.neutron.get_tenant_subnets()
         print 'Tenant ports'
         print self.neutron.get_tenant_ports()
-
