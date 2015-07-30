@@ -47,11 +47,12 @@ for user in keystone.users.list():
 
 for user_id in expired_users:
     user = users_by_id[user_id]
-    print user
+    print unicode(user).encode('utf8')
     domain = user.name.partition('@')[2]
     if domain != '' and domain in dont_delete_domains:
-        msg = 'User with name {1} should not be deleted because the domain'
-        logging.warning(msg.format(user.name))
+        logging.warning(
+            'User with name %(name)s should not be deleted because the domain',
+            {'name':user.name})
     else:
         print >>fich, user_id
 

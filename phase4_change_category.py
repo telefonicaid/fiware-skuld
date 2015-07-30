@@ -64,7 +64,13 @@ def change_user_via_idm(user_id):
         logging.error('{0} is not a trial user'.format(user_id))
     body = {'user_id': user_id, 'role_id': basic}
     headers = {'X-Auth-Token': q.osclients.get_token()}
-    r = requests.post(settings.settings.HORIZON_ENDPOINT + '/account_category',
+    
+    # NOTE(garcianavalon) sometimes in settings people use the end /
+    horizon_url = settings.settings.HORIZON_ENDPOINT
+    if horizon_url.endswith('/'):
+        horizon_url = horizon_url[:-1]
+
+    r = requests.post(horizon_url + '/account_category',
                       json=body, headers=headers, verify=False)
     if r.status_code not in (200, 204):
         msg = 'The operation returned code {0}: {1}'
