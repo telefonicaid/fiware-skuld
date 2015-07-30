@@ -32,8 +32,8 @@ from settings import settings
 from osclients import OpenStackClients
 
 expired_users = ExpiredUsers(
-    username=env['OS_USERNAME'], password=['OS_PASSWORD'],
-    tenant=['OS_TENANT_NAME']).getlistusers()
+    username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
+    tenant=env['OS_TENANT_NAME']).getlistusers()
 
 dont_delete_domains = settings.DONT_DELETE_DOMAINS
 keystone = OpenStackClients().get_keystoneclientv3()
