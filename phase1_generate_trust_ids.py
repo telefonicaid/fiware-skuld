@@ -24,21 +24,16 @@
 #
 author = 'chema'
 
-from user_resources import UserResources
-from os import environ as env
+from impersonate import TrustFactory
+from settings.settings import TRUSTEE
 
+users_to_delete = open('users_to_delete.txt')
+users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
-user = env['OS_USERNAME']
-password = env['OS_PASSWORD']
-user_resources = None
-if 'OS_TENANT_NAME' in env:
-    tenant = env['OS_TENANT_NAME']
-    user_resources = UserResources(user, password, tenant_name=tenant)
-elif 'OS_TENANT_ID' in env:
-    tenant = env['OS_TENANT_ID']
-    user_resources = UserResources(user, password, tenant_id=tenant)
-elif 'OS_TRUST_ID' in env:
-    trust_id = env['OS_TRUST_ID']
-    user_resources = UserResources(user, password, trust_id=trust_id)
+trust_factory = TrustFactory()
+user_ids = list()
+for user in users_to_delete.readlines():
+    (username, trust_id) = trust_factory.create_trust(user, TRUSTEE)
+    print >>users_trusted_ids, username + ',' + trust_id
 
-user_resources.print_tenant_resources()
+users_trusted_ids.close()

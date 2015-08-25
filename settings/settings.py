@@ -30,6 +30,7 @@ TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
 BASIC_ROLE_ID = "0bcb7fa6e85046cb9e89ded5656b192b"
 KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
 HORIZON_ENDPOINT = "https://130.206.84.7/"
+TRUSTEE = "e.fiware4@telefonica.com"
 MAX_NUMBER_OF_DAYS = 14  # days
 DONT_DELETE_DOMAINS = set((
    'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu',

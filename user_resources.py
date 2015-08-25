@@ -25,6 +25,7 @@
 author = 'chema'
 
 import time
+import impersonate
 
 from osclients import OpenStackClients
 from nova_resources import NovaResources
@@ -33,21 +34,25 @@ from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
 from blueprint_resources import BluePrintResources
 
-
 class UserResources(object):
     """Class to list, delete user resources. Also provides a method to stop all
     the VM of the tenant.
 
     This class works creating a instance with the credential of the user owner
     of the resources. It does not use an admin credential!!!"""
-    def __init__(self, username, password, tenant_id=None, tenant_name=None):
+    def __init__(self, username, password, tenant_id=None, tenant_name=None,
+                 trust_id=None):
         self.clients = OpenStackClients()
         if tenant_id:
             self.clients.set_credential(username, password, tenant_id, False)
         elif tenant_name:
             self.clients.set_credential(username, password, tenant_name)
+        elif trust_id:
+            self.clients.set_credential(username, password, trust_id=trust_id)
+            self.trust_id = trust_id
         else:
-            raise('Either tenant_id or tenant_name must be provided')
+            raise(
+                'Either tenant_id or tenant_name or trust_id must be provided')
 
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
@@ -138,3 +143,13 @@ class UserResources(object):
         print self.neutron.get_tenant_subnets()
         print 'Tenant ports'
         print self.neutron.get_tenant_ports()
+
+    def free_trust_id(self):
+        """Free trust_id, if it exists.
+
+        :return: nothing
+        """
+        if self.trust_id:
+            trust = impersonate.TrustFactory(self.clients)
+            trust.delete_trust(self.trust_id)
+

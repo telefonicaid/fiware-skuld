@@ -99,7 +99,13 @@ class OpenStackClients(object):
         else:
             self.region = None
 
-    def set_credential(self, username, password, tenant, tenant_is_name=True):
+        if 'OS_TRUST_ID' in env:
+            self.__trust_id = env['OS_TRUST_ID']
+        else:
+            self.__trust_id = None
+
+    def set_credential(self, username, password, tenant, tenant_is_name=True,
+                       trusted_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidate. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
@@ -117,6 +123,8 @@ class OpenStackClients(object):
                the tenant_id.
         :param tenant_is_name: If true, the variable tenant is a name, if false
          it is an id.
+        :param trusted_id: optional parameter, that allows a user to
+        impersonate another one.
         :return: Nothing.
         """
         self.__username = username
@@ -127,6 +135,10 @@ class OpenStackClients(object):
         else:
             self.__tenant_id = tenant
             self.__tenant = None
+        if trusted_id:
+            self.__trusted_id = trusted_id
+        else:
+            self.__trusted_id = None
 
         # clear sessions
         if self._session_v2:
@@ -199,18 +211,19 @@ class OpenStackClients(object):
         if not self.__username:
             raise Exception('Username must be provided')
 
-        if self.__tenant:
-            auth = v2.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                tenant_name=self.__tenant)
+        other_params = dict()
+        if self.__trust_id:
+            other_params['trust_id'] = self.__trust_id
+        elif self.__tenant:
+            other_params['tenant_name'] = self.__tenant
         else:
-            auth = v2.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                tenant_id=self.__tenant_id)
+            other_params['tenant_id'] = self.__tenant_id
+
+        auth = v2.Password(
+            auth_url=auth_url,
+            username=self.__username,
+            password=self.__password,
+            **other_params)
 
         self._session_v2 = session.Session(auth=auth)
         return self._session_v2
@@ -234,20 +247,21 @@ class OpenStackClients(object):
         if not self.__username:
             raise Exception('Username must be provided')
 
-        if self.__tenant:
-            auth = v3.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                project_name=self.__tenant,
-                project_domain_name='default', user_domain_name='default')
+        other_params = dict()
+        if self.__trust_id:
+            other_params['trust_id'] = self.__trust_id
+        elif self.__tenant:
+            other_params['project_name'] = self.__tenant
         else:
-            auth = v3.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                project_id=self.__tenant_id,
-                project_domain_name='default', user_domain_name='default')
+            other_params['project_id'] = self.__tenant_id
+
+        auth = v3.Password(
+            auth_url=auth_url,
+            username=self.__username,
+            password=self.__password,
+            project_domain_name='default', user_domain_name='default',
+            **other_params)
+
         self._session_v3 = session.Session(auth=auth)
         return self._session_v3
 
