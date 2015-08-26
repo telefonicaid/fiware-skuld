@@ -31,28 +31,39 @@ from expired_users import ExpiredUsers
 from settings import settings
 from osclients import OpenStackClients
 
+logging.debug('Getting expired users')
 expired_users = ExpiredUsers(
     username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
     tenant=env['OS_TENANT_NAME']).getlistusers()
 
 dont_delete_domains = settings.DONT_DELETE_DOMAINS
-keystone = OpenStackClients().get_keystoneclientv3()
+osclients = OpenStackClients()
+
+# Use an alternative URL that allow direct access to the keystone admin
+# endpoint, because the registered one uses an internal IP address.
+
+osclients.override_endpoint(
+    'identity', osclients.region, 'admin', settings.KEYSTONE_ENDPOINT)
+
+keystone = osclients.get_keystoneclientv3()
 
 fich = open('users_to_delete.txt', 'w')
 
 # build users map
+logging.debug('Building user map')
 users_by_id = dict()
 for user in keystone.users.list():
     users_by_id[user.id] = user
 
+logging.debug('Generating user list')
 for user_id in expired_users:
     user = users_by_id[user_id]
-    print unicode(user).encode('utf8')
+    # print unicode(user).encode('utf8')
     domain = user.name.partition('@')[2]
     if domain != '' and domain in dont_delete_domains:
         logging.warning(
             'User with name %(name)s should not be deleted because the domain',
-            {'name':user.name})
+            {'name': user.name})
     else:
         print >>fich, user_id
 
