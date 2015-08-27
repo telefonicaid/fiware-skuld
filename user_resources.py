@@ -25,14 +25,16 @@
 author = 'chema'
 
 import time
-import impersonate
+import logging
 
+import impersonate
 from osclients import OpenStackClients
 from nova_resources import NovaResources
 from glance_resources import GlanceResources
 from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
 from blueprint_resources import BluePrintResources
+
 
 class UserResources(object):
     """Class to list, delete user resources. Also provides a method to stop all
@@ -152,6 +154,7 @@ class UserResources(object):
         :return: nothing
         """
         if self.trust_id:
+            logging.info('Freeing trust-id')
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
 
