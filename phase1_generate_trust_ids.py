@@ -26,14 +26,27 @@ author = 'chema'
 
 from impersonate import TrustFactory
 from settings.settings import TRUSTEE
+from settings.settings import KEYSTONE_ENDPOINT
+from osclients import OpenStackClients
 
 users_to_delete = open('users_to_delete.txt')
 users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
-trust_factory = TrustFactory()
+osclients = OpenStackClients()
+
+# Use an alternative URL that allow direct access to the keystone admin
+# endpoint, because the registered one uses an internal IP address.
+
+osclients.override_endpoint(
+    'identity', osclients.region, 'admin', KEYSTONE_ENDPOINT)
+
+trust_factory = TrustFactory(osclients)
 user_ids = list()
 for user in users_to_delete.readlines():
-    (username, trust_id) = trust_factory.create_trust(user, TRUSTEE)
+    user = user.strip()
+    if user == '':
+        continue
+    (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
     print >>users_trusted_ids, username + ',' + trust_id
 
 users_trusted_ids.close()

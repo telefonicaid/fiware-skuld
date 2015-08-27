@@ -45,12 +45,14 @@ class TrustFactory:
         if not osclients_o:
             osclients_o = osclients.OpenStackClients()
 
-        osclients_o.override_endpoint('identity', osclients_o.region, 'admin',
-                          os.environ['KEYSTONE_ADMIN_ENDPOINT'])
+        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
+            osclients_o.override_endpoint(
+                'identity', osclients_o.region, 'admin',
+                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         self.keystone = osclients_o.get_keystoneclientv3()
 
-    def create_trust(self, trustor_id, trustee_name):
+    def create_trust_admin(self, trustor_id, trustee_name):
         """
         Create a TRUST_ID. This method must be invoked by the administrator and
         only works if the keystone server has been adapted to allow the

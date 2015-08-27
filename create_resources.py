@@ -161,8 +161,10 @@ class ResourcePopulator(object):
         server.add_floating_ip(floatingip.ip)
 
         osclients2 = OpenStackClients()
-        osclients2.set_credential('testdelete2', os.environ['PASSWORD_USER2'],
-                                  'testdelete2')
+        second_user = os.environ['USER2']
+        second_user_tenant = os.environ['USER2_TENANT']
+        osclients2.set_credential(second_user, os.environ['PASSWORD_USER2'],
+                                  tenant_name=second_user_tenant)
         nova = osclients2.get_novaclient()
         neutron = osclients2.get_neutronclient()
 

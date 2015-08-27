@@ -51,9 +51,9 @@ class OpenStackClients(object):
         """Constructor of the class. The Keystone URL may be provided,
         otherwise it is obtained from the environment (OS_AUTH_URL)
 
-        The fields with the user, password, tenant_id/tenant_name and region
-        are initialized with the environemnt variables if present, but they
-        can be set also with set_credential/set_region methods.
+        The fields with the user, password, tenant_id/tenant_name/trust_id and
+        region are initialized with the environemnt variables if present, but
+        they can be set also with set_credential/set_region methods.
 
         :param auth_url: The keystone URL (OS_AUTH_URL if omitted)
         :return: nothing
@@ -104,41 +104,48 @@ class OpenStackClients(object):
         else:
             self.__trust_id = None
 
-    def set_credential(self, username, password, tenant, tenant_is_name=True,
-                       trusted_id=None):
+    def set_credential(self, username, password, tenant_name=None,
+                       tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidate. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
-        unless the OS_USERNAME, OS_PASSWORD, OS_TENANT_NAME/OS_TENANT_ID are
-        defined.
+        unless the OS_USERNAME, OS_PASSWORD,
+        OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID are defined.
 
-        The tenant may be a name (the default) or an id. In the last case, set
-        tenant_is_name to False.
+        The tenant may be a name or a tenant_id, but also it is possible to
+        provide a trust_id, in this case the tenant/tenant_id must not be
+        provided. With the admin account also has sense do not provide
+        tenant/tenant_id/trust_id (a unscoped token).
 
         :param username: the username of the user
         :param password: the password of the user
-        :param tenant: the tenant name, but if tenat_is_name=False, this is
-               the tenant_id.
-        :param tenant_is_name: If true, the variable tenant is a name, if false
-         it is an id.
-        :param trusted_id: optional parameter, that allows a user to
-        impersonate another one.
+        :param tenant_name: the tenant name (a.k.a. project_name)
+        :param tenant_id: the tenant id (a.k.a. project_id)
+        :param trust_id: optional parameter, that allows a user to
+        impersonate another one. If trust_id is provided, do not fill
+        tenant_name nor tenant_id.
         :return: Nothing.
         """
         self.__username = username
         self.__password = password
-        if tenant_is_name:
-            self.__tenant = tenant
+        if trust_id:
+            self.__trust_id = trust_id
             self.__tenant_id = None
-        else:
-            self.__tenant_id = tenant
             self.__tenant = None
-        if trusted_id:
-            self.__trusted_id = trusted_id
+        elif tenant_id:
+            self.__tenant_id = tenant_id
+            self.__tenant = None
+            self.__trust_id = None
+        elif tenant_name:
+            self.__tenant = tenant_name
+            self.__tenant_id = None
+            self.__trust_id = None
         else:
-            self.__trusted_id = None
+            self.__trust_id = None
+            self.__tenant_id = None
+            self.__tenant = None
 
         # clear sessions
         if self._session_v2:
@@ -216,7 +223,7 @@ class OpenStackClients(object):
             other_params['trust_id'] = self.__trust_id
         elif self.__tenant:
             other_params['tenant_name'] = self.__tenant
-        else:
+        elif self.__tenant_id:
             other_params['tenant_id'] = self.__tenant_id
 
         auth = v2.Password(
@@ -252,7 +259,7 @@ class OpenStackClients(object):
             other_params['trust_id'] = self.__trust_id
         elif self.__tenant:
             other_params['project_name'] = self.__tenant
-        else:
+        elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
 
         auth = v3.Password(

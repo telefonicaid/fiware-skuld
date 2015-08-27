@@ -44,9 +44,11 @@ class UserResources(object):
                  trust_id=None):
         self.clients = OpenStackClients()
         if tenant_id:
-            self.clients.set_credential(username, password, tenant_id, False)
+            self.clients.set_credential(username, password,
+                                        tenant_id=tenant_id)
         elif tenant_name:
-            self.clients.set_credential(username, password, tenant_name)
+            self.clients.set_credential(username, password,
+                                        tenant_name=tenant_name)
         elif trust_id:
             self.clients.set_credential(username, password, trust_id=trust_id)
             self.trust_id = trust_id
