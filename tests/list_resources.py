@@ -31,14 +31,14 @@ from os import environ as env
 user = env['OS_USERNAME']
 password = env['OS_PASSWORD']
 user_resources = None
-if 'OS_TENANT_NAME' in env:
-    tenant = env['OS_TENANT_NAME']
-    user_resources = UserResources(user, password, tenant_name=tenant)
+if 'OS_TRUST_ID' in env:
+    trust_id = env['OS_TRUST_ID']
+    user_resources = UserResources(user, password, trust_id=trust_id)
 elif 'OS_TENANT_ID' in env:
     tenant = env['OS_TENANT_ID']
     user_resources = UserResources(user, password, tenant_id=tenant)
-elif 'OS_TRUST_ID' in env:
-    trust_id = env['OS_TRUST_ID']
-    user_resources = UserResources(user, password, trust_id=trust_id)
+elif 'OS_TENANT_NAME' in env:
+    tenant = env['OS_TENANT_NAME']
+    user_resources = UserResources(user, password, tenant_name=tenant)
 
 user_resources.print_tenant_resources()

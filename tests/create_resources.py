@@ -26,18 +26,22 @@
 author = 'chema'
 
 import time
-import pycurl
+import urllib
 import os
 
 from osclients import OpenStackClients
 
-image_name = 'debian7'
+
 
 i_url = 'http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img'
 img_name = 'cirros0.3.4.img'
 i_url2 = 'http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img'
 img_name2 = 'cirros0.3.3.img'
 
+can_create_shared_images = False
+# If can_create_shared_images is False, set the image_name here
+image_name = 'base_debian_7'
+can_create_networks = False
 
 class ResourcePopulator(object):
     """This class create resources to test that all of them are deleted by
@@ -81,19 +85,25 @@ class ResourcePopulator(object):
             container_format='bare', name='testimage1', disk_format='qcow2',
             data='aaaaa', properties=properties, is_public=False)
 
-        download_images()
 
-        print 'Creating a shared image'
-        cirrosfile = open(img_name)
-        image_shared1 = glance.images.create(
-            container_format='bare', name='testimage2', disk_format='qcow2',
-            data=cirrosfile, properties={'key2': 'value2'}, is_public=True)
 
-        print 'Creating another shared image'
-        cirrosfile2 = open(img_name2)
-        image_shared2 = glance.images.create(
-            container_format='bare', name='testimage3', disk_format='qcow2',
-            data=cirrosfile2, properties={'key3': 'value3'}, is_public=True)
+        if can_create_shared_images:
+            download_images()
+            print 'Creating a shared image'
+            cirrosfile = open(img_name)
+            image_shared1 = glance.images.create(
+                container_format='bare', name='testimg2', disk_format='qcow2',
+                data=cirrosfile, properties={'key2': 'value2'}, is_public=True)
+
+            print 'Creating another shared image'
+            cirrosfile2 = open(img_name2)
+            image_shared2 = glance.images.create(
+                container_format='bare', name='testima3', disk_format='qcow2',
+                data=cirrosfile2, properties={'key3': 'val3'}, is_public=True)
+            image_id = image_shared1.id
+        else:
+            image_id = glance.images.find(name=image_name)
+
 
         print 'Creating a keypair'
         keypair = nova.keypairs.create(name='testpublickey')
@@ -105,40 +115,47 @@ class ResourcePopulator(object):
         print 'Reserving a flotaing ip'
         floatingip = nova.floating_ips.create(pool=external_net)
 
-        print 'Creating a router'
-        router = neutron.create_router(
-            {'router': {'name': 'testrouter', 'admin_state_up': True}}
-        )['router']
+        if can_create_networks:
+            print 'Creating a router'
+            router = neutron.create_router(
+                {'router': {'name': 'testrouter', 'admin_state_up': True}}
+            )['router']
 
-        print 'Creating a network'
-        n = neutron.create_network(
-            {'network': {'name': 'testnetwork', 'admin_state_up': True, }})
-        network = n['network']
+            print 'Creating a network'
+            n = neutron.create_network(
+                {'network': {'name': 'testnetwork', 'admin_state_up': True, }})
+            network = n['network']
 
-        print 'Creating a subnet'
-        subnet = neutron.create_subnet(
-            {'subnet': {'name': 'testsubnet', 'network_id': network['id'],
-                        'ip_version': 4, 'cidr': '192.168.1.0/24',
-                        'dns_nameservers': ['8.8.8.8']}})['subnet']
+            print 'Creating a subnet'
+            subnet = neutron.create_subnet(
+                {'subnet': {'name': 'testsubnet', 'network_id': network['id'],
+                            'ip_version': 4, 'cidr': '192.168.1.0/24',
+                            'dns_nameservers': ['8.8.8.8']}})['subnet']
 
-        """
-        Only admin users can create shared networks.
+            """
+            Only admin users can create shared networks.
 
-        network2 = neutron.create_network(
-            {'network': {'name': 'testnetwork_shared', 'admin_state_up': True,
-                         'shared': True}})['network']
+            network2 = neutron.create_network(
+                {'network': {'name': 'testnetwork_shared', 'admin_state_up': True,
+                             'shared': True}})['network']
 
-        subnet2 = neutron.create_subnet(
-            {'subnet': {'name': 'testsubnet_shared',
-                        'network_id': network2['id'],
-                        'ip_version': 4, 'cidr': '192.168.2.0/24',
-                        'dns_nameservers': ['8.8.8.8']}})['subnet']
+            subnet2 = neutron.create_subnet(
+                {'subnet': {'name': 'testsubnet_shared',
+                            'network_id': network2['id'],
+                            'ip_version': 4, 'cidr': '192.168.2.0/24',
+                            'dns_nameservers': ['8.8.8.8']}})['subnet']
 
-        """
+            """
 
-        print 'Adding interface and gateway to router'
-        neutron.add_interface_router(router['id'], {'subnet_id': subnet['id']})
-        neutron.add_gateway_router(router['id'], {'network_id': external_net})
+            print 'Adding interface and gateway to router'
+            neutron.add_interface_router(router['id'], {'subnet_id': subnet['id']})
+            neutron.add_gateway_router(router['id'], {'network_id': external_net})
+        else:
+            # use any internal network
+            for net in neutron.list_networks()['networks']:
+                if not net['router:external']:
+                    break
+
 
         # The volume must be available before creating the snapshot.
         time.sleep(3)
@@ -146,8 +163,6 @@ class ResourcePopulator(object):
         print 'Creating a volume snapshot'
         snapshot = cinder.volume_snapshots.create(volume.id)
 
-        # image_id = glance.images.find(name=image_name)
-        image_id = image_shared1.id
         tiny = nova.flavors.find(name='m1.tiny')
         small = nova.flavors.find(name='m1.small')
         nic = {'net-id': network['id']}
@@ -160,24 +175,26 @@ class ResourcePopulator(object):
         time.sleep(2)
         server.add_floating_ip(floatingip.ip)
 
-        osclients2 = OpenStackClients()
-        second_user = os.environ['USER2']
-        second_user_tenant = os.environ['USER2_TENANT']
-        osclients2.set_credential(second_user, os.environ['PASSWORD_USER2'],
-                                  tenant_name=second_user_tenant)
-        nova = osclients2.get_novaclient()
-        neutron = osclients2.get_neutronclient()
+        if can_create_shared_images:
+            # create a VM using another tenant, based in a shared image
+            osclients2 = OpenStackClients()
+            second_user = os.environ['USER2']
+            second_user_tenant = os.environ['USER2_TENANT']
+            osclients2.set_credential(second_user, os.environ['PASSWORD_USER2'],
+                                      tenant_name=second_user_tenant)
+            nova = osclients2.get_novaclient()
+            neutron = osclients2.get_neutronclient()
 
-        net2 = None
-        for net in neutron.list_networks()['networks']:
-            if not net['router:external']:
-                net2 = net['id']
-                break
+            net2 = None
+            for net in neutron.list_networks()['networks']:
+                if not net['router:external']:
+                    net2 = net['id']
+                    break
 
-        nics = [{'net-id': net2}]
-        print 'Creating a second VM, with a different user'
-        server2 = nova.servers.create(
-            'vm_testdelete2', flavor=tiny, image=image_shared2.id, nics=nics)
+            nics = [{'net-id': net2}]
+            print 'Creating a second VM, with a different user'
+            server2 = nova.servers.create(
+                'vm_testdelete2', flavor=tiny, image=image_shared2.id, nics=nics)
 
 
 def download_images():
@@ -186,16 +203,9 @@ def download_images():
     """
     if not os.path.exists(img_name):
         print 'Downloading ' + img_name
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, i_url)
-        c.setopt(pycurl.WRITEDATA, open(img_name, 'w'))
-        c.perform()
+        urllib.urlretrieve(i_url, img_name)
     if not os.path.exists(img_name2):
         print 'Downloading ' + img_name2
-        c = pycurl.Curl()
-        c.setopt(pycurl.URL, i_url2)
-        c.setopt(pycurl.WRITEDATA, open(img_name2, 'w'))
-        c.perform()
-
+        urllib.urlretrieve(i_url2, img_name2)
 
 resources = ResourcePopulator()
