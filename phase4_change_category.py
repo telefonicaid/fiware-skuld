@@ -62,7 +62,7 @@ def change_user_via_idm(user_id):
     """
     if q.get_type_fiware_user(user_id) != 'trial':
         logging.error('{0} is not a trial user'.format(user_id))
-    body = {'user_id': user_id, 'role_id': basic}
+    body = {'user_id': user_id, 'role_id': basic, 'notify': True}
     headers = {'X-Auth-Token': q.osclients.get_token()}
     
     # NOTE(garcianavalon) sometimes in settings people use the end /
@@ -79,5 +79,7 @@ def change_user_via_idm(user_id):
 users = open('users_to_delete.txt')
 for line in users.readlines():
     user_id = line.strip()
-    print 'Changing user {0} from trial to basic'.format(user_id)
+    if user_id == '':
+        continue
+    logging.info('Changing user {0} from trial to basic'.format(user_id))
     change_user_via_idm(user_id)
