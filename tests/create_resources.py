@@ -152,8 +152,10 @@ class ResourcePopulator(object):
             neutron.add_gateway_router(router['id'], {'network_id': external_net})
         else:
             # use any internal network
+            network = None
             for net in neutron.list_networks()['networks']:
                 if not net['router:external']:
+                    network = net
                     break
 
 
@@ -172,7 +174,8 @@ class ResourcePopulator(object):
             'vm_testdelete', flavor=tiny, image=image_id,
             key_name='testpublickey', security_groups=['default'], nics=[nic])
         # , files=files, config_drive=True)
-        time.sleep(2)
+        # give some time before assigning the floating ip
+        time.sleep(10)
         server.add_floating_ip(floatingip.ip)
 
         if can_create_shared_images:
