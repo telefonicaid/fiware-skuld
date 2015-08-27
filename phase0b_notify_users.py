@@ -46,7 +46,7 @@ def notify_users(user_ids):
     if horizon_url.endswith('/'):
         horizon_url = horizon_url[:-1]
 
-    r = requests.post(horizon_url + '/notify_expire_users/',
+    r = requests.post(horizon_url + '/notify_expire_users',
                       json=body, headers=headers, verify=False)
     if r.status_code not in (200, 204):
         msg = 'The operation returned code {0}: {1}'
