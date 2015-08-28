@@ -51,13 +51,16 @@ def notify_users(user_ids):
     if r.status_code not in (200, 204):
         msg = 'The operation returned code {0}: {1}'
         logging.error(msg.format(r.status_code, r.reason))
+    else:
+        # If there is an error with some users, they are
+        # included in the body of the message.
+        print 'Completed. ' + r.text
 
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
 users = open('users_to_delete.txt')
 list_users = list()
 for line in users.readlines():
     user_id = line.strip()
-
     if user_id == '':
         continue
     list_users.append(user_id)
