@@ -50,7 +50,8 @@ the trial account must be freed. Note that if a user has worked also in other
 projects (tenants), these other resources must not be deleted.
 
 The resources that these scripts can free, fall in following categories:
-* nova resources: vms, user keys, security groups
+* nova resources: vms, user keys, security groups (only the default security
+group cannot be deleted)
 * glance resources: images (snapshots are also images)
 * cinder resources: volumes, snapshot-volumes, backup-volumes
 * neutron resources: networks, subnets, ports, routers, floating ips, security groups.
@@ -58,6 +59,10 @@ The resources that these scripts can free, fall in following categories:
 * swift resources: containers, objects
 
 Optionally, images created by the user but in use by other tenants, may be preserved.
+
+The deletion of the resources follow and order, for example snapshot volumes must be removed
+before volumes, or blueprint instances before templates. The code try to minimize pauses
+executing firts all the deletion from the same priority for each user.
 
 The deletion scripts has the particularity that are not invoked by the admin but
 by impersonating the users themselves. This is the only way to delete the key pairs and

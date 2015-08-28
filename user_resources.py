@@ -67,38 +67,118 @@ class UserResources(object):
         # in use by other tenants
         self.imagesinuse = set()
 
-    def delete_tenant_resources(self):
-        """Delete all the resources of the tenant, and also the keypairs of the
-        user"""
+    def delete_tenant_resources_pri_1(self):
+        """Delete here all the elements that do not depend of others are
+        deleted first"""
 
-        self.nova.delete_user_keypairs()
+        try:
+            self.nova.delete_user_keypairs()
+        except Exception, e:
+            logging.error('Deletion of keypairs failed')
 
         # Snapshots must be deleted before the volumes, because a snapshot
-        # depends of a volume. A pause is required.
-        self.cinder.delete_tenant_volume_snapshots()
+        # depends of a volume.
+        try:
+            self.cinder.delete_tenant_volume_snapshots()
+        except Exception, e:
+            logging.error('Deletion of volume snaphosts failed')
+
+        # Blueprint instances must be deleted before VMs, instances before
+        # templates
+        try:
+            self.blueprints.delete_tenant_blueprints()
+        except Exception, e:
+            logging.error('Deletion of blueprints failed')
+
+        try:
+            self.cinder.delete_tenant_backup_volumes()
+        except Exception, e:
+            logging.error('Deletion of backup volumes failed')
+
+
+    def delete_tenant_resources_pri_2(self):
+        """Delete resources that must be deleted after p1 resources"""
+        # VMs and blueprint templates should be deleted after blueprint
+        # instances.
+
+        count = 0
+        while self.blueprints.get_tenant_blueprints() and count < 120:
+            time.sleep(1)
+            count += 1
+        try:
+            self.nova.delete_tenant_vms()
+        except Exception, e:
+            logging.error('Deletion of VMs failed')
+
+        # Blueprint instances must be deleted after blueprint templates
+        try:
+            self.blueprints.delete_tenant_templates()
+        except Exception, e:
+            logging.error('Deletion of blueprint templates failed')
+
+    def delete_tenant_resources_pri_3(self):
+        """Delete resources that must be deleted after p2 resources"""
+        # security group, volumes, network ports, images, floating ips,
+        # must be deleted after VMs
+        try:
+            self.nova.delete_tenant_security_groups()
+        except Exception, e:
+            logging.error('Deletion of security groups failed')
+
+        # self.glance.delete_tenant_images()
+        try:
+            self.glance.delete_tenant_images_notinuse(self.imagesinuse)
+        except Exception, e:
+            logging.error('Deletion of images failed')
+
+        # Before deleting volumes, snapshot volumes must be deleted
         while self.cinder.get_tenant_volume_snapshots():
             time.sleep(1)
 
-        # Blueprint instances must be deleted before VMs
-        self.blueprints.delete_tenant_blueprints()
-        self.blueprints.delete_tenant_templates()
+        try:
+            self.cinder.delete_tenant_volumes()
+        except Exception, e:
+            logging.error('Deletion of volumes failed')
 
-        # VM must be deleted before purging the security groups
-        self.nova.delete_tenant_vms()
 
-        self.nova.delete_tenant_security_groups()
+        try:
+            self.neutron.delete_tenant_ports()
+        except Exception, e:
+            logging.error('Deletion of network ports failed')
 
-        # self.glance.delete_tenant_images()
-        self.glance.delete_tenant_images_notinuse(self.imagesinuse)
-        self.cinder.delete_tenant_volumes()
-        self.cinder.delete_tenant_backup_volumes()
+        try:
+            self.neutron.delete_tenant_securitygroups()
+        except Exception, e:
+            logging.error('Deletion of network security groups failed')
 
-        self.neutron.delete_tenant_ports()
-        self.neutron.delete_tenant_securitygroups()
-        self.neutron.delete_tenant_floatingips()
-        self.neutron.delete_tenant_subnets()
-        self.neutron.delete_tenant_networks()
-        self.neutron.delete_tenant_routers()
+        try:
+            self.neutron.delete_tenant_floatingips()
+        except Exception, e:
+            logging.error('Deletion of floating ips failed')
+
+        try:
+            self.neutron.delete_tenant_subnets()
+        except Exception, e:
+            logging.error('Deletion of subnets failed')
+
+        try:
+            self.neutron.delete_tenant_networks()
+        except Exception, e:
+            logging.error('Deletion of networks failed')
+
+        try:
+            self.neutron.delete_tenant_routers()
+        except Exception, e:
+            logging.error('Deletion of routers failed')
+
+    def delete_tenant_resources(self):
+        """Delete all the resources of the tenant, and also the keypairs of the
+        user"""
+        self.delete_tenant_resources_pri_1()
+        time.sleep(10)
+        self.delete_tenant_resources_pri_2()
+        self.delete_tenant_resources_pri_3()
+
 
     def stop_tenant_vms(self):
         """Stop all the active vms of the tenant"""

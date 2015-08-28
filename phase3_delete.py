@@ -49,6 +49,7 @@ if os.path.exists('users_trusted_ids.txt'):
     if 'OS_TRUST_ID' in env:
         del env['OS_TRUST_ID']
 
+    users_list = list()
     for line in users_trusted_ids.readlines():
         (user, trust_id) = line.strip().split(',')
         logging.info('Deleting resources of user ' + user)
@@ -58,7 +59,18 @@ if os.path.exists('users_trusted_ids.txt'):
         if images_in_use:
             user_resources.imagesinuse = images_in_use
 
-        user_resources.delete_tenant_resources()
+        users_list.append(user_resources)
+
+    # Avoid pauses
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_1()
+
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_2()
+
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_3()
+        # user_resources.delete_tenant_resources()
         if 'DONT_FREE_TRUST_ID' not in env:
             user_resources.free_trust_id()
 
@@ -76,7 +88,7 @@ elif os.path.exists('users_credentials.txt'):
         del env['OS_TENANT_ID']
 
     users_credentials = open('users_credentials.txt')
-
+    users_list = list()
     for line in users_credentials.readlines():
         (user, password, tenant_id) = line.strip().split(',')
         print 'Deleting resources of user ' + user
@@ -84,4 +96,13 @@ elif os.path.exists('users_credentials.txt'):
         if images_in_use:
             user_resources.imagesinuse = images_in_use
 
-        user_resources.delete_tenant_resources()
+    # Avoid pauses
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_1()
+
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_2()
+
+    for user_resources in users_list:
+        user_resources.delete_tenant_resources_pri_3()
+        # user_resources.delete_tenant_resources()
