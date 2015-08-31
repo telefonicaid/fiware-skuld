@@ -190,6 +190,11 @@ if using the phase1 change password alternative. If using *trust_ids* only
 OS_PASSWORD must be set with the password of the trustee (i.e. the account used
 to impersonate the users).
 
+The phase3_delete.py generates a pickle file (named freeresources-<datatime>.pickle)
+This is a dictionary of users, each entry is a tuple with another two dictionaries:
+the first references the resources before deletion and the second the resources
+after deletion.
+
 Testing
 =======
 
