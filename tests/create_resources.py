@@ -48,6 +48,7 @@ class ResourcePopulator(object):
     the code.
 
     It creates:
+    *an object inside a new container
     *a volume
     *a private image
     *a router
@@ -68,6 +69,13 @@ class ResourcePopulator(object):
         cinder = osclients.get_cinderclient()
         glance = osclients.get_glanceclient()
         nova = osclients.get_novaclient()
+        swift = osclients.get_swiftclient()
+
+        print 'Creating a container'
+        swift.put_container('container', dict())
+
+        print 'Creating an object'
+        swift.put_object('container', 'object', 'content')
 
         print 'Creating a volume'
         volume = cinder.volumes.create(name='cindervolume', size=1)
@@ -84,8 +92,6 @@ class ResourcePopulator(object):
         image = glance.images.create(
             container_format='bare', name='testimage1', disk_format='qcow2',
             data='aaaaa', properties=properties, is_public=False)
-
-
 
         if can_create_shared_images:
             download_images()

@@ -28,9 +28,14 @@ from os import environ as env
 import os.path
 import cPickle as pickle
 import logging
+import datetime
 
 from user_resources import UserResources
 from settings.settings import TRUSTEE
+
+logging.debug('start delete script')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 images_in_use = None
 if os.path.exists('imagesinuse.pickle'):
@@ -50,12 +55,16 @@ if os.path.exists('users_trusted_ids.txt'):
         del env['OS_TRUST_ID']
 
     users_list = list()
+    report = dict()
+    report_l = list()
     for line in users_trusted_ids.readlines():
         (user, trust_id) = line.strip().split(',')
-        logging.info('Deleting resources of user ' + user)
+        logger.info('Deleting resources of user ' + user)
         password = env['OS_PASSWORD']
         user_resources = UserResources(TRUSTEE, password,
                                        trust_id=trust_id)
+        report[user] = user_resources.get_resources_dict()
+        report_l.append(user)
         if images_in_use:
             user_resources.imagesinuse = images_in_use
 
@@ -68,9 +77,13 @@ if os.path.exists('users_trusted_ids.txt'):
     for user_resources in users_list:
         user_resources.delete_tenant_resources_pri_2()
 
+    users = iter(report_l)
     for user_resources in users_list:
         user_resources.delete_tenant_resources_pri_3()
         # user_resources.delete_tenant_resources()
+        # tuple with user's resources before and after deletion.
+        user = users.next()
+        report[user] = (report[user], user_resources.get_resources_dict())
         if 'DONT_FREE_TRUST_ID' not in env:
             user_resources.free_trust_id()
 
@@ -89,10 +102,15 @@ elif os.path.exists('users_credentials.txt'):
 
     users_credentials = open('users_credentials.txt')
     users_list = list()
+    report = dict()
+    report_l = list()
     for line in users_credentials.readlines():
         (user, password, tenant_id) = line.strip().split(',')
         print 'Deleting resources of user ' + user
         user_resources = UserResources(user, password, tenant_id)
+        report[user] = user_resources.get_resources_dict()
+        report_l.append(user)
+
         if images_in_use:
             user_resources.imagesinuse = images_in_use
 
@@ -103,6 +121,13 @@ elif os.path.exists('users_credentials.txt'):
     for user_resources in users_list:
         user_resources.delete_tenant_resources_pri_2()
 
+    users = iter(report_l)
     for user_resources in users_list:
         user_resources.delete_tenant_resources_pri_3()
         # user_resources.delete_tenant_resources()
+
+# Save report
+
+now = datetime.datetime.now().isoformat()
+with open('freeresources_report_' + now + '.pickle', 'wf') as f:
+    pickle.dump(report, f, protocol=-1)

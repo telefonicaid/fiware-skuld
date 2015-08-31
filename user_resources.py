@@ -45,6 +45,21 @@ class UserResources(object):
     of the resources. It does not use an admin credential!!!"""
     def __init__(self, username, password, tenant_id=None, tenant_name=None,
                  trust_id=None):
+        """
+        Constructor of the class. Tenant-id or tenant_name or tust_id must be
+        provided.
+
+        :param username: the username of the user whose resources are deleted
+          or from the user that impersonate them
+        :param password: the password of the user whose resources are deleted
+          or from the user that impersonate them
+        :param tenant_id: the tenant id of the user whose resources must be
+        deleted.
+        :param tenant_name: the tenant name of the user whose reources must be
+         deleted
+        :param trust_id: the trust_id use to impersonate the user
+        :return: nothing
+        """
         self.clients = OpenStackClients()
         if tenant_id:
             self.clients.set_credential(username, password,
@@ -124,6 +139,11 @@ class UserResources(object):
 
     def delete_tenant_resources_pri_3(self):
         """Delete resources that must be deleted after p2 resources"""
+        count = 0
+        while self.nova.get_tenant_vms() and count < 120:
+            time.sleep(1)
+            count += 1
+
         # security group, volumes, network ports, images, floating ips,
         # must be deleted after VMs
         try:
@@ -205,7 +225,7 @@ class UserResources(object):
         resources['vms'] = set(self.nova.get_tenant_vms())
         resources['security_groups'] = set(
             self.nova.get_tenant_security_groups())
-        resources['images'] = set(self.glance.get_tenant_images())
+        resources['images'] = self.glance.get_tenant_images()
         resources['volumesnapshots'] = set(
             self.cinder.get_tenant_volume_snapshots())
         resources['volumes'] = set(self.cinder.get_tenant_volumes())

@@ -42,6 +42,18 @@ class GlanceResources(object):
         self.tenant_id = osclients.get_session().get_project_id()
 
     def get_tenant_images(self):
+        """ return a list of images ids
+
+        :return: a list of image ids
+        """
+        images = list()
+        for image in self.glance.images.findall(owner=self.tenant_id):
+            if image.owner != self.tenant_id:
+                continue
+            images.append(image.id)
+        return images
+
+    def get_tenant_images_tuple(self):
         """ return a tuple with two list of images: the private images and the
         shared images. It is safe to delete the private images after killing
         the VMs, but the shared images requires more attention because they
