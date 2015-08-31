@@ -34,6 +34,7 @@ from glance_resources import GlanceResources
 from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
 from blueprint_resources import BluePrintResources
+from swift_resources import SwiftResources
 
 
 class UserResources(object):
@@ -63,6 +64,7 @@ class UserResources(object):
         self.glance = GlanceResources(self.clients)
         self.neutron = NeutronResources(self.clients)
         self.blueprints = BluePrintResources(self.clients)
+        self.swift = SwiftResources(self.clients)
         # Images in use is a set used to avoid deleting formerly glance images
         # in use by other tenants
         self.imagesinuse = set()
@@ -95,6 +97,10 @@ class UserResources(object):
         except Exception, e:
             logging.error('Deletion of backup volumes failed')
 
+        try:
+            self.swift.delete_tenant_containers()
+        except Exception, e:
+            logging.error('Deletion of swift containers failed')
 
     def delete_tenant_resources_pri_2(self):
         """Delete resources that must be deleted after p1 resources"""
@@ -188,6 +194,35 @@ class UserResources(object):
         """Make private all the tenant public images"""
         self.glance.unshare_images()
 
+    def get_resources_dict(self):
+        """return a dictionary of sets with the ids of the user's resources
+        :return: a dictionary with the user's resources
+        """
+        resources = dict()
+        resources['blueprints'] = set(self.blueprints.get_tenant_blueprints())
+        resources['templates'] = set(self.blueprints.get_tenant_templates())
+        resources['keys'] = set(self.nova.get_user_keypairs())
+        resources['vms'] = set(self.nova.get_tenant_vms())
+        resources['security_groups'] = set(
+            self.nova.get_tenant_security_groups())
+        resources['images'] = set(self.glance.get_tenant_images())
+        resources['volumesnapshots'] = set(
+            self.cinder.get_tenant_volume_snapshots())
+        resources['volumes'] = set(self.cinder.get_tenant_volumes())
+        resources['backupvolumes'] = set(
+            self.cinder.get_tenant_backup_volumes())
+        resources['floatingips'] = set(
+            self.neutron.get_tenant_floatingips())
+        resources['networks'] = set(
+            self.neutron.get_tenant_networks())
+        resources['nsecuritygroups'] = set(
+            self.neutron.get_tenant_securitygroups())
+        resources['routers'] = set(self.neutron.get_tenant_routers())
+        resources['subnets'] = set(self.neutron.get_tenant_subnets())
+        resources['ports'] = set(self.neutron.get_tenant_ports())
+        resources['containers'] = self.swift.get_tenant_containers_dicts()
+        return resources
+
     def print_tenant_resources(self):
         """print all the tenant's resources"""
         print 'Tenant id is: ' + self.clients.get_session().get_project_id()
@@ -227,6 +262,8 @@ class UserResources(object):
         print self.neutron.get_tenant_subnets()
         print 'Tenant ports'
         print self.neutron.get_tenant_ports()
+        print 'Containers'
+        print self.swift.get_tenant_containers()
 
     def free_trust_id(self):
         """Free trust_id, if it exists.
