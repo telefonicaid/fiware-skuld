@@ -59,11 +59,16 @@ if os.path.exists('users_trusted_ids.txt'):
     report_l = list()
     for line in users_trusted_ids.readlines():
         (user, trust_id) = line.strip().split(',')
-        logger.info('Deleting resources of user ' + user)
+        logger.info('Obtaining resources of user ' + user)
         password = env['OS_PASSWORD']
         user_resources = UserResources(TRUSTEE, password,
                                        trust_id=trust_id)
-        report[user] = user_resources.get_resources_dict()
+        try:
+            report[user] = user_resources.get_resources_dict()
+        except Exception, e:
+            logging.error('Calculating resources of user ' + user + ' failed')
+            continue
+
         report_l.append(user)
         if images_in_use:
             user_resources.imagesinuse = images_in_use
