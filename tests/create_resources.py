@@ -74,9 +74,9 @@ class ResourcePopulator(object):
         print 'Creating a container'
         swift.put_container('container', dict())
 
-        print 'Creating an object'
+        print 'Creating two objects'
         swift.put_object('container', 'object', 'content')
-
+        swift.put_object('container', 'object2', 'content2')
         print 'Creating a volume'
         volume = cinder.volumes.create(name='cindervolume', size=1)
 

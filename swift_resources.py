@@ -56,6 +56,17 @@ class SwiftResources(object):
             objects = list(obj['name'] for obj in container[1])
             containers[container_name] = objects
 
+    def get_tenant_objects(self):
+        """ Return all the objects as tuples container,path
+        :return: a tuple (container,path)
+        """
+        containers_list = self.get_tenant_containers()
+        object_list = list()
+        for container_name in containers_list:
+            container = self.swiftclient.get_container(container_name)
+            for obj in container[1]:
+                object_list.append((container_name, obj['name']))
+        return object_list
 
     def delete_tenant_containers(self):
         """delete all the swift contents of the tenant. That is,

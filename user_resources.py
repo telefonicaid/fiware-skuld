@@ -60,6 +60,8 @@ class UserResources(object):
         :param trust_id: the trust_id use to impersonate the user
         :return: nothing
         """
+
+        self.logger = logging.getLogger(__name__)
         self.clients = OpenStackClients()
         if tenant_id:
             self.clients.set_credential(username, password,
@@ -74,6 +76,9 @@ class UserResources(object):
             raise(
                 'Either tenant_id or tenant_name or trust_id must be provided')
 
+        self.user_id = self.clients.get_session().get_user_id()
+        session = self.clients.get_session()
+        self.user_name = session.auth.get_access(session)
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
@@ -91,31 +96,31 @@ class UserResources(object):
         try:
             self.nova.delete_user_keypairs()
         except Exception, e:
-            logging.error('Deletion of keypairs failed')
+            self.logger.error('Deletion of keypairs failed')
 
         # Snapshots must be deleted before the volumes, because a snapshot
         # depends of a volume.
         try:
             self.cinder.delete_tenant_volume_snapshots()
         except Exception, e:
-            logging.error('Deletion of volume snaphosts failed')
+            self.logger.error('Deletion of volume snaphosts failed')
 
         # Blueprint instances must be deleted before VMs, instances before
         # templates
         try:
             self.blueprints.delete_tenant_blueprints()
         except Exception, e:
-            logging.error('Deletion of blueprints failed')
+            self.logger.error('Deletion of blueprints failed')
 
         try:
             self.cinder.delete_tenant_backup_volumes()
         except Exception, e:
-            logging.error('Deletion of backup volumes failed')
+            self.logger.error('Deletion of backup volumes failed')
 
         try:
             self.swift.delete_tenant_containers()
         except Exception, e:
-            logging.error('Deletion of swift containers failed')
+            self.logger.error('Deletion of swift containers failed')
 
     def delete_tenant_resources_pri_2(self):
         """Delete resources that must be deleted after p1 resources"""
@@ -129,13 +134,13 @@ class UserResources(object):
         try:
             self.nova.delete_tenant_vms()
         except Exception, e:
-            logging.error('Deletion of VMs failed')
+            self.logger.error('Deletion of VMs failed')
 
         # Blueprint instances must be deleted after blueprint templates
         try:
             self.blueprints.delete_tenant_templates()
         except Exception, e:
-            logging.error('Deletion of blueprint templates failed')
+            self.logger.error('Deletion of blueprint templates failed')
 
     def delete_tenant_resources_pri_3(self):
         """Delete resources that must be deleted after p2 resources"""
@@ -149,13 +154,13 @@ class UserResources(object):
         try:
             self.nova.delete_tenant_security_groups()
         except Exception, e:
-            logging.error('Deletion of security groups failed')
+            self.logger.error('Deletion of security groups failed')
 
         # self.glance.delete_tenant_images()
         try:
             self.glance.delete_tenant_images_notinuse(self.imagesinuse)
         except Exception, e:
-            logging.error('Deletion of images failed')
+            self.logger.error('Deletion of images failed')
 
         # Before deleting volumes, snapshot volumes must be deleted
         while self.cinder.get_tenant_volume_snapshots():
@@ -164,38 +169,38 @@ class UserResources(object):
         try:
             self.cinder.delete_tenant_volumes()
         except Exception, e:
-            logging.error('Deletion of volumes failed')
+            self.logger.error('Deletion of volumes failed')
 
 
         try:
             self.neutron.delete_tenant_ports()
         except Exception, e:
-            logging.error('Deletion of network ports failed')
+            self.logger.error('Deletion of network ports failed')
 
         try:
             self.neutron.delete_tenant_securitygroups()
         except Exception, e:
-            logging.error('Deletion of network security groups failed')
+            self.logger.error('Deletion of network security groups failed')
 
         try:
             self.neutron.delete_tenant_floatingips()
         except Exception, e:
-            logging.error('Deletion of floating ips failed')
+            self.logger.error('Deletion of floating ips failed')
 
         try:
             self.neutron.delete_tenant_subnets()
         except Exception, e:
-            logging.error('Deletion of subnets failed')
+            self.logger.error('Deletion of subnets failed')
 
         try:
             self.neutron.delete_tenant_networks()
         except Exception, e:
-            logging.error('Deletion of networks failed')
+            self.logger.error('Deletion of networks failed')
 
         try:
             self.neutron.delete_tenant_routers()
         except Exception, e:
-            logging.error('Deletion of routers failed')
+            self.logger.error('Deletion of routers failed')
 
     def delete_tenant_resources(self):
         """Delete all the resources of the tenant, and also the keypairs of the
@@ -240,7 +245,7 @@ class UserResources(object):
         resources['routers'] = set(self.neutron.get_tenant_routers())
         resources['subnets'] = set(self.neutron.get_tenant_subnets())
         resources['ports'] = set(self.neutron.get_tenant_ports())
-        resources['containers'] = self.swift.get_tenant_containers_dicts()
+        resources['objects'] = set(self.swift.get_tenant_objects())
         return resources
 
     def print_tenant_resources(self):
@@ -291,7 +296,7 @@ class UserResources(object):
         :return: nothing
         """
         if self.trust_id:
-            logging.info('Freeing trust-id')
+            self.logger.info('Freeing trust-id')
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
 
