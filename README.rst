@@ -1,53 +1,34 @@
-==========================
-delete_os_tenant_resources
-==========================
+=============================
+FIWARE Trial Users Management
+=============================
+
+.. contents:: :local:
 
 Introduction
 ============
 
-This code is a series of scripts to free the resources allocated by the expired
-trial users and to change the user type from trial to ordinary.
+
+
+This project is a scripts sets developed to free the allocated resources by the
+expired Trial Users in any FIWARE Lab node and finally change the user type
+from Trial User to Basic User.
 
 This project is part of FIWARE_.
-
-Components
-----------
-
-There is only one component, implemented with scritps and python classes:
-
-osclients.py
-    This class provides access to all the OpenStack clients. It may be reused
-    in other projects.
-
-the \*_resources.py modules
-    Provide the methods to list/delete resources from this class
-
-impersonate.py
-    Provide methods to impersonate a user using trusted ids.
-expired_users.py
-    Obtains the list of expired trial accounts
-change_password.py
-    A tool to change the password of any OpenStack user
-queries.py
-    Some useful methods to get information from OpenStack servers
-phase*.py
-    The scripts that free the resources
-
 
 Description
 ===========
 
-The purpose of these scripts is to detected the trial accounts that are expired,
+The purpose of these scripts are the recovering of the trial users that are expired,
 free the associated resources and change the user type from trial to basic.
 
 Most of the user resources are not really associated with users but with tenants;
-an exception is user keys. Therefore, the resources of the tenant associated with
+an exception is user key pairs. Therefore, the resources of the tenant associated with
 the trial account must be freed. Note that if a user has worked also in other
 projects (tenants), these other resources must not be deleted.
 
 The resources that these scripts can free, fall in following categories:
 
-- nova resources: vms, user keys, security groups (only the default security
+- nova resources: servers, user key pairs, security groups (only the default security
   group cannot be deleted)
 - glance resources: images (snapshots are also images)
 - cinder resources: volumes, snapshot-volumes, backup-volumes
@@ -65,6 +46,29 @@ The deletion scripts has the particularity that are not invoked by the admin but
 by impersonating the users themselves. This is the only way to delete the key pairs and
 for other resources has the advantage that it is impossible to delete the resources of other
 users because the lack of permissions.
+
+Components
+----------
+
+There are not propertly components in this project. The code is a series of
+scripts with some code organized inside python classes:
+
+the phase\*.py scripts
+    The scripts that are invoked by the users to free the resources
+the \*_resources.py modules
+    Provide the methods to list/delete resources from different services (nova,
+    glance, neutron, cinder...)
+osclients.py
+    This class provides access to all the OpenStack clients. It may be reused
+    in other projects.
+impersonate.py
+    Provide methods to impersonate a user using trusted ids.
+expired_users.py
+    Obtains the list of expired trial accounts
+change_password.py
+    A tool to change the password of any OpenStack user
+queries.py
+    Some useful methods to get information from OpenStack servers
 
 Build and Install
 =================
@@ -88,7 +92,7 @@ The recommend installation method is using a virtualenv. Actually, the installat
 process is only about the python dependencies, because the scripts do not need
 installation.
 
-1) Create a virtualenv 'delete_ENV' invoking *virtualenv deleteENV*
+1) Create a virtualenv 'deleteENV' invoking *virtualenv deleteENV*
 2) Activate the virtualenv with *source deleteENV/bin/activate*
 3) Install the requirements running *pip install -r requirements.txt
    --allow-all-external*
@@ -134,9 +138,9 @@ The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
      user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``users_list.txt``). The idea is to run this script a day or two
-     before the following scripts, to give some time to users to react before
-     their resources are freed.
+     the file ``users_list.txt``). This script must be executed some days
+     before the execution of the next scripts, to give some time to users to
+     react before their resources are deleted.
 
 -phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
      the file ``users_list.txt``. It sets a new random password for each user
@@ -159,7 +163,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      that time this script must be executed again to generate new tokens.
 
 -phase2: ``phase2_stopvms.py``. This scripts does not delete anything, yet. It
-     stops the VMs of the users and makes private their shared images. The idea
+     stops the servers of the users and makes private their shared images. The idea
      is to grant a grace period to users to detect that their resources are not
      available before they are beyond redemption. This script does not require
      the admin account, because it applies the user' credential from
@@ -167,7 +171,7 @@ The procedure works by invoking the scripts corresponding to different phases:
 
 -phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to
      detect images owned by the user, in use by other tenants. Theoretically
-     deleting a image used  by a VM doesn't break the VM, but if you prefer to
+     deleting a image used  by a server doesn't break the server, but if you prefer to
      avoid deleting that images, invoke this script before phase3. The script
      purge_images.py may be invoked after, to delete the images with has no VM
      anymore. This script requires the admin credential. It generates the file
@@ -214,7 +218,31 @@ To run unit test, invoke *test_expired_users.py* inside *tests* folder
 Acceptance tests
 ----------------
 
-See <tests/acceptance_tests/README.md>
+The acceptante tests are inside the folder *tests/acceptance_tests*
+Folder for acceptance tests of the FIWARE Trial Users Management.
+
+Prerequisites
+*************
+
+- Python 2.7 or newer
+- pip installed (http://docs.python-guide.org/en/latest/starting/install/linux/)
+- virtualenv installed (pip install virtalenv)
+- Git installed (yum install git-core / apt-get install git)
+
+Environment preparation
+***********************
+- Create a virtual environment somewhere, e.g. in ENV (virtualenv ENV)
+- Activate the virtual environment (source ENV/bin/activate)
+- Change to the test/acceptance folder of the project
+- Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
+- Configure file in tests/acceptance_tests/commons/configuration.py adding the keystone url, and a valid, user, password and tenant ID.
+
+Tests execution
+***************
+
+1) Change to the tests/acceptance_tests folder of the project if not already on it
+2) Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
+3) Run lettuce_tools with appropriate params (see available ones with the -h option)
 
 Tools
 -----
@@ -235,7 +263,7 @@ advantage is that the script support OS_TRUST_ID, while other tools as nova
 does not.
 
 License
--------
+=======
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 

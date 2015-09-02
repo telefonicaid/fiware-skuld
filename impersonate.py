@@ -29,11 +29,11 @@ from oslo_utils import timeutils
 import time
 
 class TrustFactory:
-    """This class is to create/destroy a TRUST_ID, that allows a user (the
+    """This class is used to create/destroy a TRUST_ID, that allows a user (the
      trustee) to impersonate another user (the trustor).
 
-    The main stream functionaly only allows to the trustor create the TRUST_ID
-    but this class uses a change in the FiWare IDM that permits the admin user
+    The mainstream functionalily only allows to the trustor create the TRUST_ID
+    but this class uses a change in the FiWare IDM that allows admin user
     to create any TRUST_ID"""
 
     def __init__(self, osclients_o=None):
