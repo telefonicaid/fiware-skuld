@@ -85,9 +85,9 @@ class OpenStackClients(object):
             self.__password = None
 
         if 'OS_TENANT_NAME' in env:
-            self.__tenant = env['OS_TENANT_NAME']
+            self.__tenant_name = env['OS_TENANT_NAME']
         else:
-            self.__tenant = None
+            self.__tenant_name = None
 
         if 'OS_TENANT_ID' in env:
             self.__tenant_id = env['OS_TENANT_ID']
@@ -133,19 +133,19 @@ class OpenStackClients(object):
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
-            self.__tenant = None
+            self.__tenant_name = None
         elif tenant_id:
             self.__tenant_id = tenant_id
-            self.__tenant = None
+            self.__tenant_name = None
             self.__trust_id = None
         elif tenant_name:
-            self.__tenant = tenant_name
+            self.__tenant_name = tenant_name
             self.__tenant_id = None
             self.__trust_id = None
         else:
             self.__trust_id = None
             self.__tenant_id = None
-            self.__tenant = None
+            self.__tenant_name = None
 
         # clear sessions
         if self._session_v2:
@@ -221,8 +221,8 @@ class OpenStackClients(object):
         other_params = dict()
         if self.__trust_id:
             other_params['trust_id'] = self.__trust_id
-        elif self.__tenant:
-            other_params['tenant_name'] = self.__tenant
+        elif self.__tenant_name:
+            other_params['tenant_name'] = self.__tenant_name
         elif self.__tenant_id:
             other_params['tenant_id'] = self.__tenant_id
 
@@ -257,8 +257,8 @@ class OpenStackClients(object):
         other_params = dict()
         if self.__trust_id:
             other_params['trust_id'] = self.__trust_id
-        elif self.__tenant:
-            other_params['project_name'] = self.__tenant
+        elif self.__tenant_name:
+            other_params['project_name'] = self.__tenant_name
         elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
 
