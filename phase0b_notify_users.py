@@ -30,7 +30,7 @@ import warnings
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from osclients import osclients
-import settings.settings
+from settings.settings import HORIZON_ENDPOINT
 
 def notify_users(user_ids):
     """
@@ -42,7 +42,7 @@ def notify_users(user_ids):
     body = {'users': user_ids}
     headers = {'X-Auth-Token': osclients.get_token()}
 
-    horizon_url = settings.settings.HORIZON_ENDPOINT
+    horizon_url = HORIZON_ENDPOINT
     if horizon_url.endswith('/'):
         horizon_url = horizon_url[:-1]
 
