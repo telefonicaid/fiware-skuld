@@ -46,18 +46,25 @@ class UserResources(object):
     def __init__(self, username, password, tenant_id=None, tenant_name=None,
                  trust_id=None):
         """
-        Constructor of the class. Tenant-id or tenant_name or tust_id must be
+        Constructor of the class. Tenant_id or tenant_name or tust_id must be
         provided.
 
-        :param username: the username of the user whose resources are deleted
-          or from the user that impersonate them
+        There are two ways of using this class:
+        -passing the user, password, tenant_id or tenant_name of the user whose
+        resources are being deleted
+        -passing the user and password of the trustee, and the trust_id
+        generated to impersonate the trustor.
+
+        :param username: the user name whose resources are deleted
+          or the user name of the trustee
         :param password: the password of the user whose resources are deleted
-          or from the user that impersonate them
+          or the password of the trustee
         :param tenant_id: the tenant id of the user whose resources must be
         deleted.
-        :param tenant_name: the tenant name of the user whose reources must be
+        :param tenant_name: the tenant name of the user whose resources must be
          deleted
-        :param trust_id: the trust_id use to impersonate the user
+        :param trust_id: the trust_id used to impersonate the user whose
+        resources must be deleted
         :return: nothing
         """
 

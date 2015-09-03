@@ -52,8 +52,14 @@ class OpenStackClients(object):
         otherwise it is obtained from the environment (OS_AUTH_URL)
 
         The fields with the user, password, tenant_id/tenant_name/trust_id and
-        region are initialized with the environemnt variables if present, but
+        region are initialized with the environment variables if present, but
         they can be set also with set_credential/set_region methods.
+
+        OS_USERNAME: the username
+        OS_PASSWORD: the password
+        OS_TENANT_NAME/OS_TENANT_ID: alternate ways of providing the tenant
+        OS_TRUST_ID: a trust id, to impersonate another user. In this case
+          OS_TENANT_NAME/OS_TENANT_ID must not be provided.
 
         :param auth_url: The keystone URL (OS_AUTH_URL if omitted)
         :return: nothing
@@ -107,25 +113,31 @@ class OpenStackClients(object):
     def set_credential(self, username, password, tenant_name=None,
                        tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
-        exists, it is invalidate. It is possible to save and then restore the
+        exists, it is invalidates. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
-        unless the OS_USERNAME, OS_PASSWORD,
-        OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID are defined.
+        unless the OS_USERNAME, OS_PASSWORD is provided (in that case, also
+        OS_TENANT_NAME, OS_TENANT_ID and OS_TRUST_ID are considered)
 
-        The tenant may be a name or a tenant_id, but also it is possible to
-        provide a trust_id, in this case the tenant/tenant_id must not be
-        provided. With the admin account also has sense do not provide
-        tenant/tenant_id/trust_id (a unscoped token).
+        The tenant may be a name or a tenant_id. However, when trust_id is
+        provided neither tenant_name nor tenant_id must be
+        provided, because the tenant is the corresponding to the trustor.
+
+        With the admin account also has sense do not provide
+        tenant/tenant_id/trust_id (this is an unscoped token, and it works
+        with many keystone operations).
 
         :param username: the username of the user
         :param password: the password of the user
         :param tenant_name: the tenant name (a.k.a. project_name)
         :param tenant_id: the tenant id (a.k.a. project_id)
-        :param trust_id: optional parameter, that allows a user to
-        impersonate another one. If trust_id is provided, do not fill
-        tenant_name nor tenant_id.
+        :param trust_id: optional parameter, that allows a user (the trustee)
+        to impersonate another one (the trustor). It works because
+        previously the trustor has created a delegation to the trustee and
+        passed them the generated trust_id. When trust_id is provided, do not
+        fill tenant_name nor tenant_id because the tenant of the trustor is
+        used.
         :return: Nothing.
         """
         self.__username = username
