@@ -57,7 +57,11 @@ def notify_users(user_ids):
         print 'Completed. ' + r.text
 
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
-users = open('users_to_delete.txt')
+try:
+    users = open('users_to_delete.txt')
+except Exception:
+    logging.error('The users_to_delete.txt file must exists')
+
 list_users = list()
 for line in users.readlines():
     user_id = line.strip()

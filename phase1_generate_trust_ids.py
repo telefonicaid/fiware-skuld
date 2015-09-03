@@ -28,8 +28,12 @@ from impersonate import TrustFactory
 from settings.settings import TRUSTEE
 from settings.settings import KEYSTONE_ENDPOINT
 from osclients import OpenStackClients
+import logging
+try:
+    users_to_delete = open('users_to_delete.txt')
+except Exception:
+    logging.error('The users_to_delete.txt file must exists')
 
-users_to_delete = open('users_to_delete.txt')
 users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
 osclients = OpenStackClients()

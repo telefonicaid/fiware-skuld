@@ -84,6 +84,7 @@ or with yum in CentOS):
 
 - Python 2.7
 - pip
+- virtualenv
 
 Installation
 ------------
@@ -105,6 +106,8 @@ Configuration
 The only configuration file is *settings/settings.py*. The following options may
 be set:
 
+* TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
+  privileges. The value is a username (e.g. trustee@example.com)
 * MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
   Default is 14 days. It is very important that this parameter has the right
   value, otherwise accounts could be deleted prematurely.
@@ -117,15 +120,18 @@ be set:
   access)
 * KEYSTONE_ENDPOINT. The Keystone endpoint.
 * HORIZON_ENDPOINT. The Horizon endpoint.
-* TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
-  privileges.
 * DONT_DELETE_DOMAINS = A set with e-mail domains. The resources of the users
   with ids in these domains must not be freed, even if the accounts are trial
   and expired.
 
+The TRUSTEE parameter has a fake value that must be changed unless you use the
+method to impersonate users that implies changing the passwords. See below for
+details.
+
 The admin credential is not stored in any configuration file. Instead, the
 usual OpenStack environment variables (OS_USERNAME, OS_PASSWORD,
-OS_TENANT_NAME, OS_REGION_NAME) must be set.
+OS_TENANT_NAME, OS_REGION_NAME) must be set. In the same way, the scripts that
+expect the password of the TRUSTEE, read the OS_PASSWORD environment variable.
 
 Running
 =======
@@ -190,6 +196,11 @@ The procedure works by invoking the scripts corresponding to different phases:
       ``users_to_delete.txt``. Please, note that phase4 script must no be
       executed for each region, but only once, at the end of the process.
 
+It is very important to note that phase2 and phase3 use the output of previous
+phases scripts without checking again if the user is still a trial user. Therefore
+if the scripts are not executed in the same day, it is convenience to invoke
+the first scripts to check if some users are not in the new list (but be aware
+that new users, expired more recently, can be added also).
 
 Please, be aware that scripts phase2, phase2b and phase3 must be invoked for
 each region and OS_REGION_NAME must be filled accordingly.
@@ -234,8 +245,10 @@ Environment preparation
 - Create a virtual environment somewhere, e.g. in ENV (virtualenv ENV)
 - Activate the virtual environment (source ENV/bin/activate)
 - Change to the test/acceptance folder of the project
-- Install the requirements for the acceptance tests in the virtual environment (pip install -r requirements.txt --allow-all-external).
-- Configure file in tests/acceptance_tests/commons/configuration.py adding the keystone url, and a valid, user, password and tenant ID.
+- Install the requirements for the acceptance tests in the virtual environment
+  (pip install -r requirements.txt --allow-all-external).
+- Configure file in tests/acceptance_tests/commons/configuration.py adding the
+  keystone url, and a valid, user, password and tenant ID.
 
 Tests execution
 ***************
