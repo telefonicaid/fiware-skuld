@@ -23,10 +23,15 @@
 # contact with opensource@tid.es
 #
 author = 'chema'
-import osclients
 import os
 from oslo_utils import timeutils
 import time
+
+import osclients
+try:
+    from settings.settings import TRUSTID_VALIDITY
+except ImportError:
+    TRUSTID_VALIDITY = 36000
 
 class TrustFactory:
     """This class is used to create/destroy a TRUST_ID, that allows a user (the
@@ -36,11 +41,13 @@ class TrustFactory:
     but this class uses a change in the FiWare IDM that allows admin user
     to create any TRUST_ID"""
 
-    def __init__(self, osclients_o=None):
+    def __init__(self, osclients_o=None, trustid_validity=TRUSTID_VALIDITY):
         """
         Constructor
         :param openstackclients: a osclients object; by default this object
         is built using the environment variables (OS_AUTH_URL, OS_PASSWORD...)
+        :param trustid_validity: number of seconds the TRUST_ID last. It can
+        be also released manually.
         """
         if not osclients_o:
             osclients_o = osclients.OpenStackClients()
@@ -51,6 +58,7 @@ class TrustFactory:
                 os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         self.keystone = osclients_o.get_keystoneclientv3()
+        self.trustid_validity = trustid_validity
 
     def create_trust_admin(self, trustor_id, trustee_name):
         """
@@ -74,7 +82,7 @@ class TrustFactory:
         data['trustee_user_id'] = trustee.id
         data['trustor_user_id'] = trustor.id
         data['expires_at'] = timeutils.iso8601_from_timestamp(
-            time.time()+3600, True)
+            time.time() + self.trustid_validity, True)
         # data['remaining_uses'] = 1
         request = {'trust': data}
         (resp, body_resp) = self.keystone.trusts.client.post(
@@ -97,7 +105,8 @@ class TrustFactory:
         """
 
         trustor = self.keystone.users.get(trustor_id)
-        expire = timeutils.datetime.datetime.fromtimestamp(time.time()+3600)
+        expire = timeutils.datetime.datetime.fromtimestamp(
+            time.time() + self.trustid_validity)
         trust = self.keystone.trusts.create(
             trustee_id, trustor_id, ['owner'], trustor.cloud_project_id,
             True, expire)
