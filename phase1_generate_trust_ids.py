@@ -24,22 +24,33 @@
 #
 author = 'chema'
 
+from impersonate import TrustFactory
+from settings.settings import TRUSTEE
+from settings.settings import KEYSTONE_ENDPOINT
+from osclients import OpenStackClients
 import logging
-
-from change_password import PasswordChanger
 try:
     users_to_delete = open('users_to_delete.txt')
 except Exception:
     logging.error('The users_to_delete.txt file must exists')
 
-users_credentials = open('users_credentials.txt', 'w')
+users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
-user_manager = PasswordChanger()
+osclients = OpenStackClients()
+
+# Use an alternative URL that allow direct access to the keystone admin
+# endpoint, because the registered one uses an internal IP address.
+
+osclients.override_endpoint(
+    'identity', osclients.region, 'admin', KEYSTONE_ENDPOINT)
+
+trust_factory = TrustFactory(osclients)
 user_ids = list()
 for user in users_to_delete.readlines():
-    user_ids.append(user.strip())
-cred_list = user_manager.get_list_users_with_cred(user_ids)
-for cred in cred_list:
-    print >>users_credentials, ','.join(cred)
+    user = user.strip()
+    if user == '':
+        continue
+    (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
+    print >>users_trusted_ids, username + ',' + trust_id
 
-users_credentials.close()
+users_trusted_ids.close()
