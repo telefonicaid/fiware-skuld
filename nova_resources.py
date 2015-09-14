@@ -34,8 +34,13 @@ class NovaResources(object):
         :param openstackclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
+        self.osclients = osclients
         self.novaclient = osclients.get_novaclient()
         self.tenant_id = osclients.get_session().get_project_id()
+
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.novaclient = self.osclients.get_novaclient()
 
     def get_tenant_vms(self):
         """return all the tenant's vms

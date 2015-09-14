@@ -53,6 +53,16 @@ class BluePrintResources(object):
                         'Content-type': 'application/xml'}
         warnings.simplefilter('ignore', category=InsecureRequestWarning)
 
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+
+        region = self.osclients.region
+        self.url_base = self.osclients.get_public_endpoint('paas', region)
+        self.url_temp = self.url_base + '/catalog/org/FIWARE/vdc/' + \
+            self.tenant_id + '/environment'
+        self.url_blue = self.url_base + '/envInst/org/FIWARE/vdc/' + \
+            self.tenant_id + '/environmentInstance'
+
     def get_tenant_blueprints(self):
         """Return a list with all the blueprint instances of the tenant.
         :return: a list of blueprint instance names. None if error

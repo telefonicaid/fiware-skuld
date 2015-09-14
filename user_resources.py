@@ -89,12 +89,34 @@ class UserResources(object):
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
-        self.neutron = NeutronResources(self.clients)
+        try:
+            self.neutron = NeutronResources(self.clients)
+        except Exception:
+            self.neutron = None
         self.blueprints = BluePrintResources(self.clients)
-        self.swift = SwiftResources(self.clients)
+        try:
+            self.swift = SwiftResources(self.clients)
+        except Exception:
+            self.swift = None
         # Images in use is a set used to avoid deleting formerly glance images
         # in use by other tenants
         self.imagesinuse = set()
+
+    def change_region(self, region):
+        """
+
+        :param region:
+        :return:
+        """
+        self.clients.set_region(region)
+        self.nova.on_region_changed()
+        self.glance.on_region_changed()
+        if self.swift:
+            self.swift.on_region_changed()
+        self.cinder.on_region_changed()
+        self.blueprint.on_region_changed()
+        if self.neutron:
+            self.neutron.on_region_changed()
 
     def delete_tenant_resources_pri_1(self):
         """Delete here all the elements that do not depend of others are
@@ -125,7 +147,8 @@ class UserResources(object):
             self.logger.error('Deletion of backup volumes failed')
 
         try:
-            self.swift.delete_tenant_containers()
+            if self.swift:
+                self.swift.delete_tenant_containers()
         except Exception, e:
             self.logger.error('Deletion of swift containers failed')
 
@@ -226,7 +249,8 @@ class UserResources(object):
 
     def unshare_images(self):
         """Make private all the tenant public images"""
-        self.glance.unshare_images()
+        if self.glance:
+            self.glance.unshare_images()
 
     def get_resources_dict(self):
         """return a dictionary of sets with the ids of the user's resources
@@ -254,7 +278,9 @@ class UserResources(object):
         resources['routers'] = set(self.neutron.get_tenant_routers())
         resources['subnets'] = set(self.neutron.get_tenant_subnets())
         resources['ports'] = set(self.neutron.get_tenant_ports())
-        resources['objects'] = set(self.swift.get_tenant_objects())
+        if self.swift:
+            resources['objects'] = set(self.swift.get_tenant_objects())
+
         return resources
 
     def print_tenant_resources(self):

@@ -38,8 +38,13 @@ class GlanceResources(object):
         :param openstackclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
+        self.osclients = osclients
         self.glance = osclients.get_glanceclient()
         self.tenant_id = osclients.get_session().get_project_id()
+
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.glance = self.osclients.get_glanceclient()
 
     def get_tenant_images(self):
         """ return a list of images ids
