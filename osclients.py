@@ -540,3 +540,6 @@ class OpenStackClients(object):
 # from osclients import osclients
 # nova = osclients.get_novaclient()
 osclients = OpenStackClients()
+if 'KEYSTONE_ADMIN_ENDPOINT' in env:
+    osclients.override_endpoint(
+        'identity', osclients.region, 'admin', env['KEYSTONE_ADMIN_ENDPOINT'])

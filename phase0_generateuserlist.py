@@ -31,12 +31,27 @@ from expired_users import ExpiredUsers
 from settings import settings
 from osclients import OpenStackClients
 
-logging.debug('Getting expired users')
-expired_users = ExpiredUsers(
-    username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
-    tenant=env['OS_TENANT_NAME']).getlistusers()
+def is_user_protected(user):
+    """
+    Return true if the user must not be deleted, because their address has a
+    domain in setting.DONT_DELETE_DOMAINS, and print a warning.
+    :param user: user to check
+    :return: true if the user must not be deleted
+    """
+    domain = user.name.partition('@')[2]
+    if domain != '' and domain in settings.DONT_DELETE_DOMAINS:
+        logging.warning(
+            'User with name %(name)s should not be deleted because the domain',
+            {'name': user.name})
+        return True
+    else:
+        return False
 
-dont_delete_domains = settings.DONT_DELETE_DOMAINS
+logging.debug('Getting expired users')
+(next_to_expire, expired_users) = ExpiredUsers(
+    username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
+    tenant=env['OS_TENANT_NAME']).get_yellow_red_users()
+
 osclients = OpenStackClients()
 
 # Use an alternative URL that allow direct access to the keystone admin
@@ -47,7 +62,6 @@ osclients.override_endpoint(
 
 keystone = osclients.get_keystoneclientv3()
 
-fich = open('users_to_delete.txt', 'w')
 
 # build users map
 logging.debug('Building user map')
@@ -55,16 +69,14 @@ users_by_id = dict()
 for user in keystone.users.list():
     users_by_id[user.id] = user
 
-logging.debug('Generating user list')
-for user_id in expired_users:
-    user = users_by_id[user_id]
-    # print unicode(user).encode('utf8')
-    domain = user.name.partition('@')[2]
-    if domain != '' and domain in dont_delete_domains:
-        logging.warning(
-            'User with name %(name)s should not be deleted because the domain',
-            {'name': user.name})
-    else:
-        print >>fich, user_id
+with open('users_to_delete.txt', 'w') as fich_delete:
+    logging.debug('Generating user delete list')
+    for user_id in expired_users:
+        if not is_user_protected(users_by_id[user_id]):
+            print >>fich_delete, user_id
 
-fich.close()
+with open('users_to_notify.txt', 'w') as fich_notify:
+    logging.debug('Generating user notification list')
+    for user_id in next_to_expire:
+        if not is_user_protected(users_by_id[user_id]):
+            print >>fich_notify, user_id

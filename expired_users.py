@@ -28,7 +28,7 @@ import requests
 from datetime import datetime
 from settings import settings
 from utils.log import logger
-
+import osclients
 
 class ExpiredUsers:
     def __init__(self, tenant=None, username=None, password=None):
@@ -43,6 +43,7 @@ class ExpiredUsers:
         self.listUsers = []
         self.MAX_NUMBER_OF_DAYS = settings.MAX_NUMBER_OF_DAYS
         self.finalList = []
+        self.yellowList = []
         self.__tenant = tenant
         self.__username = username
         self.__password = password
@@ -97,6 +98,41 @@ class ExpiredUsers:
 
         return self.listUsers
 
+    def get_yellow_red_users(self):
+
+        # Get the security token
+        self.get_admin_token()
+
+        # Get the list of Trial users
+        self.get_list_trial_users()
+
+        self.__check_token()
+
+        url = self.KEYSTONE_ENDPOINT + self.v30 + "users/"
+        headers = {'X-Auth-Token': self.token}
+
+        # Extract the list of user_ids
+        for user_id in self.listUsers:
+            finalurl = url + user_id
+            r = requests.get(url=finalurl, headers=headers)
+
+            user = json.loads(r.text)['user']
+            remaining = self.get_trial_remaining_time(user)
+
+            if remaining < 0:
+                # It means that the user trial period has expired
+                self.finalList.append(user_id)
+            elif remaining <= settings.NOTIFY_BEFORE_EXPIRED:
+                # It means that the user trial period is going to expire in
+                # a week or less.
+                self.yellowList.append(user_id)
+
+        logger.info("Number of expired users found: %d", len(self.finalList))
+        logger.info("Number of near to expire users found: %d",
+                    len(self.yellowList))
+
+        return (self.yellowList, self.finalList)
+
     def get_list_expired_users(self):
         """
         For each users id that have the Trial role, we need to check
@@ -116,9 +152,12 @@ class ExpiredUsers:
             finalurl = url + user_id
             r = requests.get(url=finalurl, headers=headers)
 
-            trial_started_at = json.loads(r.text)['user']['trial_started_at']
+            user = json.loads(r.text)['user']
+            trial_started_at = user['trial_started_at']
+            trial_duration = user.get(
+                'trial_duration', self.MAX_NUMBER_OF_DAYS)
 
-            if self.check_time(trial_started_at):
+            if self.check_time(trial_started_at, trial_duration):
                 # If true means that the user trial period has expired
                 self.finalList.append(user_id)
 
@@ -126,11 +165,13 @@ class ExpiredUsers:
 
         return self.finalList
 
-    def check_time(self, trial_started_at):
+    def check_time(self, trial_started_at,
+                   trial_duration=settings.MAX_NUMBER_OF_DAYS):
         """
         Check the time of the trial user in order to see if it is expired.
         :param trial_started_at: the date in which the trial user was created
-        :return: True if the trial period was expired (greater than settings.MAX_NUMBER_OF_DAYS).
+        :return: True if the trial period was expired (greater than
+                 settings.MAX_NUMBER_OF_DAYS).
                  False anyway
         """
 
@@ -144,12 +185,36 @@ class ExpiredUsers:
 
         difference = date_object_new - date_object_old
 
-        if difference.days > self.MAX_NUMBER_OF_DAYS:
+        if difference.days > trial_duration:
             result = True
         else:
             result = False
 
         return result
+
+    def get_trial_remaining_time(self, user):
+        """
+        Check the time of the trial user; return the remaining days.
+        The number will be negative when the account is expired.
+        :param user: the trial user data obtained from keystone API server
+        :return: remaining days (may be negative)
+        """
+
+        trial_started_at = user['trial_started_at']
+        trial_duration = user.get(
+            'trial_duration', self.MAX_NUMBER_OF_DAYS)
+
+        formatter_string = "%Y-%m-%d"
+
+        datetime_object = datetime.strptime(trial_started_at, formatter_string)
+        date_object_old = datetime_object.date()
+
+        datetime_object = datetime.today()
+        date_object_new = datetime_object.date()
+
+        difference = date_object_new - date_object_old
+
+        return trial_duration - difference.days
 
     def __check_token(self):
         """Check if the token is not blank"""
@@ -185,7 +250,7 @@ class ExpiredUsers:
         :return: List of Expired Users id who have Trial role and expired, example:
                     ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a']
         """
-        # Get the securoty token
+        # Get the security token
         self.get_admin_token()
 
         # Get the list of Trial users

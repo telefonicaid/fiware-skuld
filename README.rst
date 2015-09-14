@@ -139,14 +139,15 @@ Running
 The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
-    trial users. The output of the script is the file ``users_lists.txt``.
+    trial users and the users to notify because their resources are expiring in
+    the next days (7 days or less). The output of the script are the files
+    ``users_to_delete.txt`` and  ``users_to_notify.txt``.
     This script requires the admin credential.
 
 -phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
      user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``users_list.txt``). This script must be executed some days
-     before the execution of the next scripts, to give some time to users to
-     react before their resources are deleted.
+     the file ``users_to_notify.txt``). The purpose of this scripts is to give
+     some time to users to react before their resources are deleted.
 
 -phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
      the file ``users_list.txt``. It sets a new random password for each user
@@ -158,7 +159,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      not possible via API).
 
 -phase1, alternative 2: ``phase1_generate_trust_ids.py``. This script has as
-     input the file ``users_list.txt``. It generates a trust_id for each user
+     input the file ``users_to_delete.txt``. It generates a trust_id for each user
      and generates the file ``users_trusted_ids.txt``. The idea is to use this
      token to impersonate the user without touching their password. The
      disadvantage is that it requires a change in the keystone server, to allow
@@ -168,7 +169,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      The generated *trust ids* by default are only valid during one hour; after
      that time this script must be executed again to generate new tokens.
 
--phase2: ``phase2_stopvms.py``. This scripts does not delete anything, yet. It
+-phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
      stops the servers of the users and makes private their shared images. The idea
      is to grant a grace period to users to detect that their resources are not
      available before they are beyond redemption. This script does not require
@@ -193,8 +194,10 @@ The procedure works by invoking the scripts corresponding to different phases:
 
 -phase4: ``phase4_change_category.py``. Change the type of user from trial to
       basic. This script requires the admin credential. It reads the file
-      ``users_to_delete.txt``. Please, note that phase4 script must no be
-      executed for each region, but only once, at the end of the process.
+      ``users_to_delete.txt``. Users of type basic cannot access the cloud
+      portal anymore (however, the resources created are still available).
+      Please, note that this script must no be executed for each region, but
+      only once.
 
 It is very important to note that phase2 and phase3 use the output of previous
 phases scripts without checking again if the user is still a trial user. Therefore
