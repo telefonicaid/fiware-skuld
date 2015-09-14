@@ -50,7 +50,11 @@ for user in users_to_delete.readlines():
     user = user.strip()
     if user == '':
         continue
-    (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
-    print >>users_trusted_ids, username + ',' + trust_id
+    try:
+        (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
+        print >>users_trusted_ids, username + ',' + trust_id
+    except Exception:
+        print 'Failed: ' + user
+        logging.error('Failed getting trust-id from trustor ' + user)
 
 users_trusted_ids.close()
