@@ -219,8 +219,10 @@ class UserResources(object):
 
 
     def stop_tenant_vms(self):
-        """Stop all the active vms of the tenant"""
-        self.nova.stop_tenant_vms()
+        """Stop all the active vms of the tenant
+        :return:  stopped vms
+        """
+        return self.nova.stop_tenant_vms()
 
     def unshare_images(self):
         """Make private all the tenant public images"""
