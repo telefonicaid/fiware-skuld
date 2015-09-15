@@ -69,11 +69,14 @@ else:
     raise "user_trusted_ids.txt or users_credentials.txt must exists"
 
 
+count = 0
+total = len(lines)
 for line in lines:
     try:
+        count += 1
         if use_trust_ids:
             (user, trust_id) = line.strip().split(',')
-            logger.info('Obtaining resources of user ' + user)
+            logger.info('Obtaining resources of user {0} ({1}/{2})'.user)
             password = env['OS_PASSWORD']
             user_resources = UserResources(TRUSTEE, password,
                                            trust_id=trust_id)
@@ -96,28 +99,41 @@ for line in lines:
 # free resources; group by priorities and delete all the user's resources with
 # the some priority before starting with the next priority, to avoid pauses
 total_free = dict()
+count = 0
+total = len(users_list)
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 1 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 1 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_1()
 
+count = 0
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 2 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 2 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_2()
 
+count = 0
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 3 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 3 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_3()
 
 # Report
+count = 0
 for user_resources in users_list:
     # tuple with user's resources before and after deletion.
     u_id = user_resources.user_id
+    count += 1
     resources_before = report[u_id]
     try:
-        logger.info('Retrieving after resources of user ' + u_id)
+        msg = "Retrieving after resources of user: {0} ({1}/{2})"
+        logger.info(msg.format(u_id, count, total))
         resources_after = user_resources.get_resources_dict()
     except Exception, e:
         msg = 'Error retrieving resources after freeing of user {0} cause: {1}'
