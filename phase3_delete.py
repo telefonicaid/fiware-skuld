@@ -27,15 +27,13 @@ author = 'chema'
 from os import environ as env
 import os.path
 import cPickle as pickle
-import logging
 import datetime
 
 from user_resources import UserResources
 from settings.settings import TRUSTEE
+import utils.log
 
-logging.debug('start delete script')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = utils.log.init_logs('phase3')
 
 images_in_use = None
 free_trust_id = False
@@ -92,8 +90,8 @@ for line in lines:
         users_list.append(user_resources)
 
     except Exception, e:
-        logging.error('Obtaining resources of user {0} failed. Cause: {1}'.
-                      format(user, str(e)))
+        msg = 'Obtaining resources of user {0} failed. Cause: {1}'
+        logger.error(msg.format(user, str(e)))
 
 # free resources; group by priorities and delete all the user's resources with
 # the some priority before starting with the next priority, to avoid pauses
@@ -112,10 +110,21 @@ for user_resources in users_list:
     user_id = user_resources.user_id
     logger.info("Freeing resources priority 3 user: " + user_id)
     user_resources.delete_tenant_resources_pri_3()
+
+# Report
+for user_resources in users_list:
     # tuple with user's resources before and after deletion.
     u_id = user_resources.user_id
     resources_before = report[u_id]
-    resources_after = user_resources.get_resources_dict()
+    try:
+        logger.info('Retrieving after resources of user ' + u_id)
+        resources_after = user_resources.get_resources_dict()
+    except Exception, e:
+        msg = 'Error retrieving resources after freeing of user {0} cause: {1}'
+        logger.error(msg.format(u_id, str(e)))
+        # At least, save the resources before
+        report[u_id] = (resources_before, resources_before, False)
+        continue
     all_free = True
     for key in resources_after.keys():
         if resources_after[key]:
@@ -137,5 +146,8 @@ logger.info('Resources freed: ' + str(total_free))
 
 if free_trust_id:
     for user_resources in users_list:
-        user_resources.free_trust_id()
-
+        try:
+            user_resources.free_trust_id()
+        except Exception, e:
+            msg = 'Error freeing trust_id of user {0}. Cause: {1}'
+            logger.error(msg.format(user_resources.user_id, str(e)))

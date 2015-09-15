@@ -28,15 +28,19 @@ import queries
 import requests
 import logging
 import warnings
+import utils.log
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import settings.settings
+
+logger = utils.log.init_logs('phase4')
 
 trial = settings.settings.TRIAL_ROLE_ID
 basic = settings.settings.BASIC_ROLE_ID
 q = queries.Queries()
 keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
+
 
 
 def change_user_keystone(user_id):
@@ -74,12 +78,17 @@ def change_user_via_idm(user_id):
                       json=body, headers=headers, verify=False)
     if r.status_code not in (200, 204):
         msg = 'The operation returned code {0}: {1}'
-        logging.error(msg.format(r.status_code, r.reason))
+        logger.error(msg.format(r.status_code, r.reason))
+        raise Exception('Server error')
 
 users = open('users_to_delete.txt')
 for line in users.readlines():
     user_id = line.strip()
     if user_id == '':
         continue
-    logging.info('Changing user {0} from trial to basic'.format(user_id))
-    change_user_via_idm(user_id)
+    logger.info('Changing user {0} from trial to basic'.format(user_id))
+    try:
+        change_user_via_idm(user_id)
+    except Exception, e:
+        logger.error('Error changing user {0} to basic. Cause: {1}'.format(
+            user_id, str(e)))

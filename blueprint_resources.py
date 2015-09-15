@@ -40,6 +40,7 @@ class BluePrintResources(object):
         :param osclients: an OpenStackClient object (module osclients)
         :return: nothing
         """
+        self.logger = logging.getLogger(__name__)
         self.osclients = osclients
         self.tenant_id = osclients.get_tenant_id()
         self.url_base = osclients.get_public_endpoint('paas', osclients.region)
@@ -73,10 +74,10 @@ class BluePrintResources(object):
             response = requests.get(self.url_blue, headers=self.headers,
                                     verify=False)
         except Exception, e:
-            logging.error(err_msg.format(self.tenant_id, str(e)))
+            self.logger.error(err_msg.format(self.tenant_id, str(e)))
             return None
         if response.status_code != 200:
-            logging.error(err_msg.format(self.tenant_id),
+            self.logger.error(err_msg.format(self.tenant_id),
                           str(response.status_code) + ' ' + response.reason)
             return None
         tree = et.fromstring(response.content)
@@ -95,14 +96,14 @@ class BluePrintResources(object):
                                        headers=self.headers, verify=False)
         except Exception, e:
             msg = err_msg.format(self.tenant_id, blueinstance_id, str(e))
-            logging.error(msg)
+            self.logger.error(msg)
             return False
 
         if response.status_code not in (200, 204):
             msg = err_msg.format(self.tenant_id, blueinstance_id,
                                  str(response.status_code) + ' ' +
                                  response.reason)
-            logging.error(msg)
+            self.logger.error(msg)
             return False
         else:
             return True
@@ -114,7 +115,7 @@ class BluePrintResources(object):
         err_msg = 'Deleting blueprint instances from tenant {0} failed.'
         blueprints = self.get_tenant_blueprints()
         if blueprints is None:
-            logging.error(err_msg.format(self.tenant_id))
+            self.logger.error(err_msg.format(self.tenant_id))
             return False
 
         failed = False
@@ -133,10 +134,10 @@ class BluePrintResources(object):
             response = requests.get(self.url_temp, headers=self.headers,
                                     verify=False)
         except Exception, e:
-            logging.error(err_msg.format(self.tenant_id, str(e)))
+            self.logger.error(err_msg.format(self.tenant_id, str(e)))
             return None
         if response.status_code != 200:
-            logging.error(err_msg.format(self.tenant_id),
+            self.logger.error(err_msg.format(self.tenant_id),
                           str(response.status_code) + ' ' + response.reason)
             return None
         tree = et.fromstring(response.content)
@@ -154,14 +155,14 @@ class BluePrintResources(object):
                                        headers=self.headers, verify=False)
         except Exception, e:
             msg = err_msg.format(self.tenant_id, environment_id, str(e))
-            logging.error(msg)
+            self.logger.error(msg)
             return False
 
         if response.status_code not in (200, 204):
             msg = err_msg.format(self.tenant_id, environment_id,
                                  str(response.status_code) + ' ' +
                                  response.reason)
-            logging.error(msg)
+            self.logger.error(msg)
             return False
         else:
             return True
@@ -173,7 +174,7 @@ class BluePrintResources(object):
         err_msg = 'Deleting blueprint templates from tenant {0} failed.'
         templates = self.get_tenant_templates()
         if templates is None:
-            logging.error(err_msg.format(self.tenant_id))
+            self.logger.error(err_msg.format(self.tenant_id))
             return False
 
         failed = False

@@ -28,11 +28,13 @@ from impersonate import TrustFactory
 from settings.settings import TRUSTEE
 from settings.settings import KEYSTONE_ENDPOINT
 from osclients import OpenStackClients
-import logging
+import utils.log
+
+logger = utils.log.init_logs('phase4')
 try:
     users_to_delete = open('users_to_delete.txt')
 except Exception:
-    logging.error('The users_to_delete.txt file must exists')
+    logger.error('The users_to_delete.txt file must exists')
 
 users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
@@ -55,6 +57,6 @@ for user in users_to_delete.readlines():
         print >>users_trusted_ids, username + ',' + trust_id
     except Exception:
         print 'Failed: ' + user
-        logging.error('Failed getting trust-id from trustor ' + user)
+        logger.error('Failed getting trust-id from trustor ' + user)
 
 users_trusted_ids.close()

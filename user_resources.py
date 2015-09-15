@@ -28,6 +28,7 @@ import time
 import logging
 
 import impersonate
+from settings import settings
 from osclients import OpenStackClients
 from nova_resources import NovaResources
 from glance_resources import GlanceResources
@@ -82,7 +83,9 @@ class UserResources(object):
         else:
             raise(
                 'Either tenant_id or tenant_name or trust_id must be provided')
-
+        region = self.clients.region
+        self.clients.override_endpoint(
+            'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.user_id = self.clients.get_session().get_user_id()
         session = self.clients.get_session()
         self.user_name = session.auth.get_access(session)
@@ -102,6 +105,10 @@ class UserResources(object):
         # in use by other tenants
         self.imagesinuse = set()
 
+        # Regions the user has access
+        self.regions_available = set()
+        self.regions_available.update(self.clients.get_regions('compute'))
+
     def change_region(self, region):
         """
 
@@ -109,6 +116,8 @@ class UserResources(object):
         :return:
         """
         self.clients.set_region(region)
+        self.clients.override_endpoint(
+            'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.nova.on_region_changed()
         self.glance.on_region_changed()
         if self.swift:
@@ -161,6 +170,8 @@ class UserResources(object):
         while self.blueprints.get_tenant_blueprints() and count < 120:
             time.sleep(1)
             count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for blueprint more than 120 seconds')
         try:
             self.nova.delete_tenant_vms()
         except Exception, e:
@@ -178,13 +189,16 @@ class UserResources(object):
         while self.nova.get_tenant_vms() and count < 120:
             time.sleep(1)
             count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for VMs more than 120 seconds')
 
         # security group, volumes, network ports, images, floating ips,
         # must be deleted after VMs
         try:
             self.nova.delete_tenant_security_groups()
         except Exception, e:
-            self.logger.error('Deletion of security groups failed')
+            msg = 'Deletion of security groups failed. Detail: '
+            self.logger.error(msg + str(e))
 
         # self.glance.delete_tenant_images()
         try:
@@ -193,8 +207,12 @@ class UserResources(object):
             self.logger.error('Deletion of images failed')
 
         # Before deleting volumes, snapshot volumes must be deleted
-        while self.cinder.get_tenant_volume_snapshots():
+        count = 0
+        while self.cinder.get_tenant_volume_snapshots() and count < 120:
             time.sleep(1)
+            count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for volume snapshots > 120 seconds')
 
         try:
             self.cinder.delete_tenant_volumes()
@@ -245,6 +263,7 @@ class UserResources(object):
         """Stop all the active vms of the tenant
         :return:  stopped vms
         """
+        count = 0
         return self.nova.stop_tenant_vms()
 
     def unshare_images(self):
@@ -269,15 +288,16 @@ class UserResources(object):
         resources['volumes'] = set(self.cinder.get_tenant_volumes())
         resources['backupvolumes'] = set(
             self.cinder.get_tenant_backup_volumes())
-        resources['floatingips'] = set(
-            self.neutron.get_tenant_floatingips())
-        resources['networks'] = set(
-            self.neutron.get_tenant_networks())
-        resources['nsecuritygroups'] = set(
-            self.neutron.get_tenant_securitygroups())
-        resources['routers'] = set(self.neutron.get_tenant_routers())
-        resources['subnets'] = set(self.neutron.get_tenant_subnets())
-        resources['ports'] = set(self.neutron.get_tenant_ports())
+        if self.neutron:
+            resources['floatingips'] = set(
+                self.neutron.get_tenant_floatingips())
+            resources['networks'] = set(
+                self.neutron.get_tenant_networks())
+            resources['nsecuritygroups'] = set(
+                self.neutron.get_tenant_securitygroups())
+            resources['routers'] = set(self.neutron.get_tenant_routers())
+            resources['subnets'] = set(self.neutron.get_tenant_subnets())
+            resources['ports'] = set(self.neutron.get_tenant_ports())
         if self.swift:
             resources['objects'] = set(self.swift.get_tenant_objects())
 
@@ -331,7 +351,7 @@ class UserResources(object):
         :return: nothing
         """
         if self.trust_id:
-            self.logger.info('Freeing trust-id')
+            self.logger.info('Freeing trust-id of user ' + self.user_id)
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
 

@@ -28,7 +28,9 @@ import osclients
 
 from settings import settings
 from datetime import datetime
-import logging
+import utils.log
+
+logger = utils.log.init_logs('phase0')
 
 class ExpiredUsers():
     def __init__(self):
@@ -148,7 +150,7 @@ class ExpiredUsers():
         """
         domain = user.name.partition('@')[2]
         if domain != '' and domain in settings.DONT_DELETE_DOMAINS:
-            logging.warning(
+            logger.warning(
                 'User with name %(name)s should not be deleted because the '
                 'domain',
                 {'name': user.name})
