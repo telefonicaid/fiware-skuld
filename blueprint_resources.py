@@ -26,6 +26,8 @@ author = 'chema'
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from requests.packages.urllib3.exceptions import InsecurePlatformWarning
+
 import xml.etree.ElementTree as et
 import logging
 import warnings
@@ -53,6 +55,7 @@ class BluePrintResources(object):
                         'Tenant-id': self.tenant_id,
                         'Content-type': 'application/xml'}
         warnings.simplefilter('ignore', category=InsecureRequestWarning)
+        warnings.simplefilter('ignore', category=InsecurePlatformWarning)
 
     def on_region_changed(self):
         """Method invoked when the region is changed"""
