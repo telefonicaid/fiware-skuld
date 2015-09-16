@@ -76,7 +76,8 @@ for line in lines:
         count += 1
         if use_trust_ids:
             (user, trust_id) = line.strip().split(',')
-            logger.info('Obtaining resources of user {0} ({1}/{2})'.user)
+            logger.info('Obtaining resources of user {0} ({1}/{2})'.format(
+                user, count, total))
             password = env['OS_PASSWORD']
             user_resources = UserResources(TRUSTEE, password,
                                            trust_id=trust_id)
@@ -85,12 +86,34 @@ for line in lines:
             logger.info('Obtaining resources of user ' + user)
             user_resources = UserResources(user, password, tenant_id)
 
-        user_id = user_resources.user_id
-        logger.info('user ' + user + ' has id ' + user_id)
-        report[user_id] = user_resources.get_resources_dict()
         if images_in_use:
             user_resources.imagesinuse = images_in_use
-        users_list.append(user_resources)
+
+        user_id = user_resources.user_id
+        logger.info('user ' + user + ' has id ' + user_id)
+        resources_before = user_resources.get_resources_dict()
+
+        # check if user does not have any resources and
+        all_free = True
+        for key in resources_before:
+            if resources_before[key]:
+                all_free = False
+                break
+        if all_free:
+            report[user_id] = (resources_before, resources_before, True)
+            msg = 'User {0} does not have any reources to free'
+            logger.info(msg.format(user_resources.user_id))
+
+            if free_trust_id:
+                try:
+                    user_resources.free_trust_id()
+                except Exception, e:
+                    msg = 'Error freeing trust_id of user {0}. Cause: {1}'
+                    logger.error(msg.format(user_resources.user_id, str(e)))
+        else:
+            report[user_id] = resources_before
+            users_list.append(user_resources)
+
 
     except Exception, e:
         msg = 'Obtaining resources of user {0} failed. Cause: {1}'
@@ -160,6 +183,7 @@ with open('freeresources_report_' + now + '.pickle', 'wf') as f:
 
 logger.info('Resources freed: ' + str(total_free))
 
+# Free trust_id tokes, if used
 if free_trust_id:
     for user_resources in users_list:
         try:
