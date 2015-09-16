@@ -111,21 +111,33 @@ class UserResources(object):
 
     def change_region(self, region):
         """
-
-        :param region:
-        :return:
+        change the region. All the clients need to be updated, but the
+        session does not.
+        :param region: the name of the region
+        :return: nothing.
         """
         self.clients.set_region(region)
         self.clients.override_endpoint(
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.nova.on_region_changed()
         self.glance.on_region_changed()
-        if self.swift:
-            self.swift.on_region_changed()
+        try:
+            if self.swift:
+                self.swift.on_region_changed()
+            else:
+                self.swift = SwiftResources(self.clients)
+        except Exception:
+            self.swift = None
+
         self.cinder.on_region_changed()
         self.blueprint.on_region_changed()
-        if self.neutron:
-            self.neutron.on_region_changed()
+        try:
+            if self.neutron:
+                self.neutron.on_region_changed()
+            else:
+                self.neutron = NeutronResources(self.clients)
+        except Exception:
+            self.neutron = None
 
     def delete_tenant_resources_pri_1(self):
         """Delete here all the elements that do not depend of others are
@@ -330,20 +342,23 @@ class UserResources(object):
         print 'Tenant backup volumes:'
         print self.cinder.get_tenant_backup_volumes()
 
-        print 'Tenant floating ips:'
-        print self.neutron.get_tenant_floatingips()
-        print 'Tenant networks:'
-        print self.neutron.get_tenant_networks()
-        print 'Tenant security groups (neutron):'
-        print self.neutron.get_tenant_securitygroups()
-        print 'Tenant routers:'
-        print self.neutron.get_tenant_routers()
-        print 'Tenant subnets'
-        print self.neutron.get_tenant_subnets()
-        print 'Tenant ports'
-        print self.neutron.get_tenant_ports()
-        print 'Containers'
-        print self.swift.get_tenant_containers()
+        if self.neutron:
+            print 'Tenant floating ips:'
+            print self.neutron.get_tenant_floatingips()
+            print 'Tenant networks:'
+            print self.neutron.get_tenant_networks()
+            print 'Tenant security groups (neutron):'
+            print self.neutron.get_tenant_securitygroups()
+            print 'Tenant routers:'
+            print self.neutron.get_tenant_routers()
+            print 'Tenant subnets'
+            print self.neutron.get_tenant_subnets()
+            print 'Tenant ports'
+            print self.neutron.get_tenant_ports()
+
+        if self.swift:
+            print 'Containers'
+            print self.swift.get_tenant_containers()
 
     def free_trust_id(self):
         """Free trust_id, if it exists.
