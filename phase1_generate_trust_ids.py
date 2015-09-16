@@ -30,7 +30,7 @@ from settings.settings import KEYSTONE_ENDPOINT
 from osclients import OpenStackClients
 import utils.log
 
-logger = utils.log.init_logs('phase4')
+logger = utils.log.init_logs('phase1')
 try:
     users_to_delete = open('users_to_delete.txt')
 except Exception:
@@ -48,13 +48,19 @@ osclients.override_endpoint(
 
 trust_factory = TrustFactory(osclients)
 user_ids = list()
-for user in users_to_delete.readlines():
+lines = users_to_delete.readlines()
+total = len(lines)
+count = 0
+for user in lines:
     user = user.strip()
     if user == '':
         continue
     try:
+        count += 1
         (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
         print >>users_trusted_ids, username + ',' + trust_id
+        msg = 'Generated trustid for user {0} ({1}/{2})'
+        logger.info(msg.format(user, count, total))
     except Exception:
         print 'Failed: ' + user
         logger.error('Failed getting trust-id from trustor ' + user)
