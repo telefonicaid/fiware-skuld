@@ -127,9 +127,10 @@ class ExpiredUsers:
                 # a week or less.
                 self.yellowList.append(user_id)
 
-        logger.info("Number of expired users found: %d", len(self.finalList))
-        logger.info("Number of near to expire users found: %d",
-                    len(self.yellowList))
+        logger.info("Number of expired Trial Users found: %d",
+                    len(self.finalList))
+        logger.info("Number of Trial Users to expire in the following days: %d"
+                    , len(self.yellowList))
 
         return (self.yellowList, self.finalList)
 

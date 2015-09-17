@@ -95,13 +95,18 @@ class UserResources(object):
         try:
             self.neutron = NeutronResources(self.clients)
         except Exception:
+            # The region does not support Neutron
+            # It would be better to check the endpoint
             self.neutron = None
         self.blueprints = BluePrintResources(self.clients)
         try:
             self.swift = SwiftResources(self.clients)
         except Exception:
+            # The region does not support Swift
+            # It would be better to check the endpoint
             self.swift = None
         # Images in use is a set used to avoid deleting formerly glance images
+
         # in use by other tenants
         self.imagesinuse = set()
 
@@ -127,6 +132,7 @@ class UserResources(object):
             else:
                 self.swift = SwiftResources(self.clients)
         except Exception:
+            # The region does not support swift
             self.swift = None
 
         self.cinder.on_region_changed()
@@ -137,6 +143,7 @@ class UserResources(object):
             else:
                 self.neutron = NeutronResources(self.clients)
         except Exception:
+            # The region does not support neutron
             self.neutron = None
 
     def delete_tenant_resources_pri_1(self):

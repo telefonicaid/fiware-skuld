@@ -41,9 +41,9 @@ def is_user_protected(user):
     :return: true if the user must not be deleted
     """
     domain = user.name.partition('@')[2]
-    if domain != '' and domain in settings.DONT_DELETE_DOMAINS:
-        logging.warning(
-            'User with name %(name)s should not be deleted because the domain',
+    if domain in settings.DONT_DELETE_DOMAINS:
+        logger.warning(
+            'User with name %(name)s should not be deleted due to its domain',
             {'name': user.name})
         return True
     else:

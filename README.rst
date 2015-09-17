@@ -208,6 +208,8 @@ if some users has been upgraded.
 The following python fragment can be used to check (after the users has been
 downgraded to basic) that they are already basic:
 
+..code::
+
     from osclients import osclients
     from settings import settings
 
@@ -222,7 +224,7 @@ downgraded to basic) that they are already basic:
 Please, be aware that scripts phase2, phase2b and phase3 must be invoked for
 each region and OS_REGION_NAME must be filled accordingly.
 
-Scripts phase0, phase1, phase2b and requires setting OS_USERNAME,
+Scripts phase0, phase1, phase2b and require setting OS_USERNAME,
 OS_PASSWORD, OS_TENANT_NAME with the admin credential
 
 Scripts phase2 and phase3 do not require OS_USERNAME, OS_PASSWORD nor
