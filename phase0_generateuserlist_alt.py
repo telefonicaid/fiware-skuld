@@ -58,7 +58,8 @@ class ExpiredUsers():
 
     def get_yellow_red_users(self):
         """Get a pair of lists
-        * trail user accounts that are next to expire (7 days): yellow users
+        * trail user accounts that are next to expire (i.e. less than
+        NOTIFY_BEFORE_EXPIRE days): yellow users
         * trail user accounts that are already expired: red users
         :return: a tuple with two lists: users next to expire and expired"""
         red_users = list()
