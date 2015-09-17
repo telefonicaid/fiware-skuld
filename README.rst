@@ -206,7 +206,7 @@ if the scripts are not executed in the same day, it is convenience to recheck
 if some users has been upgraded.
 
 The following python fragment can be used to check (after the users has been
-downgraded to basic) that they are already basic:
+downgraded to basic) that they are still basic:
 
 .. code::
 
