@@ -27,15 +27,13 @@ author = 'chema'
 from os import environ as env
 import os.path
 import cPickle as pickle
-import logging
 import datetime
 
 from user_resources import UserResources
 from settings.settings import TRUSTEE
+import utils.log
 
-logging.debug('start delete script')
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger = utils.log.init_logs('phase3')
 
 images_in_use = None
 free_trust_id = False
@@ -71,11 +69,15 @@ else:
     raise "user_trusted_ids.txt or users_credentials.txt must exists"
 
 
+count = 0
+total = len(lines)
 for line in lines:
     try:
+        count += 1
         if use_trust_ids:
             (user, trust_id) = line.strip().split(',')
-            logger.info('Obtaining resources of user ' + user)
+            logger.info('Obtaining resources of user {0} ({1}/{2})'.format(
+                user, count, total))
             password = env['OS_PASSWORD']
             user_resources = UserResources(TRUSTEE, password,
                                            trust_id=trust_id)
@@ -84,38 +86,84 @@ for line in lines:
             logger.info('Obtaining resources of user ' + user)
             user_resources = UserResources(user, password, tenant_id)
 
-        user_id = user_resources.user_id
-        logger.info('user ' + user + ' has id ' + user_id)
-        report[user_id] = user_resources.get_resources_dict()
         if images_in_use:
             user_resources.imagesinuse = images_in_use
-        users_list.append(user_resources)
+
+        user_id = user_resources.user_id
+        logger.info('user ' + user + ' has id ' + user_id)
+        resources_before = user_resources.get_resources_dict()
+
+        # check if user does not have any resources and
+        all_free = True
+        for key in resources_before:
+            if resources_before[key]:
+                all_free = False
+                break
+        if all_free:
+            report[user_id] = (resources_before, resources_before, True)
+            msg = 'User {0} does not have any reources to free'
+            logger.info(msg.format(user_resources.user_id))
+
+            if free_trust_id:
+                try:
+                    user_resources.free_trust_id()
+                except Exception, e:
+                    msg = 'Error freeing trust_id of user {0}. Cause: {1}'
+                    logger.error(msg.format(user_resources.user_id, str(e)))
+        else:
+            report[user_id] = resources_before
+            users_list.append(user_resources)
+
 
     except Exception, e:
-        logging.error('Obtaining resources of user {0} failed. Cause: {1}'.
-                      format(user, str(e)))
+        msg = 'Obtaining resources of user {0} failed. Cause: {1}'
+        logger.error(msg.format(user, str(e)))
 
 # free resources; group by priorities and delete all the user's resources with
 # the some priority before starting with the next priority, to avoid pauses
 total_free = dict()
+count = 0
+total = len(users_list)
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 1 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 1 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_1()
 
+count = 0
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 2 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 2 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_2()
 
+count = 0
 for user_resources in users_list:
     user_id = user_resources.user_id
-    logger.info("Freeing resources priority 3 user: " + user_id)
+    count += 1
+    msg = "Freeing resources priority 3 user: {0} ({1}/{2})"
+    logger.info(msg.format(user_id, count, total))
     user_resources.delete_tenant_resources_pri_3()
+
+# Report
+count = 0
+for user_resources in users_list:
     # tuple with user's resources before and after deletion.
     u_id = user_resources.user_id
+    count += 1
     resources_before = report[u_id]
-    resources_after = user_resources.get_resources_dict()
+    try:
+        msg = "Retrieving after resources of user: {0} ({1}/{2})"
+        logger.info(msg.format(u_id, count, total))
+        resources_after = user_resources.get_resources_dict()
+    except Exception, e:
+        msg = 'Error retrieving resources after freeing of user {0} cause: {1}'
+        logger.error(msg.format(u_id, str(e)))
+        # At least, save the resources before
+        report[u_id] = (resources_before, resources_before, False)
+        continue
     all_free = True
     for key in resources_after.keys():
         if resources_after[key]:
@@ -135,7 +183,11 @@ with open('freeresources_report_' + now + '.pickle', 'wf') as f:
 
 logger.info('Resources freed: ' + str(total_free))
 
+# Free trust_id tokes, if used
 if free_trust_id:
     for user_resources in users_list:
-        user_resources.free_trust_id()
-
+        try:
+            user_resources.free_trust_id()
+        except Exception, e:
+            msg = 'Error freeing trust_id of user {0}. Cause: {1}'
+            logger.error(msg.format(user_resources.user_id, str(e)))

@@ -36,7 +36,12 @@ class CinderResources(object):
         :return: nothing
         """
         self.cinder = openstackclients.get_cinderclient()
-        self.tenant_id = openstackclients.get_session().get_project_id()
+        self.osclients = openstackclients
+
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.cinder = self.osclients.get_cinderclient()
+
 
     def get_tenant_volumes(self):
         """Return a list with all the volumes of the tenant

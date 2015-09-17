@@ -32,7 +32,9 @@ KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
 HORIZON_ENDPOINT = "https://130.206.84.7/"
 TRUSTEE = "change_me@fake.value.org"
 MAX_NUMBER_OF_DAYS = 14  # days
-TRUSTID_VALIDITY = 36000 # seconds
+NOTIFY_BEFORE_EXPIRED = 7  # days
+STOP_BEFORE_DELETE = 0  # days
+TRUSTID_VALIDITY = 36000  # seconds
 DONT_DELETE_DOMAINS = set((
    'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu',
    'gatv.ssr.upm.es', 'thalesgroup.com', 'atos.net', 'uth.gr', 'bth.se',

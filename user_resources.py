@@ -28,6 +28,7 @@ import time
 import logging
 
 import impersonate
+from settings import settings
 from osclients import OpenStackClients
 from nova_resources import NovaResources
 from glance_resources import GlanceResources
@@ -82,19 +83,68 @@ class UserResources(object):
         else:
             raise(
                 'Either tenant_id or tenant_name or trust_id must be provided')
-
+        region = self.clients.region
+        self.clients.override_endpoint(
+            'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.user_id = self.clients.get_session().get_user_id()
         session = self.clients.get_session()
         self.user_name = session.auth.get_access(session)
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
-        self.neutron = NeutronResources(self.clients)
+        try:
+            self.neutron = NeutronResources(self.clients)
+        except Exception:
+            # The region does not support Neutron
+            # It would be better to check the endpoint
+            self.neutron = None
         self.blueprints = BluePrintResources(self.clients)
-        self.swift = SwiftResources(self.clients)
+        try:
+            self.swift = SwiftResources(self.clients)
+        except Exception:
+            # The region does not support Swift
+            # It would be better to check the endpoint
+            self.swift = None
         # Images in use is a set used to avoid deleting formerly glance images
+
         # in use by other tenants
         self.imagesinuse = set()
+
+        # Regions the user has access
+        self.regions_available = set()
+        self.regions_available.update(self.clients.get_regions('compute'))
+
+    def change_region(self, region):
+        """
+        change the region. All the clients need to be updated, but the
+        session does not.
+        :param region: the name of the region
+        :return: nothing.
+        """
+        self.clients.set_region(region)
+        self.clients.override_endpoint(
+            'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
+        self.nova.on_region_changed()
+        self.glance.on_region_changed()
+        try:
+            if self.swift:
+                self.swift.on_region_changed()
+            else:
+                self.swift = SwiftResources(self.clients)
+        except Exception:
+            # The region does not support swift
+            self.swift = None
+
+        self.cinder.on_region_changed()
+        self.blueprint.on_region_changed()
+        try:
+            if self.neutron:
+                self.neutron.on_region_changed()
+            else:
+                self.neutron = NeutronResources(self.clients)
+        except Exception:
+            # The region does not support neutron
+            self.neutron = None
 
     def delete_tenant_resources_pri_1(self):
         """Delete here all the elements that do not depend of others are
@@ -125,7 +175,8 @@ class UserResources(object):
             self.logger.error('Deletion of backup volumes failed')
 
         try:
-            self.swift.delete_tenant_containers()
+            if self.swift:
+                self.swift.delete_tenant_containers()
         except Exception, e:
             self.logger.error('Deletion of swift containers failed')
 
@@ -138,6 +189,8 @@ class UserResources(object):
         while self.blueprints.get_tenant_blueprints() and count < 120:
             time.sleep(1)
             count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for blueprint more than 120 seconds')
         try:
             self.nova.delete_tenant_vms()
         except Exception, e:
@@ -155,13 +208,16 @@ class UserResources(object):
         while self.nova.get_tenant_vms() and count < 120:
             time.sleep(1)
             count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for VMs more than 120 seconds')
 
         # security group, volumes, network ports, images, floating ips,
         # must be deleted after VMs
         try:
             self.nova.delete_tenant_security_groups()
         except Exception, e:
-            self.logger.error('Deletion of security groups failed')
+            msg = 'Deletion of security groups failed. Detail: '
+            self.logger.error(msg + str(e))
 
         # self.glance.delete_tenant_images()
         try:
@@ -170,8 +226,12 @@ class UserResources(object):
             self.logger.error('Deletion of images failed')
 
         # Before deleting volumes, snapshot volumes must be deleted
-        while self.cinder.get_tenant_volume_snapshots():
+        count = 0
+        while self.cinder.get_tenant_volume_snapshots() and count < 120:
             time.sleep(1)
+            count += 1
+        if count >= 120:
+            self.logger.warning('Waiting for volume snapshots > 120 seconds')
 
         try:
             self.cinder.delete_tenant_volumes()
@@ -219,12 +279,16 @@ class UserResources(object):
 
 
     def stop_tenant_vms(self):
-        """Stop all the active vms of the tenant"""
-        self.nova.stop_tenant_vms()
+        """Stop all the active vms of the tenant
+        :return:  stopped vms
+        """
+        count = 0
+        return self.nova.stop_tenant_vms()
 
     def unshare_images(self):
         """Make private all the tenant public images"""
-        self.glance.unshare_images()
+        if self.glance:
+            self.glance.unshare_images()
 
     def get_resources_dict(self):
         """return a dictionary of sets with the ids of the user's resources
@@ -243,16 +307,19 @@ class UserResources(object):
         resources['volumes'] = set(self.cinder.get_tenant_volumes())
         resources['backupvolumes'] = set(
             self.cinder.get_tenant_backup_volumes())
-        resources['floatingips'] = set(
-            self.neutron.get_tenant_floatingips())
-        resources['networks'] = set(
-            self.neutron.get_tenant_networks())
-        resources['nsecuritygroups'] = set(
-            self.neutron.get_tenant_securitygroups())
-        resources['routers'] = set(self.neutron.get_tenant_routers())
-        resources['subnets'] = set(self.neutron.get_tenant_subnets())
-        resources['ports'] = set(self.neutron.get_tenant_ports())
-        resources['objects'] = set(self.swift.get_tenant_objects())
+        if self.neutron:
+            resources['floatingips'] = set(
+                self.neutron.get_tenant_floatingips())
+            resources['networks'] = set(
+                self.neutron.get_tenant_networks())
+            resources['nsecuritygroups'] = set(
+                self.neutron.get_tenant_securitygroups())
+            resources['routers'] = set(self.neutron.get_tenant_routers())
+            resources['subnets'] = set(self.neutron.get_tenant_subnets())
+            resources['ports'] = set(self.neutron.get_tenant_ports())
+        if self.swift:
+            resources['objects'] = set(self.swift.get_tenant_objects())
+
         return resources
 
     def print_tenant_resources(self):
@@ -282,20 +349,23 @@ class UserResources(object):
         print 'Tenant backup volumes:'
         print self.cinder.get_tenant_backup_volumes()
 
-        print 'Tenant floating ips:'
-        print self.neutron.get_tenant_floatingips()
-        print 'Tenant networks:'
-        print self.neutron.get_tenant_networks()
-        print 'Tenant security groups (neutron):'
-        print self.neutron.get_tenant_securitygroups()
-        print 'Tenant routers:'
-        print self.neutron.get_tenant_routers()
-        print 'Tenant subnets'
-        print self.neutron.get_tenant_subnets()
-        print 'Tenant ports'
-        print self.neutron.get_tenant_ports()
-        print 'Containers'
-        print self.swift.get_tenant_containers()
+        if self.neutron:
+            print 'Tenant floating ips:'
+            print self.neutron.get_tenant_floatingips()
+            print 'Tenant networks:'
+            print self.neutron.get_tenant_networks()
+            print 'Tenant security groups (neutron):'
+            print self.neutron.get_tenant_securitygroups()
+            print 'Tenant routers:'
+            print self.neutron.get_tenant_routers()
+            print 'Tenant subnets'
+            print self.neutron.get_tenant_subnets()
+            print 'Tenant ports'
+            print self.neutron.get_tenant_ports()
+
+        if self.swift:
+            print 'Containers'
+            print self.swift.get_tenant_containers()
 
     def free_trust_id(self):
         """Free trust_id, if it exists.
@@ -303,7 +373,7 @@ class UserResources(object):
         :return: nothing
         """
         if self.trust_id:
-            self.logger.info('Freeing trust-id')
+            self.logger.info('Freeing trust-id of user ' + self.user_id)
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
 

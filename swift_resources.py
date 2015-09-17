@@ -36,6 +36,11 @@ class SwiftResources(object):
         """
         self.swiftclient = osclients.get_swiftclient()
         self.tenant_id = osclients.get_session().get_project_id()
+        self.osclients = osclients
+
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.swiftclient = self.osclients.get_swiftclient()
 
     def get_tenant_containers(self):
         """return all the tenant's containers

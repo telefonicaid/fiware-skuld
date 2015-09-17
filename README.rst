@@ -40,7 +40,7 @@ Optionally, images created by the user but in use by other tenants, may be prese
 
 The deletion of the resources follow and order, for example snapshot volumes must be removed
 before volumes, or blueprint instances before templates. The code try to minimize pauses
-executing firts all the deletion from the same priority for each user.
+executing first all the deletion from the same priority for each user.
 
 The deletion scripts has the particularity that are not invoked by the admin but
 by impersonating the users themselves. This is the only way to delete the key pairs and
@@ -50,7 +50,7 @@ users because the lack of permissions.
 Components
 ----------
 
-There are not propertly components in this project. The code is a series of
+There are not properly components in this project. The code is a series of
 scripts with some code organized inside python classes:
 
 the phase\*.py scripts
@@ -139,14 +139,22 @@ Running
 The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
-    trial users. The output of the script is the file ``users_lists.txt``.
+    trial users and the users to notify because their resources are expiring in
+    the next days (7 days or less). The output of the script are the files
+    ``users_to_delete.txt`` and  ``users_to_notify.txt``.
     This script requires the admin credential.
 
 -phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
      user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``users_list.txt``). This script must be executed some days
-     before the execution of the next scripts, to give some time to users to
-     react before their resources are deleted.
+     the file ``users_to_notify.txt``). The purpose of this scripts is to give
+     some time to users to react before their resources are deleted.
+
+-phase0c: ``phase0c_change_category.py``. Change the type of user from trial to
+      basic. This script requires the admin credential. It reads the file
+      ``users_to_delete.txt``. Users of type basic cannot access the cloud
+      portal anymore (however, the resources created are still available).
+      Please, note that this script must no be executed for each region, but
+      only once.
 
 -phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
      the file ``users_list.txt``. It sets a new random password for each user
@@ -158,7 +166,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      not possible via API).
 
 -phase1, alternative 2: ``phase1_generate_trust_ids.py``. This script has as
-     input the file ``users_list.txt``. It generates a trust_id for each user
+     input the file ``users_to_delete.txt``. It generates a trust_id for each user
      and generates the file ``users_trusted_ids.txt``. The idea is to use this
      token to impersonate the user without touching their password. The
      disadvantage is that it requires a change in the keystone server, to allow
@@ -168,7 +176,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      The generated *trust ids* by default are only valid during one hour; after
      that time this script must be executed again to generate new tokens.
 
--phase2: ``phase2_stopvms.py``. This scripts does not delete anything, yet. It
+-phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
      stops the servers of the users and makes private their shared images. The idea
      is to grant a grace period to users to detect that their resources are not
      available before they are beyond redemption. This script does not require
@@ -191,21 +199,32 @@ The procedure works by invoking the scripts corresponding to different phases:
      invoked again before this script, because the phase2 script delete the
      *trust id* after using it.
 
--phase4: ``phase4_change_category.py``. Change the type of user from trial to
-      basic. This script requires the admin credential. It reads the file
-      ``users_to_delete.txt``. Please, note that phase4 script must no be
-      executed for each region, but only once, at the end of the process.
 
 It is very important to note that phase2 and phase3 use the output of previous
 phases scripts without checking again if the user is still a trial user. Therefore
-if the scripts are not executed in the same day, it is convenience to invoke
-the first scripts to check if some users are not in the new list (but be aware
-that new users, expired more recently, can be added also).
+if the scripts are not executed in the same day, it is convenience to recheck
+if some users has been upgraded.
+
+The following python fragment can be used to check (after the users has been
+downgraded to basic) that they are still basic:
+
+.. code::
+
+    from osclients import osclients
+    from settings import settings
+
+    typeuser = settings.BASIC_ROLE_ID
+    ids = set(line.strip() for line in open('users_to_delete.txt').readlines())
+    k = osclients.get_keystoneclientv3()
+    users_basic = set(
+        asig.user['id'] for asig in k.role_assignments.list(domain='default')
+        if asig.role['id'] == typeuser and asig.user['id'] in ids)
+    print 'Users that are not basic: ',  ids - users_basic
 
 Please, be aware that scripts phase2, phase2b and phase3 must be invoked for
 each region and OS_REGION_NAME must be filled accordingly.
 
-Scripts phase0, phase1, phase2b and phase4 requires setting OS_USERNAME,
+Scripts phase0, phase1, phase2b and require setting OS_USERNAME,
 OS_PASSWORD, OS_TENANT_NAME with the admin credential
 
 Scripts phase2 and phase3 do not require OS_USERNAME, OS_PASSWORD nor
@@ -216,7 +235,8 @@ the account used to impersonate the users).
 The phase3_delete.py generates a pickle file (named
 freeresources-<datatime>.pickle). This is a dictionary of users, each entry is
 a tuple with another two dictionaries: the first references the resources
-before deletion and the second the resources after deletion.
+before deletion and the second the resources after deletion. The tuple has a
+boolean as a third value: it is True when all the users resources are deleted.
 
 Testing
 =======
@@ -224,13 +244,12 @@ Testing
 Unit tests
 ----------
 
-To run unit test, invoke *test_expired_users.py* inside *tests* folder
+To run unit test, invoke *nosetest test_expired_users.py* inside *tests* folder
 
 Acceptance tests
 ----------------
 
 The acceptante tests are inside the folder *tests/acceptance_tests*
-Folder for acceptance tests of the FIWARE Trial Users Management.
 
 Prerequisites
 *************

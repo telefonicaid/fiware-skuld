@@ -34,25 +34,35 @@ class NovaResources(object):
         :param openstackclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
+        self.osclients = osclients
         self.novaclient = osclients.get_novaclient()
         self.tenant_id = osclients.get_session().get_project_id()
 
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.novaclient = self.osclients.get_novaclient()
+
     def get_tenant_vms(self):
         """return all the tenant's vms
-        :return: a list of VMs UUID
+        :return: a list of VMs UUID, with user_id and status
         """
         vms = list()
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
-            vms.append((vm.id, vm.user_id))
+            vms.append((vm.id, vm.user_id, vm.status))
         return vms
 
     def stop_tenant_vms(self):
-        """stop all the tenant's which are in ACTIVE state."""
+        """stop all the tenant's which are in ACTIVE state.
+        :return: the number of stopped vms
+        """
+        count = 0
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
             if vm.status == 'ACTIVE':
                 vm.stop()
+                count += 1
+        return count
 
     def delete_tenant_vms(self):
         """delete all the tenant's vms."""

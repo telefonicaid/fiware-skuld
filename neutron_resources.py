@@ -41,8 +41,13 @@ class NeutronResources(object):
         :param openstackclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
+        self.osclients = osclients
         self.neutron = osclients.get_neutronclient()
         self.tenant_id = osclients.get_session().get_project_id()
+
+    def on_region_changed(self):
+        """Method invoked when the region is changed"""
+        self.neutron = self.osclients.get_neutronclient()
 
     def get_tenant_floatingips(self):
         """Return a list with the ids of all the tenant's floating ips
