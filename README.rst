@@ -208,7 +208,7 @@ if some users has been upgraded.
 The following python fragment can be used to check (after the users has been
 downgraded to basic) that they are already basic:
 
-..code::
+.. code::
 
     from osclients import osclients
     from settings import settings
