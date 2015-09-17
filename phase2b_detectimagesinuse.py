@@ -26,6 +26,7 @@ author = 'chema'
 
 from queries import Queries
 import cPickle as pickle
+import utils
 
 """This scripts generate a file with a set of images ids that are in use by
 at least another tenant different than the owner of the image
@@ -34,6 +35,7 @@ Invoke this script before deleting the users if you don't want to remove
 the images of the tenant in use by other tenants.
 """
 q = Queries()
+logger = utils.log.init_logs('phase2b')
 
 image_set = q.get_imageset_othertenants()
 print image_set

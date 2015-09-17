@@ -24,12 +24,14 @@
 #
 author = 'chema'
 
-import logging
 from os import environ as env
 
 from expired_users import ExpiredUsers
 from settings import settings
 from osclients import OpenStackClients
+import utils
+
+logger = utils.log.init_logs('phase0')
 
 def is_user_protected(user):
     """
@@ -47,7 +49,7 @@ def is_user_protected(user):
     else:
         return False
 
-logging.debug('Getting expired users')
+logger.debug('Getting expired users')
 (next_to_expire, expired_users) = ExpiredUsers(
     username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
     tenant=env['OS_TENANT_NAME']).get_yellow_red_users()
@@ -64,19 +66,19 @@ keystone = osclients.get_keystoneclientv3()
 
 
 # build users map
-logging.debug('Building user map')
+logger.debug('Building user map')
 users_by_id = dict()
 for user in keystone.users.list():
     users_by_id[user.id] = user
 
 with open('users_to_delete.txt', 'w') as fich_delete:
-    logging.debug('Generating user delete list')
+    logger.debug('Generating user delete list')
     for user_id in expired_users:
         if not is_user_protected(users_by_id[user_id]):
             print >>fich_delete, user_id
 
 with open('users_to_notify.txt', 'w') as fich_notify:
-    logging.debug('Generating user notification list')
+    logger.debug('Generating user notification list')
     for user_id in next_to_expire:
         if not is_user_protected(users_by_id[user_id]):
             print >>fich_notify, user_id

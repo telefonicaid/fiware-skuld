@@ -33,7 +33,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import settings.settings
 
-logger = utils.log.init_logs('phase4')
+logger = utils.log.init_logs('phase0c')
 
 trial = settings.settings.TRIAL_ROLE_ID
 basic = settings.settings.BASIC_ROLE_ID

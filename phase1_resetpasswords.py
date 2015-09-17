@@ -24,13 +24,15 @@
 #
 author = 'chema'
 
-import logging
-
+import utils
 from change_password import PasswordChanger
+
+logger = utils.log.init_logs('phase1')
+
 try:
     users_to_delete = open('users_to_delete.txt')
 except Exception:
-    logging.error('The users_to_delete.txt file must exists')
+    logger.error('The users_to_delete.txt file must exists')
 
 users_credentials = open('users_credentials.txt', 'w')
 

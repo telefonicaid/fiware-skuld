@@ -25,7 +25,6 @@
 author = 'chema'
 
 import requests
-import logging
 import warnings
 import os.path
 import cPickle as pickle
@@ -33,6 +32,9 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from osclients import osclients
 from settings.settings import HORIZON_ENDPOINT
+import utils
+
+logger = utils.log.init_logs('phase0c')
 
 def notify_users(user_ids):
     """
@@ -50,7 +52,7 @@ def notify_users(user_ids):
             current.update(user_ids)
             user_ids_filtered = list(current - previous)
 
-    logging.info('Notifying {0}/{1} users'.format(
+    logger.info('Notifying {0}/{1} users'.format(
         len(user_ids_filtered), len(user_ids)))
 
     if user_ids_filtered:
@@ -65,7 +67,7 @@ def notify_users(user_ids):
                           json=body, headers=headers, verify=False)
         if r.status_code not in (200, 204):
             msg = 'The operation returned code {0}: {1}'
-            logging.error(msg.format(r.status_code, r.reason))
+            logger.error(msg.format(r.status_code, r.reason))
         else:
             # If there is an error with some users, they are
             # included in the body of the message.
@@ -80,7 +82,7 @@ warnings.simplefilter('ignore', category=InsecureRequestWarning)
 try:
     users = open('users_to_notify.txt')
 except Exception:
-    logging.error('The users_to_notify.txt file must exists')
+    logger.error('The users_to_notify.txt file must exists')
 
 list_users = list()
 for line in users.readlines():
