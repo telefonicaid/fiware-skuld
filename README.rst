@@ -294,6 +294,11 @@ and to compare the resources before and after running the scripts. Another
 advantage is that the script support OS_TRUST_ID, while other tools as nova
 does not.
 
+Deletion of Unaccepted Terms & Conditions users
+===============================================
+
+You can find here details about `Deletion of users that does not accept new Terms and Conditions <scripts/unacceptedTermsAndConditions>`_
+
 License
 =======
 
