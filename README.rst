@@ -297,7 +297,7 @@ does not.
 Deletion of Unaccepted Terms & Conditions users
 ===============================================
 
-You can find here details about `Deletion of users that does not accept new Terms and Conditions <scripts/unacceptedTermsAndConditions/README.rst>`_
+You can find here details about `Deletion of users that does not accept new Terms and Conditions <scripts/unacceptedTermsAndConditions>`_
 
 License
 =======

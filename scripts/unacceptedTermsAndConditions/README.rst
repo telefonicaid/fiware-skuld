@@ -12,20 +12,24 @@ have not accepted the `FIWARE LAB Terms and Conditions`_. The results of this sc
 as a suggestion being a concern of each node administrator to decide what to do with the suggestions.
 
 The script uses 2 temporary files:
+
 - /tmp/accepted_list.txt  -- The file containing the user names who have accepted
 - /tmp/vm_file.txt  -- The list of the instances in the node
 
 The scripts produces 4 result files:
+
 - /tmp/2delete.txt  -- This is a result file. A "script like" file of nova-delete suggesting the 
-commands to be executed.
+  commands to be executed.
 - /tmp/2keep.txt   -- This is another result file of images to be kept.
 - /tmp/2check.txt  -- This file is to manually check what to do with a VM.
 - /tmp/ips2delete.txt -- This another "script like" file suggesting the commands to be executed to 
-delete floating IPs of users who have not accepted.
+  delete floating IPs of users who have not accepted.
 - /tmp/2workon.txt  -- This is a file formated with "user tenant" in each line; You can surely find 
-things to be cleaned belonging to this user after the deletion of VMs and floating-ips is done.
+  things to be cleaned belonging to this user after the deletion of VMs and floating-ips is done.
 
 Before running the Script you must set the openstack variables, or exec your own "keystonerc" file:
+
+.. code::
 
     export OS_AUTH_URL=xxx
     export OS_USERNAME=xxx
@@ -57,20 +61,22 @@ Known issues
 ============
 
 - Please, be aware that this script doesn't seem to work with organizations. If a VM belongs to an organization, 
-it is writen a "log line" in file /tmp/2check.txt -- This must be tested manually.
+  it is writen a "log line" in file /tmp/2check.txt -- This must be tested manually.
 
 - "nova list" only return 1000 results. If the amount of instances is bigger than that, the script might not 
-completely work. It might be useful to be executed serveral times after the deletions.
+  completely work. It might be useful to be executed serveral times after the deletions.
 
 - This is not ready yet to clean and delete networks and routers for users.
 
 - Maybe, "nova delete xxx" doesn't work in some places and they need to do some "nova shutdown" before running 
-"nova delete". As a workaround, you can create a "shutdown script" from the "delete script" just this way:
+  "nova delete". As a workaround, you can create a "shutdown script" from the "delete script" just this way:
+
+.. code::
 
    sed "s|^nova delete|nova shutdown|g" /tmp/2delete.txt > /tmp/2shutdown.txt
 
 - After the deletion, you may consider cleaning other things (networks, routers, private images, cinder volumes, 
-Objects stored, etc) belonging to this user. You can check user/tenants to be cleand in file /tmp/2workon.txt
+  Objects stored, etc) belonging to this user. You can check user/tenants to be cleand in file /tmp/2workon.txt
 
 
 
