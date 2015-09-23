@@ -51,7 +51,7 @@ class OpenStackMap():
     use_wrapper = True
 
     def __init__(
-            self, persistence_dir='~/persistence', region=None, auth_url=None,
+            self, persistence_dir='~/openstackmap', region=None, auth_url=None,
             objects_strategy=USE_CACHE_OBJECTS):
         """
         Constructor
@@ -94,9 +94,28 @@ class OpenStackMap():
             else:
                 region = env['OS_REGION_NAME']
 
+        self.objects_strategy = objects_strategy
+
         self.persistence_dir = os.path.expanduser(persistence_dir)
         self.pers_region = self.persistence_dir + '/' + region
         self.pers_keystone = self.persistence_dir + '/keystone'
+
+        if objects_strategy not in (OpenStackMap.DIRECT_OBJECTS,
+                                    OpenStackMap.NO_CACHE_OBJECTS):
+            if not os.path.exists(self.persistence_dir):
+                os.mkdir(self.persistence_dir)
+
+            if not os.path.exists(self.pers_keystone):
+                os.mkdir(self.pers_keystone)
+
+            if not os.path.exists(self.pers_region):
+                os.mkdir(self.pers_region)
+
+        self._init_resource_maps()
+
+    def _init_resource_maps(self):
+        """init all the resources that will be available
+        as empty dictionaries"""
         # Keystone resources
         self.users = dict()
         self.users_by_name = dict()
@@ -123,18 +142,6 @@ class OpenStackMap():
         self.volume_backups = dict()
         self.volume_snapshots = dict()
 
-        self.objects_strategy = objects_strategy
-        if objects_strategy not in (OpenStackMap.DIRECT_OBJECTS,
-                                    OpenStackMap.NO_CACHE_OBJECTS):
-            if not os.path.exists(self.persistence_dir):
-                os.mkdir(self.persistence_dir)
-
-            if not os.path.exists(self.pers_keystone):
-                os.mkdir(self.pers_keystone)
-
-            if not os.path.exists(self.pers_region):
-                os.mkdir(self.pers_region)
-
     def _load(self, name):
         """Load the resources persisted with pickle. This resources (e.g.
         networks, vms, images...) are saved independently for each region.
@@ -147,7 +154,6 @@ class OpenStackMap():
         """
         objects = pickle.load(open(self.pers_region + '/' + name +
                                    '.pickle', 'rb'))
-
         return self._convert(objects)
 
     def _load_fkeystone(self, name):
