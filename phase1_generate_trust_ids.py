@@ -24,45 +24,71 @@
 #
 author = 'chema'
 
+import logging
+import sys
+
 from impersonate import TrustFactory
 from settings.settings import TRUSTEE
 from settings.settings import KEYSTONE_ENDPOINT
 from osclients import OpenStackClients
 import utils.log
 
-logger = utils.log.init_logs('phase1')
-try:
-    users_to_delete = open('users_to_delete.txt')
-except Exception:
-    logger.error('The users_to_delete.txt file must exists')
 
-users_trusted_ids = open('users_trusted_ids.txt', 'w')
+def generate_trust_ids(users_to_delete):
+    """
+    From a list of users to delete, generate a file with a trustid for each
+    user. The user is acting as the trustor, delegating in a trustee, which
+    will impersonate it to delete its resources.
 
-osclients = OpenStackClients()
+    :param users_to_delete: a list of trustors.
+    :return: this function does not return anything. It creates a file.
+    """
+    global logger
 
-# Use an alternative URL that allow direct access to the keystone admin
-# endpoint, because the registered one uses an internal IP address.
+    osclients = OpenStackClients()
+    users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
-osclients.override_endpoint(
-    'identity', osclients.region, 'admin', KEYSTONE_ENDPOINT)
+    # Use an alternative URL that allow direct access to the keystone admin
+    # endpoint, because the registered one uses an internal IP address.
 
-trust_factory = TrustFactory(osclients)
-user_ids = list()
-lines = users_to_delete.readlines()
-total = len(lines)
-count = 0
-for user in lines:
-    user = user.strip()
-    if user == '':
-        continue
+    osclients.override_endpoint(
+        'identity', osclients.region, 'admin', KEYSTONE_ENDPOINT)
+
+    trust_factory = TrustFactory(osclients)
+    user_ids = list()
+    lines = users_to_delete.readlines()
+    total = len(lines)
+    count = 0
+    for user in lines:
+        user = user.strip()
+        if user == '':
+            continue
+        try:
+            count += 1
+            (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
+            print >>users_trusted_ids, username + ',' + trust_id
+            msg = 'Generated trustid for user {0} ({1}/{2})'
+            logger.info(msg.format(user, count, total))
+        except Exception:
+            print 'Failed: ' + user
+            logger.error('Failed getting trust-id from trustor ' + user)
+
+    users_trusted_ids.close()
+
+
+if __name__ == '__main__':
+    logger = utils.log.init_logs('phase1')
+    if len(sys.argv) == 2:
+        name = sys.argv[1]
+    else:
+        name = 'users_to_delete.txt'
+
     try:
-        count += 1
-        (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
-        print >>users_trusted_ids, username + ',' + trust_id
-        msg = 'Generated trustid for user {0} ({1}/{2})'
-        logger.info(msg.format(user, count, total))
+        users_to_delete = open(name)
     except Exception:
-        print 'Failed: ' + user
-        logger.error('Failed getting trust-id from trustor ' + user)
+        m = 'Failed reading the file ' + name
+        logger.error(m)
 
-users_trusted_ids.close()
+    generate_trust_ids(users_to_delete)
+else:
+    logger = logging.getLogger(__name__)
