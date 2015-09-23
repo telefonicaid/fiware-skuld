@@ -43,13 +43,13 @@ def get_unified_report(users_to_delete):
     fields:
     *dictionary of the resources (vms, volumes...) before the deletion
     *dictionary of the resources (vms, volumes...) after the deletion
-    *True if there is not resources pending of deletion, False otherwise
+    *True if there are not resources pending of deletion, False otherwise
 
     The users_to_delete list is used to filter the results. This is useful
     when some users were removed from the list after the deletion of the
     resources.
 
-    The unification process use as field "before the deletion" the result of
+    The code fills the field "before the deletion" with the result of
     the older report found for each user, and the fields "after the deletion" and
     the boolean with the result of the more recent report found for the user.
 
@@ -142,8 +142,9 @@ def save_failed_users_list(users_to_delete, unified):
     """Create file users_to_delete_failed.txt, with the ids of users who
     were failed. Only the users with basic type are included.
 
-    A user is considered failed if according the report they have resources
-    after invoking the scripts, or if they do not appear in the report
+    A user is considered failed if he/she has resources
+    after invoking the scripts, according to the report, or if he/she does not
+    appear in the report.
     :param users_to_delete: the list of users to delete, obtained with
         get_users_to_delete()
     :param unified: the report obtained with get_unified_report()
