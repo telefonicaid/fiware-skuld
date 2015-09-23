@@ -29,6 +29,7 @@ import cPickle as pickle
 
 import queries
 
+
 def get_users_to_delete():
     """
     Get the content of users_to_delete.txt as a list
@@ -50,8 +51,9 @@ def get_unified_report(users_to_delete):
     resources.
 
     The code fills the field "before the deletion" with the result of
-    the older report found for each user, and the fields "after the deletion" and
-    the boolean with the result of the more recent report found for the user.
+    the older report found for each user, and the fields "after the deletion"
+    and the boolean with the result of the more recent report found for the
+    user.
 
     :param users_to_delete: the list of users to delete, obtained with
         get_users_to_delete()
@@ -96,9 +98,9 @@ def print_summary_report(users_to_delete, report):
 
     for value in report.values():
         if value[2]:
-           yes += 1
+            yes += 1
         else:
-           no += 1
+            no += 1
 
         resources_before = value[0]
         resources_after = value[1]
@@ -130,9 +132,9 @@ def print_fails_report(report):
             after = report[key][1]
             modified = dict()
             for resource in after:
-               if after[resource]:
-                  modified[resource] = after[resource]
-                  categories.add(resource)
+                if after[resource]:
+                    modified[resource] = after[resource]
+                    categories.add(resource)
             print key, modified
 
     print 'Categories not completed: ', categories
