@@ -48,8 +48,9 @@ for other resources has the advantage that it is impossible to delete the resour
 users because the lack of permissions.
 
 The scripts can be invoked in two ways:
-*automatically, as a cron daily script
-*manually
+
+* automatically, as a cron daily script
+* manually
 
 The automatic way: cron script
 ------------------------------
@@ -141,7 +142,7 @@ installation.
 Now the system is ready to use. For future sessions, only the step2 is required.
 
 Cron script
-___________
+***********
 
 The scripts can be invoked manually when full control is needed, but the easy
 way is creating a daily cron script.
@@ -149,7 +150,7 @@ way is creating a daily cron script.
 Supposing that the project scripts are located in */root/fiware-skulds*, the
 following file can be created as */etc/cron.daily/fiware-skuld*
 
-.. code:
+.. code::
 
   #!/bin/bash
 
@@ -158,11 +159,14 @@ following file can be created as */etc/cron.daily/fiware-skuld*
   export OS_PASSWORD=<passwrod_admin>
   export OS_AUTH_URL=<keytone_url>
 
+  export TRUSTEE_USER=<trustee_user>
   export TRUSTEE_PASSWORD=<trustee_password>
   /root/fiware-skulds/cron-script.sh
 
 It is recommended to do this file only readable by the root user, because it
 contains passwords:
+
+.. code::
 
    chmod 700 /etc/cron.daily/fiware-skuld
 
@@ -174,7 +178,8 @@ The only configuration file is *settings/settings.py*. The following options may
 be set:
 
 * TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
-  privileges. The value is a username (e.g. trustee@example.com)
+  privileges. The value is a username (e.g. trustee@example.com). If
+  TRUSTEE_USER environment variable exits, it replaces this parameter.
 * TRUSTEE_PASSWORD = The password of the account use to impersonate the users.
   This parameter may be omitted: if TRUSTEE_PASSWORD environment variable
   exits, it replaces this parameter.
@@ -201,8 +206,9 @@ details.
 The admin credential is not stored in any configuration file. Instead, the
 usual OpenStack environment variables (OS_USERNAME, OS_PASSWORD,
 OS_TENANT_NAME, OS_REGION_NAME) must be set. In the same way, the scripts that
-expect the password of the TRUSTEE, can use the environment variable
-TRUSTEE_PASSWORD, but it is also possible to use the settings file.
+expect the password of the TRUSTEE, can use the environment variables
+TRUSTEE_USER and TRUSTEE_PASSWORD, but it is also possible to use the settings
+file.
 
 
 Running
