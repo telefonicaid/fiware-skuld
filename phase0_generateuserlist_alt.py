@@ -25,10 +25,12 @@
 author = 'chema'
 
 import osclients
-
 from settings import settings
+
 from datetime import datetime
 import utils.log
+import utils.rotated_files
+import os.path
 
 logger = utils.log.init_logs('phase0')
 
@@ -42,12 +44,20 @@ class ExpiredUsers:
         self.keystoneclient = clients.get_keystoneclientv3()
 
     def get_trial_user_ids(self):
-        """Get the list of trial users; only the ids
-        :return: a list of user ids, corresponding to trial users.
+        """Get a set of trial users; only the ids
+        :return: a set of user ids, corresponding to trial users.
         """
         k = self.keystoneclient
         return set(e.user['id'] for e in k.role_assignments.list(
             role=settings.TRIAL_ROLE_ID))
+
+    def get_basic_users_ids(self):
+        """Get a set of basic users; only the ids
+        :return: a set of user ids, corresponding to trial users.
+        """
+        k = self.keystoneclient
+        return set(e.user['id'] for e in k.role_assignments.list(
+            role=settings.BASIC_ROLE_ID))
 
     def get_trial_users(self):
         """Get the list of trial users; the full objects are included.
@@ -77,46 +87,58 @@ class ExpiredUsers:
 
         return yellow_users, red_users
 
-    def get_yellow_orange_red_users(self):
-        """Get three lists:
-          * trail user accounts that are next to expire (i.e. less than
-          NOTIFY_BEFORE_EXPIRED days): yellow users
-          * trail user accounts that are already expired, but less than
-           STOP_BEFORE_DELETE days: orange users
-          * trail user accounts that are expired for more than
-            STOP_BEFORE_DELETE: red users
-
-        :return: a tuple with three list
-        """
-        red_users = list()
-        yellow_users = list()
-        orange_users = list()
-
-        for user in self.get_trial_users():
-            remaining = self._get_remaining_trial_time(user.to_dict())
-            if self._is_user_protected(user):
-                continue
-            if remaining < - settings.STOP_BEFORE_DELETE:
-                red_users.append(user)
-            elif remaining < 0:
-                orange_users.append(user)
-            elif remaining <= settings.NOTIFY_BEFORE_EXPIRED:
-                yellow_users.append(user)
-
-        return yellow_users, orange_users, red_users
-
-    def save_lists(self):
+    def save_lists(self, cron_daily=False):
         """Create files users_to_delete.txt and users_to_notify.txt with the
         users expired and users that will expire in a week or less.
+
+        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
+        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
+        the phase2). To create the file users_to_delete_phase3.txt, the files
+        users_to_delete.txt are rotated in each daily execution; when the file
+        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
+        to users_to_delete_phase3.txt.
+
+        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
+        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
+
+        :param cron_daily: this code is invoked from a cron daily script.
+          if implies the creation of file users_to_delete_phase3.txt
         :return: nothing
         """
         (notify_list, delete_list) = self.get_yellow_red_users()
-        with open('users_to_delete.txt', 'w') as users_to_delete:
-            for user in delete_list:
-                print >>users_to_delete, user.id
         with open('users_to_notify.txt', 'w') as users_to_notify:
             for user in notify_list:
                 print >>users_to_notify, user.id
+
+        if cron_daily:
+            if settings.STOP_BEFORE_DELETE == 0:
+                name = 'users_to_delete_phase3.txt'
+                with open(name, 'w') as users_to_delete_p3:
+                    for user in delete_list:
+                        print >>users_to_delete_p3, user.id
+            else:
+                name = 'users_to_delete.txt'
+                phase3_name = 'users_to_delete_phase3.txt'
+                basic_users = self.get_basic_users_ids()
+                utils.rotated_files.rotate_files(
+                    name, settings.STOP_BEFORE_DELETE, phase3_name)
+                # Remove from list the users that are not basic
+                # (i.e.) users who has changed to community or again to trial
+                if os.path.exists(phase3_name):
+                    with open(phase3_name, 'r') as phase3:
+                        filtered = list(u for u in phase3 if u in basic_users)
+                    with open(phase3_name, 'w') as phase3:
+                        for user in filtered:
+                            print >>phase3, user.id
+
+                with open(name, 'w') as users_to_delete:
+                    for user in delete_list:
+                        print >>users_to_delete, user.id
+
+        else:
+            with open('users_to_delete.txt', 'w') as users_to_delete:
+                for user in delete_list:
+                    print >>users_to_delete, user.id
 
     def _get_remaining_trial_time(self, user):
         """
@@ -162,4 +184,4 @@ class ExpiredUsers:
 
 if __name__ == '__main__':
     expired = ExpiredUsers()
-    expired.save_lists()
+    expired.save_lists(cron_daily=True)

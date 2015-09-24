@@ -319,7 +319,7 @@ class OpenStackClients(object):
             2, region_name=self.region, session=self.get_session())
 
     def get_cinderclient(self):
-        """Get a cinder client. A client is different for each region
+        """Get a cinder client (v2). A client is different for each region
         (although all clients share the same session and it is possible to have
          simultaneously clients to several regions).
 
@@ -334,6 +334,29 @@ class OpenStackClients(object):
         """
         return cinderclient.Client(session=self.get_session(),
                                    region_name=self.region)
+
+    def get_cinderclientv1(self):
+        """Get a cinder clientv1. The API is older than the v2 provided with
+         get_cinderclient, but there is still a lot of
+         servers that do not have registered the version 2 end-point.
+
+         A client is different for each region (although all clients share the
+         same session and it is possible to have simultaneously clients to
+         several regions).
+
+         Before calling this method, the credential must be provided. The
+         constructor obtain the credential for environment variables if present
+         but also the method set_credential is available.
+
+         Be aware that calling the method set_credential invalidate the old
+         session if already existed and therefore can affect the old clients.
+
+        :return: a cinder client valid for a region.
+        """
+        return cinderclient.Client(session=self.get_session(),
+                                   region_name=self.region,
+                                   service_type='volume')
+
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region

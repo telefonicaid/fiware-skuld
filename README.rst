@@ -47,6 +47,47 @@ by impersonating the users themselves. This is the only way to delete the key pa
 for other resources has the advantage that it is impossible to delete the resources of other
 users because the lack of permissions.
 
+The scripts can be invoked in two ways:
+
+* automatically, as a cron daily script
+* manually
+
+The automatic way: cron script
+------------------------------
+
+This is the recommended use of the script. Every day, the script notifies the
+users close to expire (only once), and change the account type and delete the
+resources of the users already expired.
+
+The notification, a remainder of the expiration day, is sent to users that will
+expire before a configurable number of days (by default it is a week). The script
+saves the list of users already notified to avoid sending the same email again
+in the following days.
+
+Before deleting the resources, the user account type is changed from trial to
+basic.
+
+Optionally, the cron script also stops all the VMs and unshares the images of
+the users instead of deleting the resources. The idea is to let several days
+of reaction before actually freeing the resources. The cron script checks that
+users to delete after the grace period are still of type "basic".
+
+The manual way
+--------------
+
+This alternative is provided because it may be useful in some situations.
+Specifically, it is recommended to regularize a system with several users
+expired some weeks ago. Here the notification system integrated in the cron
+script will not work, because the users are already expired, not next to expire.
+
+Using the manual method implies running several scripts in a determined order.
+It is the choice of the administrator who invokes the scripts when users are
+notified, their VM stopped, the user type changed and the resources freed. It
+is also their responsibility to recheck which users status has been changed
+during the process (i.e. converted to community or amplified the trial period)
+and therefore must not be deleted.
+
+
 Components
 ----------
 
@@ -100,6 +141,36 @@ installation.
 
 Now the system is ready to use. For future sessions, only the step2 is required.
 
+Cron script
+***********
+
+The scripts can be invoked manually when full control is needed, but the easy
+way is creating a daily cron script.
+
+Supposing that the project scripts are located in */root/fiware-skulds*, the
+following file can be created as */etc/cron.daily/fiware-skuld*
+
+.. code::
+
+  #!/bin/bash
+
+  export OS_USERNAME=<admin_user>
+  export OS_TENANT_NAME=<admin_tenant>
+  export OS_PASSWORD=<passwrod_admin>
+  export OS_AUTH_URL=<keytone_url>
+
+  export TRUSTEE_USER=<trustee_user>
+  export TRUSTEE_PASSWORD=<trustee_password>
+  /root/fiware-skulds/cron-script.sh
+
+It is recommended to make this file only readable by the root user, because it
+contains passwords:
+
+.. code::
+
+   chmod 700 /etc/cron.daily/fiware-skuld
+
+
 Configuration
 -------------
 
@@ -107,7 +178,11 @@ The only configuration file is *settings/settings.py*. The following options may
 be set:
 
 * TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
-  privileges. The value is a username (e.g. trustee@example.com)
+  privileges. The value is a username (e.g. trustee@example.com). If
+  TRUSTEE_USER environment variable exits, it replaces this parameter.
+* TRUSTEE_PASSWORD = The password of the account use to impersonate the users.
+  This parameter may be omitted: if TRUSTEE_PASSWORD environment variable
+  exits, it replaces this parameter.
 * MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
   Default is 14 days. It is very important that this parameter has the right
   value, otherwise accounts could be deleted prematurely.
@@ -131,23 +206,30 @@ details.
 The admin credential is not stored in any configuration file. Instead, the
 usual OpenStack environment variables (OS_USERNAME, OS_PASSWORD,
 OS_TENANT_NAME, OS_REGION_NAME) must be set. In the same way, the scripts that
-expect the password of the TRUSTEE, read the OS_PASSWORD environment variable.
+expect the password of the TRUSTEE, can use the environment variables
+TRUSTEE_USER and TRUSTEE_PASSWORD, but it is also possible to use the settings
+file.
+
 
 Running
 =======
+
+The recommended way of running the scripts is using the cron script. But if
+user need full control, here is a description of the process.
 
 The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
     trial users and the users to notify because their resources are expiring in
-    the next days (7 days or less). The output of the script are the files
+    the next days (e.g. 7 days or less). The output of the script are the files
     ``users_to_delete.txt`` and  ``users_to_notify.txt``.
     This script requires the admin credential.
 
 -phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
      user whose resources is going to be deleted (i.e. to each user listed in
      the file ``users_to_notify.txt``). The purpose of this scripts is to give
-     some time to users to react before their resources are deleted.
+     some time to users to react before their resources are deleted. This script
+     requires the admin credential.
 
 -phase0c: ``phase0c_change_category.py``. Change the type of user from trial to
       basic. This script requires the admin credential. It reads the file
@@ -171,9 +253,8 @@ The procedure works by invoking the scripts corresponding to different phases:
      token to impersonate the user without touching their password. The
      disadvantage is that it requires a change in the keystone server, to allow
      admin user to generate the trust_ids, because usually only the own user to
-     impersonate is allowed to create these tokens. Another disadvantage is that
-     users can login and create new resources until phase4 script is invoked.
-     The generated *trust ids* by default are only valid during one hour; after
+     impersonate is allowed to create these tokens.
+     The generated *trust ids* by default are only valid during ten hours; after
      that time this script must be executed again to generate new tokens.
 
 -phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
@@ -182,6 +263,8 @@ The procedure works by invoking the scripts corresponding to different phases:
      available before they are beyond redemption. This script does not require
      the admin account, because it applies the user' credential from
      ``users_credentials.txt`` or the trust ids from ``users_trusted_ids.txt``.
+     If users trusted_ids, TRUSTEE_PASSWORD environment variable must be
+     defined.
 
 -phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to
      detect images owned by the user, in use by other tenants. Theoretically
@@ -197,16 +280,24 @@ The procedure works by invoking the scripts corresponding to different phases:
      ``users_credentials.txt`` or the trusted ids from ``users_trusted_ids.txt``.
      If using *trust ids*, the script phase1_generate_trust_ids.py must be
      invoked again before this script, because the phase2 script delete the
-     *trust id* after using it.
+     *trust id* after using it. In addition, TRUSTEE_PASSWORD environment
+     variable must be defined.
 
 
 It is very important to note that phase2 and phase3 use the output of previous
-phases scripts without checking again if the user is still a trial user. Therefore
+phases scripts without checking again if the user is still a basic user. Therefore
 if the scripts are not executed in the same day, it is convenience to recheck
 if some users has been upgraded.
 
-The following python fragment can be used to check (after the users has been
-downgraded to basic) that they are still basic:
+For example, in the meantime between user notification and running phase0c,
+phase0 should be invoked again and use only the intersection between the old
+file and the new file: the users included only in the new file are not notified
+yet and the users only in the old file are probably promoted to community users
+or his trial period has been extended.
+
+The following python fragment can be used to check that users to delete
+are still basic. It is useful when there is a time between running phase2 and
+phase3:
 
 .. code::
 
@@ -227,16 +318,17 @@ each region and OS_REGION_NAME must be filled accordingly.
 Scripts phase0, phase1, phase2b and require setting OS_USERNAME,
 OS_PASSWORD, OS_TENANT_NAME with the admin credential
 
-Scripts phase2 and phase3 do not require OS_USERNAME, OS_PASSWORD nor
-OS_TENANT_NAME when using the phase1 change password alternative. If using
-*trust_ids* only OS_PASSWORD must be set with the password of the trustee (i.e.
-the account used to impersonate the users).
+Scripts phase2 and phase3 do not require OS_USERNAME, OS_PASSWORD, etc. If using
+*trust_ids*  TRUSTEE_PASSWORD must be defined either in the environment or in the
+settings file. The trustee is the account used to impersonate the users.
 
 The phase3_delete.py generates a pickle file (named
 freeresources-<datatime>.pickle). This is a dictionary of users, each entry is
 a tuple with another two dictionaries: the first references the resources
 before deletion and the second the resources after deletion. The tuple has a
 boolean as a third value: it is True when all the users resources are deleted.
+A tool is provided to extract a report from free_resources-*.pickle:
+*analyse_report_data.py*
 
 Testing
 =======

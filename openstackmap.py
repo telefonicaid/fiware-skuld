@@ -31,7 +31,8 @@ import os
 import time
 from os import environ as env
 
-class OpenStackMap():
+
+class OpenStackMap(object):
     """
     This class build a map from the resources (VMs, networks, images,
     volumes, users, tenants, roles...) in an OpenStack infrastructure.
@@ -225,7 +226,7 @@ class OpenStackMap():
 
         tenants_by_name = dict()
         users_by_name = dict()
- 
+
         if dict_object:
             roles = dict((role.id, role.to_dict()) for role in roles)
             users = dict((user.id, user.to_dict()) for user in users)
@@ -317,7 +318,7 @@ class OpenStackMap():
         save = dict_object and \
             self.objects_strategy != OpenStackMap.NO_CACHE_OBJECTS
 
-        cinder = self.osclients.get_cinderclient()
+        cinder = self.osclients.get_cinderclientv1()
         volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
         snapshots = cinder.volume_snapshots.list(
             search_opts={'all_tenants': 1})
@@ -389,7 +390,7 @@ class OpenStackMap():
         snets = dict((subnet['id'], subnet) for subnet in subnets)
         routers = dict((router['id'], router) for router in routers)
         floatingips = dict((floatingip['id'], floatingip) for floatingip in
-                               floatingips)
+                           floatingips)
         sec_grps = dict((sg['id'], sg) for sg in sec_grps)
         ports = dict((port['id'], port) for port in ports)
 
@@ -439,7 +440,6 @@ class OpenStackMap():
         else:
             self._get_nova_data()
 
-
     def load_glance(self):
         """load glance data: images"""
         if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
@@ -499,77 +499,10 @@ class OpenStackMap():
         self.load_keystone()
 
     def change_region(self, region):
-        """change region and invoke load_all"""
+        """change region and clean maps"""
         self.pers_region = self.persistence_dir + '/' + region
         if not os.path.exists(self.pers_region) and self.objects_strategy\
            not in (OpenStackMap.DIRECT_OBJECTS, OpenStackMap.NO_CACHE_OBJECTS):
             os.mkdir(self.pers_region)
         self.osclients.set_region(region)
-        self.load_all()
-
-    def load_glance(self):
-        """load glance data: images"""
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
-                os.path.exists(self.pers_region + '/images.pickle'):
-            self.images = self._load('images')
-        else:
-            self._get_glance_data()
-
-    def load_neutron(self):
-        """load neutron (network) data: networks, subnets, routers,
-           floatingips, security_groups, ports"""
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
-                os.path.exists(self.pers_region + '/networks.pickle'):
-            self.networks = self._load('networks')
-            self.subnets = self._load('subnetworks')
-            self.routers = self._load('routers')
-            self.floatingips = self._load('floatingips')
-            self.security_groups = self._load('securitygroups')
-            self.ports = self._load('ports')
-        else:
-            self._get_neutron_data()
-
-    def load_keystone(self):
-        """load keystone data: users, tenants, roles, roles_a,
-           users_by_name, tenants_by_name, roles_by_project, roles_by_user
-        """
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
-                os.path.exists(self.pers_keystone + '/users.pickle'):
-            self.users = self._load_fkeystone('users')
-            self.users_by_name = self._load_fkeystone('users_by_name')
-            self.tenants = self._load_fkeystone('tenants')
-            self.tenants_by_name = self._load_fkeystone('tenants_by_name')
-            self.roles_a = self._load_fkeystone('asignments')
-            self.roles = self._load_fkeystone('roles')
-            self.roles_by_project = self._load_fkeystone('roles_by_project')
-            self.roles_by_user = self._load_fkeystone('roles_by_user')
-        else:
-            self._get_keystone_data()
-
-    def load_cinder(self):
-        """load cinder data: volumes, volume_backups, volume_snapshots
-        """
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
-                os.path.exists(self.pers_region + '/volumes.pickle'):
-            self.volumes = self._load('volumes')
-            self.volume_backups = self._load('volume_backups')
-            self.volume_snapshots = self._load('volume_snapshots')
-        else:
-            self._get_cinder_data()
-
-    def load_all(self):
-        """load all data"""
-        self.load_nova()
-        self.load_neutron()
-        self.load_glance()
-        self.load_cinder()
-        self.load_keystone()
-
-    def change_region(self, region):
-        """change region and invoke load_all"""
-        self.pers_region = self.persistence_dir + '/' + region
-        if not os.path.exists(self.pers_region) and self.objects_strategy\
-           not in (OpenStackMap.DIRECT_OBJECTS, OpenStackMap.NO_CACHE_OBJECTS):
-            os.mkdir(self.pers_region)
-        self.osclients.set_region(region)
-        self.load_all()
+        self._init_resource_maps()
