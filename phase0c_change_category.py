@@ -43,7 +43,6 @@ keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
 warnings.simplefilter('ignore', category=InsecurePlatformWarning)
 
-
 def change_user_keystone(user_id):
     """Change the user from trial to basic
     We use this on our testing environment
@@ -69,7 +68,7 @@ def change_user_via_idm(user_id):
         logger.error('{0} is not a trial user'.format(user_id))
     body = {'user_id': user_id, 'role_id': basic, 'notify': True}
     headers = {'X-Auth-Token': q.osclients.get_token()}
-    
+
     # NOTE(garcianavalon) sometimes in settings people use the end /
     horizon_url = settings.settings.HORIZON_ENDPOINT
     if horizon_url.endswith('/'):

@@ -32,7 +32,6 @@ import os
 from osclients import OpenStackClients
 
 
-
 i_url = 'http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img'
 img_name = 'cirros0.3.4.img'
 i_url2 = 'http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img'
@@ -42,6 +41,7 @@ can_create_shared_images = False
 # If can_create_shared_images is False, set the image_name here
 image_name = 'base_debian_7'
 can_create_networks = False
+
 
 class ResourcePopulator(object):
     """This class create resources to test that all of them are deleted by
@@ -110,7 +110,6 @@ class ResourcePopulator(object):
         else:
             image_id = glance.images.find(name=image_name)
 
-
         print 'Creating a keypair'
         keypair = nova.keypairs.create(name='testpublickey')
 
@@ -163,7 +162,6 @@ class ResourcePopulator(object):
                 if not net['router:external']:
                     network = net
                     break
-
 
         # The volume must be available before creating the snapshot.
         time.sleep(3)

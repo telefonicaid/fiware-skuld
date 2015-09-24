@@ -33,6 +33,7 @@ try:
 except ImportError:
     TRUSTID_VALIDITY = 36000
 
+
 class TrustFactory:
     """This class is used to create/destroy a TRUST_ID, that allows a user (the
      trustee) to impersonate another user (the trustor).
@@ -44,7 +45,7 @@ class TrustFactory:
     def __init__(self, osclients_o=None, trustid_validity=TRUSTID_VALIDITY):
         """
         Constructor
-        :param openstackclients: a osclients object; by default this object
+        :param osclients_o: a osclients object; by default this object
         is built using the environment variables (OS_AUTH_URL, OS_PASSWORD...)
         :param trustid_validity: number of seconds the TRUST_ID last. It can
         be also released manually.

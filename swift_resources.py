@@ -31,7 +31,7 @@ class SwiftResources(object):
     def __init__(self, osclients):
         """Constructor. It requires an OpenStackClients object
 
-        :param openstackclients: an OpenStackClients method (module osclients)
+        :param osclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
         self.swiftclient = osclients.get_swiftclient()
@@ -85,5 +85,3 @@ class SwiftResources(object):
             for obj in container[1]:
                 self.swiftclient.delete_object(container_name, obj['name'])
             self.swiftclient.delete_container(container_name)
-
-

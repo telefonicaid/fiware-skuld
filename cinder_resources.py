@@ -42,7 +42,6 @@ class CinderResources(object):
         """Method invoked when the region is changed"""
         self.cinder = self.osclients.get_cinderclient()
 
-
     def get_tenant_volumes(self):
         """Return a list with all the volumes of the tenant
         :return: a list of tuples (volume_id, user_id)

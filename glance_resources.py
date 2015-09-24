@@ -35,7 +35,7 @@ class GlanceResources(object):
     def __init__(self, osclients):
         """Constructor. It requires an OpenStackClients object
 
-        :param openstackclients: an OpenStackClients method (module osclients)
+        :param osclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
         self.osclients = osclients
@@ -77,7 +77,8 @@ class GlanceResources(object):
                 public_images.append(image.id)
             else:
                 private_images.append(image.id)
-        return (private_images, public_images)
+
+        return private_images, public_images
 
     def delete_tenant_images(self, also_shared=False):
         """delete all the private tenant's images. If also_shared is True,

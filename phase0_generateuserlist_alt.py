@@ -34,7 +34,8 @@ import os.path
 
 logger = utils.log.init_logs('phase0')
 
-class ExpiredUsers():
+
+class ExpiredUsers:
     def __init__(self):
         """Constructor. Create a keystone client"""
         clients = osclients.OpenStackClients()
