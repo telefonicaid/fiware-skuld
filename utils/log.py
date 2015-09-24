@@ -70,6 +70,7 @@ def init_logs(phase):
     _init_logger(logging.getLogger('swift_resources'), phase)
     _init_logger(logging.getLogger('impersonate'), phase)
     _init_logger(logging.getLogger('osclients'), phase)
+    _init_logger(logging.getLogger('phase0b_notify_users'), phase)
 
     # init root logger, to show messages also in stderr
     logging.debug('start delete script')

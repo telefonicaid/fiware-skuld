@@ -30,6 +30,7 @@ import logging
 import warnings
 import utils.log
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
 import settings.settings
 
@@ -40,7 +41,7 @@ basic = settings.settings.BASIC_ROLE_ID
 q = queries.Queries()
 keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
-
+warnings.simplefilter('ignore', category=InsecurePlatformWarning)
 
 
 def change_user_keystone(user_id):
@@ -65,7 +66,7 @@ def change_user_via_idm(user_id):
     :return: nothing
     """
     if q.get_type_fiware_user(user_id) != 'trial':
-        logging.error('{0} is not a trial user'.format(user_id))
+        logger.error('{0} is not a trial user'.format(user_id))
     body = {'user_id': user_id, 'role_id': basic, 'notify': True}
     headers = {'X-Auth-Token': q.osclients.get_token()}
     
@@ -81,14 +82,15 @@ def change_user_via_idm(user_id):
         logger.error(msg.format(r.status_code, r.reason))
         raise Exception('Server error')
 
-users = open('users_to_delete.txt')
-for line in users.readlines():
-    user_id = line.strip()
-    if user_id == '':
-        continue
-    logger.info('Changing user {0} from trial to basic'.format(user_id))
-    try:
-        change_user_via_idm(user_id)
-    except Exception, e:
-        logger.error('Error changing user {0} to basic. Cause: {1}'.format(
-            user_id, str(e)))
+if __name__ == '__main__':
+    users = open('users_to_delete.txt')
+    for line in users.readlines():
+        user_id = line.strip()
+        if user_id == '':
+            continue
+        logger.info('Changing user {0} from trial to basic'.format(user_id))
+        try:
+            change_user_via_idm(user_id)
+        except Exception, e:
+            logger.error('Error changing user {0} to basic. Cause: {1}'.format(
+                user_id, str(e)))
