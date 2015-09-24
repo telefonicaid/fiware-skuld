@@ -31,7 +31,8 @@ import os
 import time
 from os import environ as env
 
-class OpenStackMap():
+
+class OpenStackMap(object):
     """
     This class build a map from the resources (VMs, networks, images,
     volumes, users, tenants, roles...) in an OpenStack infrastructure.
@@ -317,7 +318,7 @@ class OpenStackMap():
         save = dict_object and \
             self.objects_strategy != OpenStackMap.NO_CACHE_OBJECTS
 
-        cinder = self.osclients.get_cinderclient()
+        cinder = self.osclients.get_cinderclientv1()
         volumes = cinder.volumes.list(search_opts={'all_tenants': 1})
         snapshots = cinder.volume_snapshots.list(
             search_opts={'all_tenants': 1})
@@ -499,11 +500,11 @@ class OpenStackMap():
         self.load_keystone()
 
     def change_region(self, region):
-        """change region and invoke load_all"""
+        """change region and clean maps"""
         self.pers_region = self.persistence_dir + '/' + region
         if not os.path.exists(self.pers_region) and self.objects_strategy\
            not in (OpenStackMap.DIRECT_OBJECTS, OpenStackMap.NO_CACHE_OBJECTS):
             os.mkdir(self.pers_region)
         self.osclients.set_region(region)
-        self.load_all()
+        self._init_resource_maps()
 
