@@ -55,7 +55,6 @@ def generate_trust_ids(users_to_delete):
         'identity', osclients.region, 'admin', KEYSTONE_ENDPOINT)
 
     trust_factory = TrustFactory(osclients)
-    user_ids = list()
     lines = users_to_delete.readlines()
     total = len(lines)
     count = 0
@@ -69,9 +68,9 @@ def generate_trust_ids(users_to_delete):
             print >>users_trusted_ids, username + ',' + trust_id
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
-        except Exception:
-            print 'Failed: ' + user
-            logger.error('Failed getting trust-id from trustor ' + user)
+        except Exception, e:
+            msg = 'Failed getting trust-id from trustor {0}. Reason: {1}'
+            logger.error(msg.format(user, str(e)))
 
     users_trusted_ids.close()
 
