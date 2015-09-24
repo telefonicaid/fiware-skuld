@@ -153,32 +153,37 @@ class UserResources(object):
         try:
             self.nova.delete_user_keypairs()
         except Exception, e:
-            self.logger.error('Deletion of keypairs failed')
+            msg = 'Deletion of keypairs failed. Reason: '
+            self.logger.error(msg + str(e))
 
         # Snapshots must be deleted before the volumes, because a snapshot
         # depends of a volume.
         try:
             self.cinder.delete_tenant_volume_snapshots()
         except Exception, e:
-            self.logger.error('Deletion of volume snaphosts failed')
+            msg = 'Deletion of volume snaphosts failed. Reason: '
+            self.logger.error(msg + str(e))
 
         # Blueprint instances must be deleted before VMs, instances before
         # templates
         try:
             self.blueprints.delete_tenant_blueprints()
         except Exception, e:
-            self.logger.error('Deletion of blueprints failed')
+            msg = 'Deletion of blueprints failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.cinder.delete_tenant_backup_volumes()
         except Exception, e:
-            self.logger.error('Deletion of backup volumes failed')
+            msg = 'Deletion of backup volumes failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             if self.swift:
                 self.swift.delete_tenant_containers()
         except Exception, e:
-            self.logger.error('Deletion of swift containers failed')
+            msg = 'Deletion of swift containers failed. Reason'
+            self.logger.error(msg + str(e))
 
     def delete_tenant_resources_pri_2(self):
         """Delete resources that must be deleted after p1 resources"""
@@ -194,13 +199,15 @@ class UserResources(object):
         try:
             self.nova.delete_tenant_vms()
         except Exception, e:
-            self.logger.error('Deletion of VMs failed')
+            msg = 'Deletion of VMs failed. Reason: '
+            self.logger.error(msg + str(e))
 
         # Blueprint instances must be deleted after blueprint templates
         try:
             self.blueprints.delete_tenant_templates()
         except Exception, e:
-            self.logger.error('Deletion of blueprint templates failed')
+            msg = 'Deletion of blueprint templates failed. Reason: '
+            self.logger.error(msg + str(e))
 
     def delete_tenant_resources_pri_3(self):
         """Delete resources that must be deleted after p2 resources"""
@@ -216,14 +223,15 @@ class UserResources(object):
         try:
             self.nova.delete_tenant_security_groups()
         except Exception, e:
-            msg = 'Deletion of security groups failed. Detail: '
+            msg = 'Deletion of security groups failed. Reason: '
             self.logger.error(msg + str(e))
 
         # self.glance.delete_tenant_images()
         try:
             self.glance.delete_tenant_images_notinuse(self.imagesinuse)
         except Exception, e:
-            self.logger.error('Deletion of images failed')
+            msg = 'Deletion of images failed. Reason: '
+            self.logger.error(msg + str(e))
 
         # Before deleting volumes, snapshot volumes must be deleted
         count = 0
@@ -236,37 +244,44 @@ class UserResources(object):
         try:
             self.cinder.delete_tenant_volumes()
         except Exception, e:
-            self.logger.error('Deletion of volumes failed')
+            msg = 'Deletion of volumes failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_ports()
         except Exception, e:
-            self.logger.error('Deletion of network ports failed')
+            msg = 'Deletion of network ports failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_securitygroups()
         except Exception, e:
-            self.logger.error('Deletion of network security groups failed')
+            msg = 'Deletion of network security groups failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_floatingips()
         except Exception, e:
-            self.logger.error('Deletion of floating ips failed')
+            msg = 'Deletion of floating ips failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_subnets()
         except Exception, e:
-            self.logger.error('Deletion of subnets failed')
+            msg = 'Deletion of subnets failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_networks()
         except Exception, e:
-            self.logger.error('Deletion of networks failed')
+            msg = 'Deletion of networks failed. Reason: '
+            self.logger.error(msg + str(e))
 
         try:
             self.neutron.delete_tenant_routers()
         except Exception, e:
-            self.logger.error('Deletion of routers failed')
+            msg = 'Deletion of routers failed. Reason: '
+            self.logger.error(msg + str(e))
 
     def delete_tenant_resources(self):
         """Delete all the resources of the tenant, and also the keypairs of the
@@ -275,6 +290,7 @@ class UserResources(object):
         time.sleep(10)
         self.delete_tenant_resources_pri_2()
         self.delete_tenant_resources_pri_3()
+
 
     def stop_tenant_vms(self):
         """Stop all the active vms of the tenant
