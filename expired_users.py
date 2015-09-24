@@ -28,7 +28,7 @@ import requests
 from datetime import datetime
 from settings import settings
 from utils.log import logger
-import osclients
+
 
 class ExpiredUsers:
     def __init__(self, tenant=None, username=None, password=None):
@@ -129,8 +129,8 @@ class ExpiredUsers:
 
         logger.info("Number of expired Trial Users found: %d",
                     len(self.finalList))
-        logger.info("Number of Trial Users to expire in the following days: %d"
-                    , len(self.yellowList))
+        logger.info("Number of Trial Users to expire in the following days: %d",
+                    len(self.yellowList))
 
         return (self.yellowList, self.finalList)
 
@@ -225,7 +225,7 @@ class ExpiredUsers:
 
     def __check_credentials(self):
         """Check if we have the credentials of the admin user"""
-        if self.__tenant == None or self.__username == None or self.__password == None:
+        if self.__tenant is None or self.__username is None or self.__password is None:
             # We need to have a admin token in order to proceed.
             raise ValueError("Error, you need to define the credentials of the admin user. "
                              "Please, execute the setCredentials() method previously.")
@@ -274,4 +274,3 @@ class ExpiredUsers:
         :return: The Keystone service endpoint
         """
         return self.KEYSTONE_ENDPOINT
-

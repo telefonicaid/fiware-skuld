@@ -66,7 +66,7 @@ elif os.path.exists('users_credentials.txt'):
         del env['OS_PASSWORD']
     lines = open('users_credentials.txt').readlines()
 else:
-    raise "user_trusted_ids.txt or users_credentials.txt must exists"
+    raise Exception("user_trusted_ids.txt or users_credentials.txt must exists")
 
 
 count = 0
@@ -113,7 +113,6 @@ for line in lines:
         else:
             report[user_id] = resources_before
             users_list.append(user_resources)
-
 
     except Exception, e:
         msg = 'Obtaining resources of user {0} failed. Cause: {1}'

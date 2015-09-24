@@ -31,16 +31,19 @@ from commons.configuration import USERNAME, PASSWORD, KEYSTONE_URL, TOKEN_LENGTH
 from expired_users import ExpiredUsers
 import requests
 
+
 @before.each_feature
 def setup_feature(feature):
 
     world.expiredusers = ExpiredUsers(TENANT_NAME, USERNAME, PASSWORD)
+
 
 @before.each_scenario
 def setup(scenario):
     world.expiredusers.finalList = []
     world.expiredusers.listUsers = []
     world.expiredusers.token = None
+
 
 @step(u'a connectivity to the Keystone service')
 def set_keystone_service_endpoint(step):
@@ -52,6 +55,7 @@ def set_keystone_service_endpoint(step):
     except requests.ConnectionError:
         assert False, 'Expected True but \n Obtained Connection exception'
 
+
 @step(u'a valid token from the Keystone')
 def get_admin_token(step):
 
@@ -62,9 +66,11 @@ def get_admin_token(step):
     except Exception as e:
         world.message = 'The request you have made requires authentication.'
 
+
 @step(u'a valid tenantName, username and password')
 def given_a_valid_tenantname_username_and_password(step):
     pass
+
 
 @step(u'the keystone return me a json message with a valid token')
 def check_admin_token(step):
@@ -73,9 +79,11 @@ def check_admin_token(step):
     assert len(result) == TOKEN_LENGTH, 'Expected a token with length: 32 ' \
                                         '\n Obtained a token with length: {}'.format(len(result))
 
+
 @step(u'a list of trial users from the Keystone')
 def when_i_request_a_list_of_trial_users_from_the_keystone(step):
     world.expiredusers.get_list_trial_users()
+
 
 @step(u'the Keystone returns a list with all the trial users registered')
 def then_the_keystone_returns_a_list_with_all_the_trial_users_registered(step):
@@ -94,6 +102,7 @@ def then_the_keystone_returns_a_list_with_all_the_trial_users_registered(step):
 def when_i_request_a_list_of_expired_users(step):
     world.expiredusers.get_list_expired_users()
 
+
 @step(u'the component returns a list with all the expired trial users')
 def then_the_component_returns_a_list_with_all_the_expired_trial_users(step):
     try:
@@ -104,9 +113,11 @@ def then_the_component_returns_a_list_with_all_the_expired_trial_users(step):
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
 
+
 @step(u'a wrong "([^"]*)", "([^"]*)" and "([^"]*)"')
 def given_a_wrong_tenant_username_and_password(step, tenantname, username, password):
     world.expiredusers = ExpiredUsers(tenantname, username, password)
+
 
 @step(u'the component return an exception with the message "([^"]*)"')
 def then_the_component_return_an_exception_with_the_message_group1(step, group1):

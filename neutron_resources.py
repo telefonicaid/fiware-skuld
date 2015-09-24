@@ -38,7 +38,7 @@ class NeutronResources(object):
     def __init__(self, osclients):
         """Constructor. It requires an OpenStackClients object
 
-        :param openstackclients: an OpenStackClients method (module osclients)
+        :param osclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
         self.osclients = osclients

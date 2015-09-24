@@ -36,6 +36,7 @@ import utils
 
 logger = utils.log.init_logs('phase0c')
 
+
 def notify_users(user_ids):
     """
     Notify users about the deletion of their resources sending an email to

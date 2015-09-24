@@ -89,7 +89,7 @@ class PasswordChanger(object):
         """
         Return a user object from its username. This object may be used with
          methods change_password and reset_password
-        :param userid: the UUID of the user
+        :param username: the UUID of the user
         :return: a user object
         """
         return self.keystone.users.find(name=username)

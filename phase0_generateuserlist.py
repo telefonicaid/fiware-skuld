@@ -33,6 +33,7 @@ import utils
 
 logger = utils.log.init_logs('phase0')
 
+
 def is_user_protected(user):
     """
     Return true if the user must not be deleted, because their address has a

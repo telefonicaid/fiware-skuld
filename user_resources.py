@@ -238,7 +238,6 @@ class UserResources(object):
         except Exception, e:
             self.logger.error('Deletion of volumes failed')
 
-
         try:
             self.neutron.delete_tenant_ports()
         except Exception, e:
@@ -276,7 +275,6 @@ class UserResources(object):
         time.sleep(10)
         self.delete_tenant_resources_pri_2()
         self.delete_tenant_resources_pri_3()
-
 
     def stop_tenant_vms(self):
         """Stop all the active vms of the tenant
@@ -376,4 +374,3 @@ class UserResources(object):
             self.logger.info('Freeing trust-id of user ' + self.user_id)
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
-
