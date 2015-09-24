@@ -29,6 +29,7 @@ from datetime import datetime, timedelta
 import requests_mock
 import re
 
+
 @requests_mock.Mocker()
 class TestExpiredUsers(TestCase):
     def testadmintoken(self, m):
@@ -65,7 +66,6 @@ class TestExpiredUsers(TestCase):
             expiredUsers.get_admin_token()
         except Exception as e:
             assert e.message == 'The request you have made requires authentication.'
-
 
     def testadmintokenWithoutCredentials(self, m):
         """Test the obtention of admin token without credentials"""
@@ -218,7 +218,7 @@ class TestExpiredUsers(TestCase):
         }
 
         # Extract the user_id from the request.path content
-        matchObj = re.match(r'/v3/users/(.*)', request.path, re.M|re.I)
+        matchObj = re.match(r'/v3/users/(.*)', request.path, re.M | re.I)
 
         return result[matchObj.group(1)]
 

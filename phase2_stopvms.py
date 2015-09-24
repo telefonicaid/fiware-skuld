@@ -63,7 +63,7 @@ if os.path.exists('users_trusted_ids.txt'):
     user_total = len(lines)
     for line in lines:
         (user, trust_id) = line.strip().split(',')
-        user_count +=1
+        user_count += 1
         logger.info('Stopping active VMs of user {0} ({1}/{2})'.format(
             user, user_count, user_total))
 
@@ -113,4 +113,3 @@ with open('stopresources_report_' + now + '.pickle', 'wf') as f:
 with open('stopresources_error_report_' + now + '.log', 'w') as f:
     for user in failed_users:
         print >>f, user
-

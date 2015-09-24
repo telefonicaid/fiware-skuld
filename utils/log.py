@@ -45,6 +45,7 @@ log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
 logger.setLevel(logging.DEBUG)
 
+
 def _init_logger(logger, phase):
     LOGFILE = 'delete_user_resources.log'
     log_handler = RotatingFileHandler(LOGFILE, maxBytes=1048576, backupCount=5)
@@ -53,6 +54,7 @@ def _init_logger(logger, phase):
     log_handler.setFormatter(formatter)
     logger.addHandler(log_handler)
     logger.setLevel(logging.DEBUG)
+
 
 def init_logs(phase):
     """Returns an initialized logger for the main program. Initializes also the

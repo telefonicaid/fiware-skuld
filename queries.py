@@ -117,7 +117,7 @@ class Queries(object):
     def get_vms_using_image(self, image_id, discard_owned_vm=False, flag=None):
         """
         Get a list of vms using the image
-        :param image: the id of the image
+        :param image_id: the id of the image
         :param discard_owned_vm: ignore VM owned by the same tenant than the
         image. This is useful to detect if a shared image is in use by other
         tenants.

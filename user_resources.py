@@ -390,4 +390,3 @@ class UserResources(object):
             self.logger.info('Freeing trust-id of user ' + self.user_id)
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
-
