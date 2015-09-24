@@ -14,7 +14,7 @@ cd $(dirname $0)
 ./phase0c_change_category.py
 
 # stop servers of expired users
-if [ ! -f users_to_delete_phase3.txt ] ; then
+if [ -f users_to_delete.txt ] ; then
 ./phase1_generate_trust_ids.py
 ./phase2_stopvms.py
 rm users_trusted_ids.txt
