@@ -26,6 +26,7 @@ author = 'chema'
 
 import logging
 import sys
+from os import environ as env
 
 from impersonate import TrustFactory
 from settings.settings import TRUSTEE
@@ -58,13 +59,19 @@ def generate_trust_ids(users_to_delete):
     lines = users_to_delete.readlines()
     total = len(lines)
     count = 0
+    if 'TRUSTEE_USER' in env:
+        trustee = env['TRUSTEE_USER']
+    else:
+        trustee = TRUSTEE
+
     for user in lines:
         user = user.strip()
         if user == '':
             continue
         try:
             count += 1
-            (username, trust_id) = trust_factory.create_trust_admin(user, TRUSTEE)
+            (username, trust_id) = trust_factory.create_trust_admin(
+                user, trustee)
             print >>users_trusted_ids, username + ',' + trust_id
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))

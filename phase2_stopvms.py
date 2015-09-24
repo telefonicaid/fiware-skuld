@@ -68,6 +68,11 @@ if os.path.exists('users_trusted_ids.txt'):
         msg = 'TRUSTEE_PASSWORD must be defined, either in settings or environ'
         raise Exception(msg)
 
+    if 'TRUSTEE_USER' in env:
+        trustee = env['TRUSTEE_USER']
+    else:
+        trustee = TRUSTEE
+
     lines = users_trusted_ids.readlines()
     user_count = 0
     user_total = len(lines)
@@ -79,7 +84,7 @@ if os.path.exists('users_trusted_ids.txt'):
 
         try:
             user_resources = UserResources(
-                TRUSTEE, password, trust_id=trust_id)
+                trustee, password, trust_id=trust_id)
             vms = user_resources.get_resources_dict()['vms']
             dict_vms[user] = vms
             stopped = user_resources.stop_tenant_vms()
