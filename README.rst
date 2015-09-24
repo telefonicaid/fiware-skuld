@@ -56,7 +56,7 @@ The automatic way: cron script
 ------------------------------
 
 This is the recommended use of the script. Every day, the script notifies the
-users next to expire (only once), and change the account type and delete the
+users close to expire (only once), and change the account type and delete the
 resources of the users already expired.
 
 The notification, a remainder of the expiration day, is sent to users that will
@@ -163,7 +163,7 @@ following file can be created as */etc/cron.daily/fiware-skuld*
   export TRUSTEE_PASSWORD=<trustee_password>
   /root/fiware-skulds/cron-script.sh
 
-It is recommended to do this file only readable by the root user, because it
+It is recommended to make this file only readable by the root user, because it
 contains passwords:
 
 .. code::
