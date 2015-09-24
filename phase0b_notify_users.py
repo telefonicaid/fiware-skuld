@@ -35,6 +35,7 @@ from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 from osclients import osclients
 from settings.settings import HORIZON_ENDPOINT
 import utils.log
+import sys
 
 
 class Notifier(object):
@@ -96,6 +97,7 @@ if __name__ == '__main__':
         users = open('users_to_notify.txt')
     except Exception:
         logger.error('The users_to_notify.txt file must exists')
+        sys.exit(-1)
 
     list_users = list()
     for line in users.readlines():
