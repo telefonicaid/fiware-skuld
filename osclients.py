@@ -31,12 +31,24 @@ from keystoneclient import session
 from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
-from neutronclient.v2_0 import client as neutronclient
-from novaclient import client as novaclient
-from cinderclient.v2 import client as cinderclient
-from glanceclient import client as glanceclient
-from swiftclient import client as swiftclient
-
+if 'OSCLIENTS_MODULES' not in env:
+    from neutronclient.v2_0 import client as neutronclient
+    from novaclient import client as novaclient
+    from cinderclient.v2 import client as cinderclient
+    from glanceclient import client as glanceclient
+    from swiftclient import client as swiftclient
+else:
+    modules = set(mod.strip() for mod in env['OSCLIENTS_MODULES'].split(','))
+    if 'neutron' in modules:
+        from neutronclient.v2_0 import client as neutronclient
+    if 'nova' in modules:
+        from novaclient import client as novaclient
+    if 'cinder' in modules:
+        from cinderclient.v2 import client as cinderclient
+    if 'glance' in modules:
+        from glanceclient import client as glanceclient
+    if 'swift' in modules:
+        from swiftclient import client as swiftclient
 
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
