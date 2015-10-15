@@ -2,6 +2,8 @@
 FIWARE Trial Users Management
 =============================
 
+| |Build Status|
+
 .. contents:: :local:
 
 Introduction
@@ -396,6 +398,10 @@ License
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
+.. IMAGES
+
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=feature%2FCLAUDIA-5585_configuring_Travis
+   :target: https://travis-ci.org/telefonicaid/fiware-skuld
 
 .. REFERENCES
 
