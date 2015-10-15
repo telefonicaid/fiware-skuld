@@ -400,8 +400,9 @@ License
 
 .. IMAGES
 
-.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=feature%2FCLAUDIA-5585_configuring_Travis
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-skuld
+   :alt: Build status
 
 .. REFERENCES
 
