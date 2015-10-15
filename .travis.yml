@@ -8,4 +8,5 @@ install:
   - pip install -r requirements_dev.txt
 
 # command to run tests
-script: nosetests --with-coverage --cover-package=./ --cover-xml --with-xunit --exe
+script:
+  nosetests --with-coverage --cover-package=./ --cover-xml --with-xunit --exe
