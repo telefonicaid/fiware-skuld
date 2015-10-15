@@ -186,7 +186,7 @@ be set:
 * MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
   Default is 14 days. It is very important that this parameter has the right
   value, otherwise accounts could be deleted prematurely.
-* LOGGING_PATH. Default value, ``/var/log/fiware-trialusermanagement``, requires
+* LOGGING_PATH. Default value, ``/var/log/fiware-skuld``, requires
   permission to write on ``/var/log``
 * TRIAL_ROLE_ID. Probably this value does not have to be changed when using
   FiwareLab. It is the ID of the trial account type.

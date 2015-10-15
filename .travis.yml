@@ -7,6 +7,10 @@ install:
   - pip install -r requirements.txt
   - pip install -r requirements_dev.txt
 
+before_script:
+  - sudo touch /var/log/fiware-skuld.log
+  - sudo chown travis /var/log/fiware-skuld.log
+
 # command to run tests
 script:
   nosetests --with-coverage --cover-package=./ --cover-xml --with-xunit --exe
