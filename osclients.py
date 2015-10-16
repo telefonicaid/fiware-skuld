@@ -31,24 +31,8 @@ from keystoneclient import session
 from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
-if 'OSCLIENTS_MODULES' not in env:
-    from neutronclient.v2_0 import client as neutronclient
-    from novaclient import client as novaclient
-    from cinderclient.v2 import client as cinderclient
-    from glanceclient import client as glanceclient
-    from swiftclient import client as swiftclient
-else:
-    modules = set(mod.strip() for mod in env['OSCLIENTS_MODULES'].split(','))
-    if 'neutron' in modules:
-        from neutronclient.v2_0 import client as neutronclient
-    if 'nova' in modules:
-        from novaclient import client as novaclient
-    if 'cinder' in modules:
-        from cinderclient.v2 import client as cinderclient
-    if 'glance' in modules:
-        from glanceclient import client as glanceclient
-    if 'swift' in modules:
-        from swiftclient import client as swiftclient
+from importlib import import_module
+
 
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
@@ -59,7 +43,7 @@ class OpenStackClients(object):
     call set_keystone_version
     """
 
-    def __init__(self, auth_url=None):
+    def __init__(self, auth_url=None, modules='auto'):
         """Constructor of the class. The Keystone URL may be provided,
         otherwise it is obtained from the environment (OS_AUTH_URL)
 
@@ -74,6 +58,12 @@ class OpenStackClients(object):
           OS_TENANT_NAME/OS_TENANT_ID must not be provided.
 
         :param auth_url: The keystone URL (OS_AUTH_URL if omitted)
+        :param modules: This parameter refers to the modules to import (nova,
+        glance, cinder, swift, neutron; keystone is not considered a module
+         because it is always loaded). It can be:
+          auto: modules are imported automatically when a client is requested
+          all: import all the available modules
+          <csv>: a list of modules to import (e.g. neutron, nova, glance)
         :return: nothing
         """
         self.use_v3 = True
@@ -84,8 +74,8 @@ class OpenStackClients(object):
             self.auth_url = env['OS_AUTH_URL']
 
         if not self.auth_url:
-            raise(
-                'auth_url parameter must be provided or OS_AHT_URL be defined')
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
 
         self._session_v2 = None
         self._session_v3 = None
@@ -121,6 +111,82 @@ class OpenStackClients(object):
             self.__trust_id = env['OS_TRUST_ID']
         else:
             self.__trust_id = None
+
+        # dynamic imports
+
+        self._modneutron = None
+        self._modglance = None
+        self._modswift = None
+        self._modnova = None
+        self._modcinder = None
+        self._autoloadmodules = False
+
+        modules = modules.strip()
+        if modules == 'all':
+            self._load_swift_module()
+            self._load_neutron_module()
+            self._load_glance_module()
+            self._load_cinder_module()
+            self._load_nova_module()
+        elif modules == 'auto':
+            self._autoloadmodules = True
+        else:
+            for module in modules.split(','):
+                module = module.strip()
+                if module == 'glance':
+                    self._load_glance_module()
+                elif module == 'nova':
+                    self._load_nova_module()
+                elif module == 'neutron':
+                    self._load_neutron_module()
+                elif module == 'cinder':
+                    self._load_cinder_module()
+                elif module == 'swift':
+                    self._load_swift_module()
+                elif module == 'keystone' or module == '':
+                    # Do nothing, keystone is allways imported
+                    pass
+                else:
+                    m = 'Module ' + module + ' is unknown'
+                    raise Exception(m)
+
+    def _load_swift_module(self):
+        """dynamic import of swift module"""
+        if not self._modswift:
+            self._modswift = import_module('swiftclient.client')
+
+    def _load_glance_module(self):
+        """dynamic import of glance module"""
+        if not self._modglance:
+            self._modglance = import_module('glanceclient.client')
+
+    def _load_neutron_module(self):
+        """dynamic import of neutron module"""
+        if not self._modneutron:
+            self._modneutron = import_module('neutronclient.v2_0.client')
+
+    def _load_cinder_module(self):
+        """dynamic import of cinder module"""
+        if not self._modcinder:
+            self._modcinder = import_module('cinderclient.v2.client')
+
+    def _load_nova_module(self):
+        """dynamic import of nova module"""
+        if not self._modnova:
+            self._modnova = import_module('novaclient.client')
+
+    def _check_imported(self, module):
+        """
+        Raise exception if module was not imported
+        :param module: the module name
+        :return: nothing
+        """
+        if not (module == 'nova' and self._modnova or
+                module == 'glance' and self._modglance or
+                module == 'cinder' and self._modcinder or
+                module == 'neutron' and self._modneutron or
+                module == 'swift' and self._modswift):
+            raise Exception('Module ' + module + ' was not loaded')
 
     def set_credential(self, username, password, tenant_name=None,
                        tenant_id=None, trust_id=None):
@@ -310,7 +376,11 @@ class OpenStackClients(object):
 
         :return: a neutron client valid for a region.
         """
-        return neutronclient.Client(
+        if self._autoloadmodules:
+            self._load_neutron_module()
+
+        self._check_imported('neutron')
+        return self._modneutron.Client(
             session=self.get_session(), region_name=self.region)
 
     def get_novaclient(self):
@@ -327,7 +397,11 @@ class OpenStackClients(object):
 
         :return: a nova client valid for a region.
         """
-        return novaclient.Client(
+        if self._autoloadmodules:
+            self._load_nova_module()
+
+        self._check_imported('nova')
+        return self._modnova.Client(
             2, region_name=self.region, session=self.get_session())
 
     def get_cinderclient(self):
@@ -344,8 +418,12 @@ class OpenStackClients(object):
 
         :return: a cinder client valid for a region.
         """
-        return cinderclient.Client(session=self.get_session(),
-                                   region_name=self.region)
+        if self._autoloadmodules:
+            self._load_cinder_module()
+
+        self._check_imported('cinder')
+        return self._modcinder.Client(session=self.get_session(),
+                                      region_name=self.region)
 
     def get_cinderclientv1(self):
         """Get a cinder clientv1. The API is older than the v2 provided with
@@ -365,10 +443,13 @@ class OpenStackClients(object):
 
         :return: a cinder client valid for a region.
         """
-        return cinderclient.Client(session=self.get_session(),
-                                   region_name=self.region,
-                                   service_type='volume')
+        if self._autoloadmodules:
+            self._load_cinder_module()
 
+        self._check_imported('cinder')
+        return self._modcinder.Client(session=self.get_session(),
+                                      region_name=self.region,
+                                      service_type='volume')
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region
@@ -385,18 +466,29 @@ class OpenStackClients(object):
         :return: a glance client valid for a region.
         """
 
+        if self._autoloadmodules:
+            self._load_glance_module()
+
+        self._check_imported('glance')
         session = self.get_session()
         token = session.get_token()
         endpoint = session.get_endpoint(service_type='image',
                                         region_name=self.region)
-        return glanceclient.Client(version='1', endpoint=endpoint, token=token)
+        return self._modglance.Client(
+            version='1', endpoint=endpoint, token=token)
 
     def get_swiftclient(self):
+        if self._autoloadmodules:
+            self._load_swift_module()
+
+        self._check_imported('swift')
+
         session = self.get_session()
         token = session.get_token()
         endpoint = self.get_public_endpoint('object-store', self.region)
         token = session.get_token()
-        return swiftclient.Connection(preauthurl=endpoint, preauthtoken=token)
+        return self._modswift.Connection(
+            preauthurl=endpoint, preauthtoken=token)
 
     def get_keystoneclient(self):
         """Get a keystoneclient. A keystone server can be shared among several
