@@ -276,6 +276,14 @@ The procedure works by invoking the scripts corresponding to different phases:
      anymore. This script requires the admin credential. It generates the file
      imagesinuse.pickle.
 
+-phase2c: ``phase2c_deletespecialports.py``. This script can be needed if
+     a user subnet was added to the router of other tenant by an administrator
+     (e.g. to connect to a external network). In this case, a port is created
+     that only can be deleted removing the interface by an administrator.
+     Therefore, this script is invoked by an administrator and delete ports
+     than the phase3 script will not be able to delete because the phase3 script
+     do not use admin credentials.
+
 -phase3: ``phase3_delete.py``. This is the point of no return. Resources are
      removed and cannot be recovered. This script does not require the admin
      credential, because it applies either the user's credential from
