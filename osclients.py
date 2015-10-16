@@ -33,6 +33,15 @@ from keystoneclient.v3 import client as keystonev3
 
 from importlib import import_module
 
+# OpenStack modules available with their imports
+modules_available = {
+    'glance': 'glanceclient.client',
+    'nova': 'novaclient.client',
+    'cinder': 'cinderclient.v2.client',
+    'neutron': 'neutronclient.v2_0.client',
+    'swift': 'swiftclient.client'
+}
+
 
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
@@ -66,6 +75,8 @@ class OpenStackClients(object):
           <csv>: a list of modules to import (e.g. neutron, nova, glance)
         :return: nothing
         """
+        global modules_available
+
         self.use_v3 = True
 
         if auth_url:
@@ -114,79 +125,44 @@ class OpenStackClients(object):
 
         # dynamic imports
 
-        self._modneutron = None
-        self._modglance = None
-        self._modswift = None
-        self._modnova = None
-        self._modcinder = None
+        self._modules_imported = dict()
         self._autoloadmodules = False
 
         modules = modules.strip()
         if modules == 'all':
-            self._load_swift_module()
-            self._load_neutron_module()
-            self._load_glance_module()
-            self._load_cinder_module()
-            self._load_nova_module()
+            for module_name in modules_available.keys():
+                self._modules_imported[module_name] = \
+                    import_module(modules_available[module_name])
         elif modules == 'auto':
             self._autoloadmodules = True
         else:
             for module in modules.split(','):
                 module = module.strip()
-                if module == 'glance':
-                    self._load_glance_module()
-                elif module == 'nova':
-                    self._load_nova_module()
-                elif module == 'neutron':
-                    self._load_neutron_module()
-                elif module == 'cinder':
-                    self._load_cinder_module()
-                elif module == 'swift':
-                    self._load_swift_module()
-                elif module == 'keystone' or module == '':
-                    # Do nothing, keystone is allways imported
-                    pass
-                else:
+
+                if module == 'keystone' or module == '':
+                    continue
+                if module not in modules_available.keys():
                     m = 'Module ' + module + ' is unknown'
                     raise Exception(m)
 
-    def _load_swift_module(self):
-        """dynamic import of swift module"""
-        if not self._modswift:
-            self._modswift = import_module('swiftclient.client')
+                self._modules_imported[module] = \
+                    import_module(modules_available[module])
 
-    def _load_glance_module(self):
-        """dynamic import of glance module"""
-        if not self._modglance:
-            self._modglance = import_module('glanceclient.client')
-
-    def _load_neutron_module(self):
-        """dynamic import of neutron module"""
-        if not self._modneutron:
-            self._modneutron = import_module('neutronclient.v2_0.client')
-
-    def _load_cinder_module(self):
-        """dynamic import of cinder module"""
-        if not self._modcinder:
-            self._modcinder = import_module('cinderclient.v2.client')
-
-    def _load_nova_module(self):
-        """dynamic import of nova module"""
-        if not self._modnova:
-            self._modnova = import_module('novaclient.client')
-
-    def _check_imported(self, module):
+    def _require_module(self, module_name):
         """
-        Raise exception if module was not imported
-        :param module: the module name
+        Require module. If self._autoloadmodules, load it if not available.
+        If module is not present, raise and exception.
+        :param module_name: the module to load
         :return: nothing
         """
-        if not (module == 'nova' and self._modnova or
-                module == 'glance' and self._modglance or
-                module == 'cinder' and self._modcinder or
-                module == 'neutron' and self._modneutron or
-                module == 'swift' and self._modswift):
-            raise Exception('Module ' + module + ' was not loaded')
+        if module_name in self._modules_imported:
+            return
+
+        if self._autoloadmodules:
+            self._modules_imported[module_name] = \
+                import_module(modules_available[module_name])
+        else:
+            raise Exception('Module ' + module_name + ' was not loaded')
 
     def set_credential(self, username, password, tenant_name=None,
                        tenant_id=None, trust_id=None):
@@ -376,11 +352,8 @@ class OpenStackClients(object):
 
         :return: a neutron client valid for a region.
         """
-        if self._autoloadmodules:
-            self._load_neutron_module()
-
-        self._check_imported('neutron')
-        return self._modneutron.Client(
+        self._require_module('neutron')
+        return self._modules_imported['neutron'].Client(
             session=self.get_session(), region_name=self.region)
 
     def get_novaclient(self):
@@ -397,11 +370,8 @@ class OpenStackClients(object):
 
         :return: a nova client valid for a region.
         """
-        if self._autoloadmodules:
-            self._load_nova_module()
-
-        self._check_imported('nova')
-        return self._modnova.Client(
+        self._require_module('nova')
+        return self._modules_imported['nova'].Client(
             2, region_name=self.region, session=self.get_session())
 
     def get_cinderclient(self):
@@ -418,12 +388,9 @@ class OpenStackClients(object):
 
         :return: a cinder client valid for a region.
         """
-        if self._autoloadmodules:
-            self._load_cinder_module()
-
-        self._check_imported('cinder')
-        return self._modcinder.Client(session=self.get_session(),
-                                      region_name=self.region)
+        self._require_module('cinder')
+        return self._modules_imported['cinder'].Client(
+            session=self.get_session(), region_name=self.region)
 
     def get_cinderclientv1(self):
         """Get a cinder clientv1. The API is older than the v2 provided with
@@ -443,13 +410,10 @@ class OpenStackClients(object):
 
         :return: a cinder client valid for a region.
         """
-        if self._autoloadmodules:
-            self._load_cinder_module()
-
-        self._check_imported('cinder')
-        return self._modcinder.Client(session=self.get_session(),
-                                      region_name=self.region,
-                                      service_type='volume')
+        self._require_module('cinder')
+        return self._modules_imported['cinder'].Client(
+            session=self.get_session(), region_name=self.region,
+            service_type='volume')
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region
@@ -466,28 +430,21 @@ class OpenStackClients(object):
         :return: a glance client valid for a region.
         """
 
-        if self._autoloadmodules:
-            self._load_glance_module()
-
-        self._check_imported('glance')
+        self._require_module('glance')
         session = self.get_session()
         token = session.get_token()
         endpoint = session.get_endpoint(service_type='image',
                                         region_name=self.region)
-        return self._modglance.Client(
+        return self._modules_imported['glance'].Client(
             version='1', endpoint=endpoint, token=token)
 
     def get_swiftclient(self):
-        if self._autoloadmodules:
-            self._load_swift_module()
-
-        self._check_imported('swift')
-
+        self._require_module('swift')
         session = self.get_session()
         token = session.get_token()
         endpoint = self.get_public_endpoint('object-store', self.region)
         token = session.get_token()
-        return self._modswift.Connection(
+        return self._modules_imported['swift'].Connection(
             preauthurl=endpoint, preauthtoken=token)
 
     def get_keystoneclient(self):
