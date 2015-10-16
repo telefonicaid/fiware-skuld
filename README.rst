@@ -2,6 +2,8 @@
 FIWARE Trial Users Management
 =============================
 
+| |Build Status|
+
 .. contents:: :local:
 
 Introduction
@@ -186,7 +188,7 @@ be set:
 * MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
   Default is 14 days. It is very important that this parameter has the right
   value, otherwise accounts could be deleted prematurely.
-* LOGGING_PATH. Default value, ``/var/log/fiware-trialusermanagement``, requires
+* LOGGING_PATH. Default value, ``/var/log/fiware-skuld``, requires
   permission to write on ``/var/log``
 * TRIAL_ROLE_ID. Probably this value does not have to be changed when using
   FiwareLab. It is the ID of the trial account type.
@@ -396,6 +398,11 @@ License
 
 \(c) 2015 Telefónica I+D, Apache License 2.0
 
+.. IMAGES
+
+.. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=develop
+   :target: https://travis-ci.org/telefonicaid/fiware-skuld
+   :alt: Build status
 
 .. REFERENCES
 

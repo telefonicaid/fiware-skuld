@@ -22,10 +22,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-# TrialUserManagement settings.
+# Skuld settings.
 __author__ = 'fla'
 
-LOGGING_PATH = u'/var/log/fiware-trialusermanagement'
+LOGGING_PATH = u'/var/log/fiware-skuld'
 TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
 BASIC_ROLE_ID = "0bcb7fa6e85046cb9e89ded5656b192b"
 KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
