@@ -84,6 +84,8 @@ class OpenStackClients(object):
             self.auth_url = auth_url
         elif 'OS_AUTH_URL' in env:
             self.auth_url = env['OS_AUTH_URL']
+        else:
+            self.auth_url = None
 
         self._session_v2 = None
         self._session_v3 = None
