@@ -54,7 +54,8 @@ class OpenStackClients(object):
 
     def __init__(self, auth_url=None, modules='auto'):
         """Constructor of the class. The Keystone URL may be provided,
-        otherwise it is obtained from the environment (OS_AUTH_URL)
+        otherwise it is obtained from the environment (OS_AUTH_URL) or must
+        be provided later.
 
         The fields with the user, password, tenant_id/tenant_name/trust_id and
         region are initialized with the environment variables if present, but
@@ -83,7 +84,6 @@ class OpenStackClients(object):
             self.auth_url = auth_url
         elif 'OS_AUTH_URL' in env:
             self.auth_url = env['OS_AUTH_URL']
-
 
         self._session_v2 = None
         self._session_v3 = None
@@ -271,6 +271,10 @@ class OpenStackClients(object):
         if self._session_v2:
             return self._session_v2
 
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
+
         if self.auth_url.endswith('/v3/'):
             auth_url = self.auth_url[0:-2] + '2.0'
         elif self.auth_url.endswith('/v3'):
@@ -300,12 +304,15 @@ class OpenStackClients(object):
 
     def get_session_v3(self):
         """Get a v3 session. See get_session for more details about sessions
-
         :return: a session object
         """
 
         if self._session_v3:
             return self._session_v3
+
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
 
         if self.auth_url.endswith('/v2.0/'):
             auth_url = self.auth_url[0:-4] + '3'
@@ -426,7 +433,6 @@ class OpenStackClients(object):
 
         :return: a glance client valid for a region.
         """
-
         self._require_module('glance')
         session = self.get_session()
         token = session.get_token()
@@ -611,7 +617,6 @@ class OpenStackClients(object):
           saved session <-> current session), if False, invalidate
            the current session and restore the saved session.
         """
-
         if swap:
             tmp_v2 = self._saved_session_v2
             tmp_v3 = self._saved_session_v3
