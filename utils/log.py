@@ -31,15 +31,15 @@ from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-#LOGFILE = settings.LOGGING_PATH + '/TrialUserManagement.log'
-LOGFILE = 'TrialUserManagement.log'
+#LOGFILE = settings.LOGGING_PATH + '/Skuld.log'
+LOGFILE = 'fiware-skuld.log'
 
 if not os.path.exists(settings.LOGGING_PATH):
     os.makedirs(settings.LOGGING_PATH)
 
 log_handler = RotatingFileHandler(LOGFILE, maxBytes=1048576, backupCount=5)
 
-formatter = logging.Formatter('%(asctime)s %(levelname)s TrialUserManagement [-] %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)s Skuld [-] %(message)s')
 log_handler.setFormatter(formatter)
 
 logger.addHandler(log_handler)
