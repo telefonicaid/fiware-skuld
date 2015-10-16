@@ -13,4 +13,4 @@ before_script:
 
 # command to run tests
 script:
-  nosetests --with-coverage --cover-package=./ --cover-xml --with-xunit --exe
+  nosetests --with-coverage --cover-package=./ --exe
