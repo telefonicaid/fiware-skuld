@@ -167,12 +167,34 @@ class NeutronResources(object):
             ports.append(port['id'])
         return ports
 
+    def delete_port(self, port_id):
+        """command to delete a specific port. This method is intended for
+        the admin user, to delete a port that a user can not delete, because
+        it is associated to a router owned by another tenant
+
+        :param port_id: the port to delete
+        :return:
+        """
+        port = self.neutron.show_port(port_id)['port']
+        if port['device_owner'].startswith('network:router_interface'):
+            subnet = port['fixed_ips'][0]['subnet_id']
+            body = {'subnet_id': subnet}
+            self.neutron.remove_interface_router(
+                router=port['device_id'], body=body)
+        else:
+            self.neutron.delete_port(port_id)
+
+
     def delete_tenant_ports(self):
         """delete all the tenant's network ports"""
         for port in self.neutron.list_ports()['ports']:
             if port['tenant_id'] != self.tenant_id:
                 continue
-            if port['device_owner'] == 'network:router_interface':
+            # check if port is a interface of a router:
+            # owner is network:router_interface or
+            #          network:router_interface_distributed
+
+            if port['device_owner'].startswith('network:router_interface'):
                 subnet = port['fixed_ips'][0]['subnet_id']
                 body = {'subnet_id': subnet}
                 self.neutron.remove_interface_router(

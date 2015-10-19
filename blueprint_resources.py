@@ -27,6 +27,7 @@ author = 'chema'
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
+from urllib import quote
 
 import xml.etree.ElementTree as et
 import logging
@@ -95,7 +96,8 @@ class BluePrintResources(object):
         err_msg = 'Deleting blueprint instance {1} from tenant {0} failed. '\
                   'Reason: {2}'
         try:
-            response = requests.delete(self.url_blue + '/' + blueinstance_id,
+            response = requests.delete(self.url_blue + '/' +
+                                       quote(blueinstance_id),
                                        headers=self.headers, verify=False)
         except Exception, e:
             msg = err_msg.format(self.tenant_id, blueinstance_id, str(e))
@@ -154,7 +156,8 @@ class BluePrintResources(object):
         err_msg = 'Deleting blueprint template {1} from tenant {0} failed. '\
                   'Reason: {2}'
         try:
-            response = requests.delete(self.url_temp + '/' + environment_id,
+            response = requests.delete(self.url_temp + '/' +
+                                       quote(environment_id),
                                        headers=self.headers, verify=False)
         except Exception, e:
             msg = err_msg.format(self.tenant_id, environment_id, str(e))

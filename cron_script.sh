@@ -18,13 +18,17 @@ if [ -f users_to_delete.txt ] ; then
 ./phase1_generate_trust_ids.py
 ./phase2_stopvms.py
 rm users_trusted_ids.txt
+
 fi
 
 # delete resources of users who expired days ago (i.e. accounts that were
 # processed by the phase2_stopvms some days ago)
 if [ -f users_to_delete_phase3.txt ] ; then
 ./phase1_generate_trust_ids.py users_to_delete_phase3.txt
-rm users_to_delete_phase3.txt
+# remove special ports
+mv users_to_delete_phase3.txt users_to_delete.txt
+./phase2c_deletespecialports.py
+rm users_to_delete.txt
 ./phase3_delete.py
 rm users_trusted_ids.txt
 fi

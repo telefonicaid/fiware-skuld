@@ -220,11 +220,6 @@ class UserResources(object):
 
         # security group, volumes, network ports, images, floating ips,
         # must be deleted after VMs
-        try:
-            self.nova.delete_tenant_security_groups()
-        except Exception, e:
-            msg = 'Deletion of security groups failed. Reason: '
-            self.logger.error(msg + str(e))
 
         # self.glance.delete_tenant_images()
         try:
@@ -257,6 +252,12 @@ class UserResources(object):
             self.neutron.delete_tenant_securitygroups()
         except Exception, e:
             msg = 'Deletion of network security groups failed. Reason: '
+            self.logger.error(msg + str(e))
+
+        try:
+            self.nova.delete_tenant_security_groups()
+        except Exception, e:
+            msg = 'Deletion of security groups failed. Reason: '
             self.logger.error(msg + str(e))
 
         try:

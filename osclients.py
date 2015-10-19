@@ -54,7 +54,8 @@ class OpenStackClients(object):
 
     def __init__(self, auth_url=None, modules='auto'):
         """Constructor of the class. The Keystone URL may be provided,
-        otherwise it is obtained from the environment (OS_AUTH_URL)
+        otherwise it is obtained from the environment (OS_AUTH_URL) or must
+        be provided later.
 
         The fields with the user, password, tenant_id/tenant_name/trust_id and
         region are initialized with the environment variables if present, but
@@ -81,12 +82,10 @@ class OpenStackClients(object):
 
         if auth_url:
             self.auth_url = auth_url
-        else:
+        elif 'OS_AUTH_URL' in env:
             self.auth_url = env['OS_AUTH_URL']
-
-        if not self.auth_url:
-            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
-            raise Exception(m)
+        else:
+            self.auth_url = None
 
         self._session_v2 = None
         self._session_v3 = None
@@ -151,7 +150,7 @@ class OpenStackClients(object):
     def _require_module(self, module_name):
         """
         Require module. If self._autoloadmodules, load it if not available.
-        If module is not present, raise and exception.
+        If module is not present, raise an exception.
         :param module_name: the module to load
         :return: nothing
         """
@@ -167,7 +166,7 @@ class OpenStackClients(object):
     def set_credential(self, username, password, tenant_name=None,
                        tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
-        exists, it is invalidates. It is possible to save and then restore the
+        exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
@@ -274,6 +273,10 @@ class OpenStackClients(object):
         if self._session_v2:
             return self._session_v2
 
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
+
         if self.auth_url.endswith('/v3/'):
             auth_url = self.auth_url[0:-2] + '2.0'
         elif self.auth_url.endswith('/v3'):
@@ -303,12 +306,15 @@ class OpenStackClients(object):
 
     def get_session_v3(self):
         """Get a v3 session. See get_session for more details about sessions
-
         :return: a session object
         """
 
         if self._session_v3:
             return self._session_v3
+
+        if not self.auth_url:
+            m = 'auth_url parameter must be provided or OS_AUTH_URL be defined'
+            raise Exception(m)
 
         if self.auth_url.endswith('/v2.0/'):
             auth_url = self.auth_url[0:-4] + '3'
@@ -429,7 +435,6 @@ class OpenStackClients(object):
 
         :return: a glance client valid for a region.
         """
-
         self._require_module('glance')
         session = self.get_session()
         token = session.get_token()
@@ -441,7 +446,6 @@ class OpenStackClients(object):
     def get_swiftclient(self):
         self._require_module('swift')
         session = self.get_session()
-        token = session.get_token()
         endpoint = self.get_public_endpoint('object-store', self.region)
         token = session.get_token()
         return self._modules_imported['swift'].Connection(
@@ -607,17 +611,28 @@ class OpenStackClients(object):
         self._session_v2 = None
         self._session_v3 = None
 
-    def restore_session(self):
+    def restore_session(self, swap=False):
         """Restore the session saved with preserve_session.
 
-        See preserve_session for more details"""
-
-        if self._session_v2 and self._session_v2 != self._saved_session_v2:
-            self._session_v2.invalidate()
-        if self._session_v3 and self._session_v3 != self._saved_session_v3:
-            self._session_v3.invalidate()
-        self._session_v2 = self._saved_session_v2
-        self._session_v3 = self._saved_session_v3
+        See preserve_session for more details
+        :param swap: if True, save the current session (i.e. interchange
+          saved session <-> current session), if False, invalidate
+           the current session and restore the saved session.
+        """
+        if swap:
+            tmp_v2 = self._saved_session_v2
+            tmp_v3 = self._saved_session_v3
+            self._saved_session_v2 = self._session_v2
+            self._saved_session_v3 = self._session_v3
+            self._session_v2 = tmp_v2
+            self._session_v3 = tmp_v3
+        else:
+            if self._session_v2 and self._session_v2 != self._saved_session_v2:
+                self._session_v2.invalidate()
+            if self._session_v3 and self._session_v3 != self._saved_session_v3:
+                self._session_v3.invalidate()
+            self._session_v2 = self._saved_session_v2
+            self._session_v3 = self._saved_session_v3
 
 
 # create an object. This allows using this methods easily with
