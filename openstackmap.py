@@ -532,9 +532,10 @@ class OpenStackMap(object):
         if auto_load:
             self.load_all()
 
-    def preload_regions(self, regions=None):
-        """Method to preload the data of the specified regions
-         (all the available regions in a federation if regions is None)"""
+    def preload_regions(self, regions=None, all_regions_but=None):
+        """Method to preload the data of the specified regions. If
+        regions is None, use all the available regions in the federation, but
+        the specified in all_regions_but"""
 
         regions_compute = self.osclients.get_regions('compute')
         regions_network = self.osclients.get_regions('network')
@@ -543,9 +544,13 @@ class OpenStackMap(object):
         if not regions:
             all_regions = regions_compute.union(regions_network).union(
                 regions_image).union(regions_volume)
-            all_regions.remove(self.osclients.region)
-            regions = list(all_regions)
-            regions.append(self.osclients.region)
+            if all_regions_but:
+                all_regions.difference_update(all_regions_but)
+            if self.osclients.region in all_regions:
+                # put current region the last, because change_region call
+                all_regions.remove(self.osclients.region)
+                regions = list(all_regions)
+                regions.append(self.osclients.region)
 
         for region in regions:
             try:
