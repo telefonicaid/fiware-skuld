@@ -30,7 +30,7 @@ import cPickle as pickle
 import os
 import time
 from os import environ as env
-
+import logging
 
 class OpenStackMap(object):
     """
@@ -53,7 +53,7 @@ class OpenStackMap(object):
 
     def __init__(
             self, persistence_dir='~/openstackmap', region=None, auth_url=None,
-            objects_strategy=USE_CACHE_OBJECTS):
+            objects_strategy=USE_CACHE_OBJECTS, auto_load=True):
         """
         Constructor
         :param persistence_dir: The path where the data is saved. Ignored if
@@ -72,19 +72,16 @@ class OpenStackMap(object):
            objects are cached: the new version replace the old one.
          * USE_CACHE_OBJECTS is using the objects converted to dictionaries. If
            a cached copy of the objects are available, it is used.
-
+        :param auto_load: if True, invoke self.load_all()
          Note that neutron objects returned by the API are already dictionaries
         """
+
+        self.logger = logging.getLogger(__name__)
 
         if auth_url:
             self.osclients = OpenStackClients(auth_url=auth_url)
         else:
             self.osclients = OpenStackClients()
-
-        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
-            self.osclients.override_endpoint(
-                'identity', self.osclients.region, 'admin',
-                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         if region:
             self.osclients.set_region(region)
@@ -94,6 +91,11 @@ class OpenStackMap(object):
                                 'OS_REGION_NAME variable must be defined.')
             else:
                 region = env['OS_REGION_NAME']
+
+        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
+            self.osclients.override_endpoint(
+                'identity', self.osclients.region, 'admin',
+                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         self.objects_strategy = objects_strategy
 
@@ -113,6 +115,8 @@ class OpenStackMap(object):
                 os.mkdir(self.pers_region)
 
         self._init_resource_maps()
+        if auto_load:
+            self.load_all()
 
     def _init_resource_maps(self):
         """init all the resources that will be available
@@ -492,17 +496,68 @@ class OpenStackMap(object):
 
     def load_all(self):
         """load all data"""
-        self.load_nova()
-        self.load_neutron()
-        self.load_glance()
-        self.load_cinder()
+        region = self.osclients.region
+        if region in self.osclients.get_regions('compute'):
+            self.load_nova()
+
+        if region in self.osclients.get_regions('network'):
+            self.load_neutron()
+
+        if region in self.osclients.get_regions('image'):
+            self.load_glance()
+
+        if region in self.osclients.get_regions('volume'):
+            self.load_cinder()
+
         self.load_keystone()
 
-    def change_region(self, region):
-        """change region and clean maps"""
+    def change_region(self, region, auto_load=True):
+        """change region and clean maps. Optionally load the maps.
+        :param region: the new region
+        :param auto_load: True to invoke load_all
+        :return: nothing
+        """
         self.pers_region = self.persistence_dir + '/' + region
         if not os.path.exists(self.pers_region) and self.objects_strategy\
            not in (OpenStackMap.DIRECT_OBJECTS, OpenStackMap.NO_CACHE_OBJECTS):
             os.mkdir(self.pers_region)
         self.osclients.set_region(region)
         self._init_resource_maps()
+        if auto_load:
+            self.load_all()
+
+    def preload_all_regions(self):
+        """Method to preload the data of all the available regions in a
+        federation"""
+
+        regions_compute = self.osclients.get_regions('compute')
+        regions_network = self.osclients.get_regions('network')
+        regions_image = self.osclients.get_regions('image')
+        regions_volume = self.osclients.get_regions('volume')
+        all_regions = regions_compute.union(regions_network).union(
+            regions_image).union(regions_volume)
+
+        all_regions.remove(self.osclients.region)
+        regions = list(all_regions)
+        regions.append(self.osclients.region)
+        for region in regions:
+            try:
+                self.logger.info('Creating map of region ' + region)
+                self.change_region(region, False)
+                if region in regions_compute:
+                    self.load_nova()
+                if region in regions_network:
+                    self.load_neutron()
+                if region in regions_image:
+                    self.load_glance()
+                if region in regions_volume:
+                    self.load_cinder()
+            except Exception, e:
+                msg = 'Failed the creation of the map of {0}. Cause: {1}'
+                self.logger.error(msg.format(region, str(e)))
+                # Remove dir if it exists and is empty.
+                dir = os.path.join(self.persistence_dir, region)
+                if os.path.isdir(dir) and len(os.listdir(dir)) == 0:
+                    os.rmdir(dir)
+
+        self.load_keystone()
