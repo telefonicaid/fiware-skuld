@@ -51,6 +51,10 @@ class OpenStackMap(object):
     # objects_strategy is DIRECT_OBJECTS
     use_wrapper = True
 
+    resources_region = ['vms', 'images', 'routers', 'networks', 'subnets',
+                 'ports', 'floatingips', 'security_groups',
+                 'volumes', 'volume_backups', 'volume_snapshots']
+
     def __init__(
             self, persistence_dir='~/openstackmap', region=None, auth_url=None,
             objects_strategy=USE_CACHE_OBJECTS, auto_load=True):
@@ -117,6 +121,9 @@ class OpenStackMap(object):
         self._init_resource_maps()
         if auto_load:
             self.load_all()
+
+        self.region_map = dict()
+
 
     def _init_resource_maps(self):
         """init all the resources that will be available
@@ -293,7 +300,6 @@ class OpenStackMap(object):
         self.tenants = self._convert(tenants)
         self.tenants_by_name = self._convert(tenants_by_name)
         self.roles_a = self._convert(roles_a)
-
 
     def _get_nova_data(self):
         """ get data from nova"""
@@ -526,20 +532,21 @@ class OpenStackMap(object):
         if auto_load:
             self.load_all()
 
-    def preload_all_regions(self):
-        """Method to preload the data of all the available regions in a
-        federation"""
+    def preload_regions(self, regions=None):
+        """Method to preload the data of the specified regions
+         (all the available regions in a federation if regions is None)"""
 
         regions_compute = self.osclients.get_regions('compute')
         regions_network = self.osclients.get_regions('network')
         regions_image = self.osclients.get_regions('image')
         regions_volume = self.osclients.get_regions('volume')
-        all_regions = regions_compute.union(regions_network).union(
-            regions_image).union(regions_volume)
+        if not regions:
+            all_regions = regions_compute.union(regions_network).union(
+                regions_image).union(regions_volume)
+            all_regions.remove(self.osclients.region)
+            regions = list(all_regions)
+            regions.append(self.osclients.region)
 
-        all_regions.remove(self.osclients.region)
-        regions = list(all_regions)
-        regions.append(self.osclients.region)
         for region in regions:
             try:
                 self.logger.info('Creating map of region ' + region)
@@ -552,6 +559,11 @@ class OpenStackMap(object):
                     self.load_glance()
                 if region in regions_volume:
                     self.load_cinder()
+                region_map = dict()
+                for resource in self.resources_region:
+                    region_map[resource] = getattr(self, resource)
+                self.region_map[region] = region_map
+
             except Exception, e:
                 msg = 'Failed the creation of the map of {0}. Cause: {1}'
                 self.logger.error(msg.format(region, str(e)))
