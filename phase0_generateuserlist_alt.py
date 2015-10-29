@@ -42,6 +42,7 @@ class ExpiredUsers:
         clients.override_endpoint(
             'identity', clients.region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.keystoneclient = clients.get_keystoneclientv3()
+        self.protected= set()
 
     def get_trial_user_ids(self):
         """Get a set of trial users; only the ids
@@ -79,6 +80,7 @@ class ExpiredUsers:
         for user in self.get_trial_users():
             remaining = self._get_remaining_trial_time(user.to_dict())
             if self._is_user_protected(user):
+                self.protected.add(user)
                 continue
             if remaining < 0:
                 red_users.append(user)
