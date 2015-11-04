@@ -42,7 +42,7 @@ class ExpiredUsers:
         clients.override_endpoint(
             'identity', clients.region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.keystoneclient = clients.get_keystoneclientv3()
-        self.protected= set()
+        self.protected = set()
 
     def get_trial_user_ids(self):
         """Get a set of trial users; only the ids
@@ -117,7 +117,7 @@ class ExpiredUsers:
                 name = 'users_to_delete_phase3.txt'
                 with open(name, 'w') as users_to_delete_p3:
                     for user in delete_list:
-                        print >>users_to_delete_p3, user.id
+                        print >>users_to_delete_p3, user.id + ',' + user.name
             else:
                 name = 'users_to_delete.txt'
                 phase3_name = 'users_to_delete_phase3.txt'
@@ -131,7 +131,7 @@ class ExpiredUsers:
                         filtered = list(u for u in phase3 if u in basic_users)
                     with open(phase3_name, 'w') as phase3:
                         for user in filtered:
-                            print >>phase3, user.id
+                            print >>phase3, user.id + ',' + user.name
 
                 with open(name, 'w') as users_to_delete:
                     for user in delete_list:
@@ -140,7 +140,7 @@ class ExpiredUsers:
         else:
             with open('users_to_delete.txt', 'w') as users_to_delete:
                 for user in delete_list:
-                    print >>users_to_delete, user.id
+                    print >>users_to_delete, user.id + ',' + user.name
 
     def _get_remaining_trial_time(self, user):
         """
