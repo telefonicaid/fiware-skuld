@@ -346,7 +346,7 @@ A tool is provided to extract a report from free_resources-*.pickle:
 The classify_resources_by_owner tool
 ------------------------------------
 
-A tool is provided to analyse the cloud resources in each region
+A tool is provided to analyse the cloud resources on each region
 and who owns them. The main purpose of the tool is to detect anomalies,
 cloud resources that are not owned by the users who can create resources:
 community users, trial users and admins.
@@ -359,20 +359,20 @@ users created with OpenStack tools that are not members of FIWARE. The
 users with a project-id that does not exist, refers to a cloud-project-id
 that should have all users but admins.
 
-The tool also print of summary of a set of resources in the specified regions.
+The tool also print a summary of a set of resources in the specified regions.
 The following resources are supported:
 
-- vms: Virtual machines
-- floatingips: Floating IPs
-- networks: Networks
-- subnets: Subnetworks (i.e. IP nets)
-- routers: routers to connect subnets
-- security_groups: security groups to allow/deny network traffic
+- vms: Virtual machines.
+- floatingips: Floating IPs.
+- networks: Networks.
+- subnets: Subnetworks (i.e. IP nets).
+- routers: routers to connect subnets.
+- security_groups: security groups to allow/deny network traffic.
 - ports: ports are created for each interface of a VM, routers, etc.
 - images: glance images. Snapshots are also images.
-- volumes: cinder volumes
-- volume_backups: backups of cinder volumes
-- volume_snapshot: snapshot of a volume
+- volumes: cinder volumes.
+- volume_backups: backups of cinder volumes.
+- volume_snapshot: snapshot of a volume.
 
 For example, to print information about vms and images on Spain2 and Mexico,
 run:
@@ -387,14 +387,14 @@ directory should be deleted or empty.
 
 The report print the number of resources of that type:
 
-* total. The total sum of the following four groups
+* total. The total sum of the following four groups.
 * resources owned by users community/trial/admin. This is the right situation.
-* resources owned by other registered users (basic, other type, without a role)
+* resources owned by other registered users (basic, other type, without a role).
 * resources whose project-id is not the cloud-project-id of any user, but is
   an existing project-id. A specific case are the resource whose project-id is the
-  default_project_id of the user intead of their cloud-project-id.
+  default-project-id of the user intead of their cloud-project-id.
 * all the other resources, that is, resources with a project-id that is not the
-  cloud-project-id nor defautl-project-id of any user and in addition is not a
+  cloud-project-id nor default-project-id of any user and in addition is not a
   registered project-id. This situation happens when a project has been deleted.
 
 Testing
