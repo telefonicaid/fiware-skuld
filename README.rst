@@ -343,15 +343,15 @@ boolean as a third value: it is True when all the users resources are deleted.
 A tool is provided to extract a report from free_resources-*.pickle:
 *analyse_report_data.py*
 
-The classify_resources_by_owner tool
-------------------------------------
+The classify_resources_by_owner script
+--------------------------------------
 
-A tool is provided to analyse the cloud resources on each region
-and who owns them. The main purpose of the tool is to detect anomalies,
+A script is provided to analyse the cloud resources on each region
+and who owns them. Its main purpose is to detect anomalies,
 cloud resources that are not owned by the users who can create resources:
 community users, trial users and admins.
 
-The tool at first prints a summary with the number of users of each type: community,
+The script at first prints a summary with the number of users of each type: community,
 trial and admin users can have resources. Basic users can log in the portal
 but can not create cloud resources. The 'other type users' are other
 users created with OpenStack tools that are not members of FIWARE. The
@@ -359,7 +359,7 @@ users created with OpenStack tools that are not members of FIWARE. The
 users with a project-id that does not exist, refers to a cloud-project-id
 that should have all users but admins.
 
-The tool also print a summary of a set of resources in the specified regions.
+The script also print a summary of a set of resources in the specified regions.
 The following resources are supported:
 
 - vms: Virtual machines.
@@ -379,7 +379,7 @@ run:
 
 .. code::
 
-    ./classify_resources_by_owners.py vms images --regions Spain2 Mexico --cache_dir ~/.cachedir
+    ./scripts/classify_resources_by_owners.py vms images --regions Spain2 Mexico --cache_dir ~/.cachedir
 
 The *--cache-dir* option is to provide the directory where the information is
 cached. By default this path is *~/openstackmap*. To get updated data, this
