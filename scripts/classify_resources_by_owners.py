@@ -41,7 +41,12 @@ class ClassifyResources(object):
        an owner"""
 
     def __init__(self, cache_dir, regions=None):
-        """constructor"""
+        """Constructor
+        It also build the sets about users and tenants
+        :param cache_dir: the directory where the data is cached.
+        :param regions: a list with the regions whose maps are preload. If None
+          all the available regions.
+        """
         self.logger = logging.getLogger(__name__)
         if regions:
             self.map = openstackmap.OpenStackMap(cache_dir, auto_load=False)
