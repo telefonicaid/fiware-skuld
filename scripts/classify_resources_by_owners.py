@@ -123,8 +123,9 @@ class ClassifyResources(object):
                     self.admin_users.add(user.id)
                     # use default_project_id with admin users, because
                     # cloud_project_id does not exist.
-                    self.admin_cloud_projects.add(user.default_project_id)
-                    self.user_cloud_projects.add(cloud_project_id)
+                    if hasattr(user, 'default_project_id'):
+                        self.admin_cloud_projects.add(user.default_project_id)
+                        self.user_cloud_projects.add(cloud_project_id)
 
             if not user_type:
                 self.other_users.add(user.id)
