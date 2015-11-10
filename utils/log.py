@@ -47,7 +47,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def _init_logger(logger, phase):
-    LOGFILE = 'delete_user_resources.log'
+    # LOGFILE = 'delete_user_resources.log'
     log_handler = RotatingFileHandler(LOGFILE, maxBytes=1048576, backupCount=5)
     fmt = '%(asctime)s %(levelname)s {0} [-] %(message)s'.format(phase)
     formatter = logging.Formatter(fmt)
