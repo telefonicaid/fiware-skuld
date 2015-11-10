@@ -87,8 +87,8 @@ class UserResources(object):
         self.clients.override_endpoint(
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.user_id = self.clients.get_session().get_user_id()
+        self.user_name = username
         session = self.clients.get_session()
-        self.user_name = session.auth.get_access(session)
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)

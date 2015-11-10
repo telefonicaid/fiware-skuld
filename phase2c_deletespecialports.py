@@ -38,7 +38,8 @@ class SpecialPortRemover(object):
     def __init__(self):
         """constructor"""
         self.logger = logging.getLogger(__name__)
-        osmap = OpenStackMap(objects_strategy=OpenStackMap.NO_CACHE_OBJECTS)
+        OpenStackMap.load_filters = False
+        osmap = OpenStackMap(objects_strategy=OpenStackMap.NO_CACHE_OBJECTS, auto_load=False)
         osmap.load_keystone()
         osmap.load_neutron()
         self.map = osmap
@@ -57,7 +58,7 @@ class SpecialPortRemover(object):
 
         list_users = list()
         for line in users.readlines():
-            user_id = line.strip()
+            user_id = line.strip().split(',')[0]
             if user_id == '':
                 continue
             list_users.append(user_id)

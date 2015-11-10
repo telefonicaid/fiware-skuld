@@ -71,7 +71,8 @@ class TrustFactory:
         impersonated by the trustee)
         :param trustee_name: the user name of the trustee user (who
         impersonates the trustor)
-        :return: the tuple (trustor_username, trust_id), None if error
+        :return: the tuple (trustor_username, trust_id, trustor_id), None
+                 if error
         """
         trustor = self.keystone.users.get(trustor_id)
         trustee = self.keystone.users.find(name=trustee_name)
@@ -89,7 +90,7 @@ class TrustFactory:
         (resp, body_resp) = self.keystone.trusts.client.post(
             'OS-TRUST/trusts_for_admin', body=request)
         if resp.ok:
-            return trustor.name, body_resp['trust']['id']
+            return trustor.name, body_resp['trust']['id'], trustor.id
         else:
             return None
 
@@ -102,7 +103,8 @@ class TrustFactory:
         impersonated by the trustee)
         :param trustee_id: the user id of the trustee user (who
         impersonates the trustor)
-        :return: the tuple (trustor_username, trust_id), None if error
+        :return: the tuple (trustor_username, trust_id, trustor_id), None if
+                 error
         """
 
         trustor = self.keystone.users.get(trustor_id)
@@ -112,7 +114,7 @@ class TrustFactory:
             trustee_id, trustor_id, ['owner'], trustor.cloud_project_id,
             True, expire)
         if trust:
-            return trustor.name, trust.id
+            return trustor.name, trust.id, trustor.id
         else:
             return None
 

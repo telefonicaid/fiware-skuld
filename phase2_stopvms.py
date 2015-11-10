@@ -77,10 +77,10 @@ if os.path.exists('users_trusted_ids.txt'):
     user_count = 0
     user_total = len(lines)
     for line in lines:
-        (user, trust_id) = line.strip().split(',')
+        (user, trust_id, user_id) = line.strip().split(',')
         user_count += 1
-        logger.info('Stopping active VMs of user {0} ({1}/{2})'.format(
-            user, user_count, user_total))
+        logger.info('Stopping active VMs of user {3} {0} ({1}/{2})'.format(
+            user, user_count, user_total, user_id))
 
         try:
             user_resources = UserResources(
