@@ -51,6 +51,8 @@ class OpenStackMap(object):
     # objects_strategy is DIRECT_OBJECTS
     use_wrapper = True
 
+    load_filters = True
+
     resources_region = ['vms', 'images', 'routers', 'networks', 'subnets',
                  'ports', 'floatingips', 'security_groups',
                  'volumes', 'volume_backups', 'volume_snapshots']
@@ -137,6 +139,9 @@ class OpenStackMap(object):
         self.roles_a = list()
         self.roles_by_project = dict()
         self.roles_by_user = dict()
+        self.filters = dict()
+        self.filters_by_project = dict()
+
         # Glance resources
         self.images = dict()
         # Neutron resources
@@ -210,6 +215,29 @@ class OpenStackMap(object):
         tenants = keystone.projects.list()
         roles_a = keystone.role_assignments.list()
 
+        if OpenStackMap.load_filters:
+            ef = {'service_type': 'identity', 'interface': 'public'}
+            resp = keystone.session.get('/OS-EP-FILTER/endpoint_groups',
+                                        endpoint_filter=ef)
+            filters = resp.json()['endpoint_groups']
+            projects_by_filter = dict()
+            filters_by_project = dict()
+            for f in filters:
+                filter_id = f['id']
+                resp = keystone.session.get(
+                    '/OS-EP-FILTER/endpoint_groups/' + filter_id +
+                    '/projects', endpoint_filter=ef)
+                projects = resp.json()['projects']
+                projects_by_filter[filter_id] = projects
+                for project in projects:
+                    if project['id'] not in filters_by_project:
+                        filters_by_project[project['id']] = list()
+                    filters_by_project[project['id']].append(filter_id)
+
+        else:
+            filters = list()
+            filters_by_project = dict()
+
         roles_by_user = dict()
         roles_by_project = dict()
 
@@ -238,6 +266,7 @@ class OpenStackMap(object):
         tenants_by_name = dict()
         users_by_name = dict()
 
+        filters = dict((f['id'], f) for f in filters)
         if dict_object:
             roles = dict((role.id, role.to_dict()) for role in roles)
             users = dict((user.id, user.to_dict()) for user in users)
@@ -265,6 +294,8 @@ class OpenStackMap(object):
 
             self.tenants_by_name = tenants_by_name
             self.users_by_name = users_by_name
+            self.filters = filters
+            self.filters_by_project = filters_by_project
             return
 
         if save:
@@ -294,12 +325,21 @@ class OpenStackMap(object):
                     f:
                 pickle.dump(roles_by_project, f, protocol=-1)
 
+            with open(self.pers_keystone + '/filters.pickle', 'wb') as f:
+                pickle.dump(filters, f, protocol=-1)
+
+            with open(self.pers_keystone + '/filters_byproject.pickle', 'wb') \
+                    as f:
+                pickle.dump(filters_by_project, f, protocol=-1)
+
         self.roles = self._convert(roles)
         self.users = self._convert(users)
         self.users_by_name = self._convert(users_by_name)
         self.tenants = self._convert(tenants)
         self.tenants_by_name = self._convert(tenants_by_name)
         self.roles_a = self._convert(roles_a)
+        self.filters = self._convert(filters)
+        self.filters_by_project = self._convert(filters_by_project)
 
     def _get_nova_data(self):
         """ get data from nova"""
@@ -486,6 +526,9 @@ class OpenStackMap(object):
             self.roles = self._load_fkeystone('roles')
             self.roles_by_project = self._load_fkeystone('roles_by_project')
             self.roles_by_user = self._load_fkeystone('roles_by_user')
+            self.filters = self._load_fkeystone('filters')
+            self.filters_by_project = self._load_fkeystone(
+                'filters_byproject')
         else:
             self._get_keystone_data()
 
