@@ -29,6 +29,7 @@ import sys
 from os import environ as env
 
 from impersonate import TrustFactory
+from check_users import CheckUsers
 from settings.settings import TRUSTEE
 from settings.settings import KEYSTONE_ENDPOINT
 from osclients import OpenStackClients
@@ -49,6 +50,8 @@ def generate_trust_ids(users_to_delete):
     osclients = OpenStackClients()
     users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
+    check_users = CheckUsers()
+
     # Use an alternative URL that allow direct access to the keystone admin
     # endpoint, because the registered one uses an internal IP address.
 
@@ -65,16 +68,20 @@ def generate_trust_ids(users_to_delete):
         trustee = TRUSTEE
 
     for user in lines:
-        user = user.strip()
+        count += 1
+        user = user.strip().split(',')[0]
         if user == '':
             continue
+        if user not in check_users.users_basic:
+            logger.warning('Ignoring user {0} because is not basic'.format(user))
+            continue
         try:
-            count += 1
-            (username, trust_id) = trust_factory.create_trust_admin(
+            (username, trust_id, user_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            print >>users_trusted_ids, username + ',' + trust_id
-            msg = 'Generated trustid for user {0} ({1}/{2})'
-            logger.info(msg.format(user, count, total))
+            print >>users_trusted_ids, username + ',' + trust_id + ',' + \
+                user_id
+            msg = 'Generated trustid for user {0} ({1}) ({2}/{3})'
+            logger.info(msg.format(user_id, username, count, total))
         except Exception, e:
             msg = 'Failed getting trust-id from trustor {0}. Reason: {1}'
             logger.error(msg.format(user, str(e)))
