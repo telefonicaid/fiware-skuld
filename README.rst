@@ -1,8 +1,9 @@
+.. _Top:
 =============================
 FIWARE Trial Users Management
 =============================
 
-| |Build Status|
+| |Build Status| |StackOverflow|
 
 .. contents:: :local:
 
@@ -16,6 +17,9 @@ expired Trial Users in any FIWARE Lab node and finally change the user type
 from Trial User to Basic User.
 
 This project is part of FIWARE_.
+
+Top_
+
 
 Description
 ===========
@@ -112,6 +116,9 @@ change_password.py
     A tool to change the password of any OpenStack user
 queries.py
     Some useful methods to get information from OpenStack servers
+
+Top_
+
 
 Build and Install
 =================
@@ -211,6 +218,8 @@ OS_TENANT_NAME, OS_REGION_NAME) must be set. In the same way, the scripts that
 expect the password of the TRUSTEE, can use the environment variables
 TRUSTEE_USER and TRUSTEE_PASSWORD, but it is also possible to use the settings
 file.
+
+Top_
 
 
 Running
@@ -340,6 +349,9 @@ boolean as a third value: it is True when all the users resources are deleted.
 A tool is provided to extract a report from free_resources-*.pickle:
 *analyse_report_data.py*
 
+Top_
+
+
 Testing
 =======
 
@@ -396,10 +408,25 @@ and to compare the resources before and after running the scripts. Another
 advantage is that the script support OS_TRUST_ID, while other tools as nova
 does not.
 
+Top_
+
+
 Deletion of Unaccepted Terms & Conditions users
 ===============================================
 
 You can find here details about `Deletion of users that does not accept new Terms and Conditions <scripts/unacceptedTermsAndConditions>`_
+
+Top_
+
+
+Support
+=======
+
+Ask your thorough programming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
+In both cases please use the tag *fiware-skuld*.
+
+Top_
+
 
 License
 =======
@@ -411,7 +438,12 @@ License
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-skuld
    :alt: Build status
+.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+   :target: https://stackoverflow.com/questions/tagged/fiware-skuld
+   :alt: Help? Ask questions
 
 .. REFERENCES
 
 .. _FIWARE: http://www.fiware.org/
+.. _stackoverflow: http://stackoverflow.com/questions/ask
+.. _`FIWARE Q&A`: https://ask.fiware.org
