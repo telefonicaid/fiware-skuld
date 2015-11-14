@@ -3,5 +3,6 @@ omit =
     tests/*
     settings/*
     */__init__.py
+    */site-packages/*
 
 
