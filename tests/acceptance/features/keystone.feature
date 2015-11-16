@@ -24,7 +24,7 @@ Feature: Get the list of expired users from the IdM.
       Then the component returns a list with all the expired trial users
 
     Scenario Outline: 04: Request a token with invalid data
-      Given a wrong "<tenantName>", "<username>" and "<password>"
+      Given a wrong "<tenantName>", "<username>" or "<password>"
       And a connectivity to the Keystone service
       When I request a valid token from the Keystone
       Then the component return an exception with the message "<message>"

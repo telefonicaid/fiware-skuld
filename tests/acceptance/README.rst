@@ -38,6 +38,7 @@ Tests execution
 
 - Change to the tests/acceptance folder of the project if not already on it
 
-- Run lettuce_tools with appropriate params (see available ones with the -h option)
-- Run behave
+- Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
+ 
+- Run behave features/ --tags ~@skip
 

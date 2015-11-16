@@ -36,11 +36,21 @@ MULTIPLE_CHOICE = 300
 
 @given(u'a valid tenantName, username and password')
 def step_impl(context):
+    """
+    Just starting point.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     pass
 
 
 @given(u'a connectivity to the Keystone service')
 def step_impl(context):
+    """
+    Check if we can contact with the Keystone service defined in the KEYSTONE_URL.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     context.expiredusers.set_keystone_endpoint(KEYSTONE_URL)
 
     try:
@@ -53,7 +63,13 @@ def step_impl(context):
 
 
 @when(u'I request a valid token from the Keystone')
+@given(u'a valid token from the Keystone')
 def step_impl(context):
+    """
+    Request a valid administration token from the Keystone service.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     context.message = ''
 
     try:
@@ -64,6 +80,11 @@ def step_impl(context):
 
 @then(u'the keystone return me a json message with a valid token')
 def step_impl(context):
+    """
+    Return the valid token corresponding to an administrator user.
+    :param context: Context of the acceptance test execution.
+    :return: Noting.
+    """
     result = context.expiredusers.getadmintoken()
 
     assert result is not None, 'Expected a valid token but obtained no token'
@@ -71,24 +92,24 @@ def step_impl(context):
                                         '\n Obtained a token with length: {}'.format(len(result))
 
 
-@given(u'a valid token from the Keystone')
-def step_impl(context):
-    context.message = ''
-
-    try:
-        context.expiredusers.get_admin_token()
-    except ValueError:
-        context.message = 'The request you have made requires authentication.'
-
-
 @when(u'I request a list of trial users from the Keystone')
 @given(u'a list of trial users from the Keystone')
 def step_impl(context):
+    """
+    Request the list of trial users from the Keystone.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     context.expiredusers.get_list_trial_users()
 
 
 @then(u'the Keystone returns a list with all the trial users registered')
 def step_impl(context):
+    """
+    Returns the list of the expired users.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     try:
         result = context.expiredusers.gerlisttrialusers()
 
@@ -101,13 +122,23 @@ def step_impl(context):
 
 @when(u'I request a list of expired users')
 def step_impl(context):
-    context.expiredusers.get_list_expired_users()
+    """
+    From the list of trial users, returns the list of expired users.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
+    context.expiredusers.finalList = context.expiredusers.get_list_expired_users()
 
 
 @then(u'the component returns a list with all the expired trial users')
 def step_impl(context):
+    """
+    Recover the list of expired trial users.
+    :param context: Context of the acceptance test execution.
+    :return: Nothing.
+    """
     try:
-        result = context.expiredusers.gerlisttrialusers()
+        result = context.expiredusers.finalList
         print
         print('      Number of expired trial users found: {}\n'.format(len(result)))
         print
@@ -115,12 +146,26 @@ def step_impl(context):
         assert False, 'Cannot recover the list of trial users'
 
 
-@given(u'a wrong "{tenantname}", "{username}" and "{password}"')
+@given(u'a wrong "{tenantname}", "{username}" or "{password}"')
 def given_a_wrong_tenant_username_and_password(context, tenantname, username, password):
+    """
+    Check that the operation to recover trial users with wrong data produce an exception.
+    :param context: Context of the acceptance test execution.
+    :param tenantname: Wrong tenant name.
+    :param username: Wrong user name.
+    :param password: Wrong password.
+    :return:
+    """
     context.expiredusers = ExpiredUsers(tenantname, username, password)
 
 
 @then(u'the component return an exception with the message "{message}"')
 def step_impl(context, message):
+    """
+    Check that the component return the error message.
+    :param context: Context of the acceptance test execution.
+    :param message: Message to check.
+    :return:
+    """
     result = unicode(context.message)
     assert result == message, message

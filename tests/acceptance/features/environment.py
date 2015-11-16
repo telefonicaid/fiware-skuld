@@ -32,6 +32,7 @@ from tests.acceptance.commons.logger_utils import get_logger
 
 __logger__ = get_logger("qautils")
 
+
 def before_scenario(context, scenario):
     """
     HOOK: To be executed before each Scenario:
@@ -46,6 +47,7 @@ def before_scenario(context, scenario):
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
+
 
 def after_scenario(context, scenario):
     """
