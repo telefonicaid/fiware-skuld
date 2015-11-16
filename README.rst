@@ -312,7 +312,7 @@ phase3:
 .. code::
 
     from osclients import osclients
-    from settings import settings
+    from conf import settings
 
     typeuser = settings.BASIC_ROLE_ID
     ids = set(line.strip() for line in open('users_to_delete.txt').readlines())

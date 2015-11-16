@@ -27,7 +27,7 @@
 import argparse
 import base64
 
-from osclients import OpenStackClients
+from utils.osclients import OpenStackClients
 
 
 class PasswordChanger(object):

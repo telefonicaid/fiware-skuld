@@ -24,10 +24,12 @@
 __author__ = 'fla'
 
 from unittest import TestCase
-from expired_users import ExpiredUsers
 from datetime import datetime, timedelta
-import requests_mock
 import re
+
+import requests_mock
+
+from skuld.expired_users import ExpiredUsers
 
 
 @requests_mock.Mocker()

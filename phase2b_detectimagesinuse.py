@@ -24,8 +24,9 @@
 #
 author = 'chema'
 
-from queries import Queries
 import cPickle as pickle
+
+from skuld.queries import Queries
 import utils
 
 """This scripts generate a file with a set of images ids that are in use by
@@ -38,6 +39,6 @@ q = Queries()
 logger = utils.log.init_logs('phase2b')
 
 image_set = q.get_imageset_othertenants()
-print image_set
+print(image_set)
 with open('imagesinuse.pickle', 'wb') as f:
     pickle.dump(image_set, f, protocol=-1)

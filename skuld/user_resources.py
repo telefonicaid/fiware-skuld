@@ -28,13 +28,13 @@ import time
 import logging
 
 import impersonate
-from settings import settings
-from osclients import OpenStackClients
-from nova_resources import NovaResources
-from glance_resources import GlanceResources
-from cinder_resources import CinderResources
-from neutron_resources import NeutronResources
-from blueprint_resources import BluePrintResources
+from conf import settings
+from utils.osclients import OpenStackClients
+from skuld.nova_resources import NovaResources
+from skuld.glance_resources import GlanceResources
+from skuld.cinder_resources import CinderResources
+from skuld.neutron_resources import NeutronResources
+from skuld.blueprint_resources import BluePrintResources
 from swift_resources import SwiftResources
 
 
@@ -292,12 +292,10 @@ class UserResources(object):
         self.delete_tenant_resources_pri_2()
         self.delete_tenant_resources_pri_3()
 
-
     def stop_tenant_vms(self):
         """Stop all the active vms of the tenant
         :return:  stopped vms
         """
-        count = 0
         return self.nova.stop_tenant_vms()
 
     def unshare_images(self):
@@ -339,48 +337,48 @@ class UserResources(object):
 
     def print_tenant_resources(self):
         """print all the tenant's resources"""
-        print 'Tenant id is: ' + self.clients.get_session().get_project_id()
-        print 'User id is: ' + self.clients.get_session().get_user_id()
+        print('Tenant id is: ' + self.clients.get_session().get_project_id())
+        print('User id is: ' + self.clients.get_session().get_user_id())
 
-        print 'Tenant blueprint instances: '
-        print self.blueprints.get_tenant_blueprints()
-        print 'Tenant blueprint templates: '
-        print self.blueprints.get_tenant_templates()
+        print('Tenant blueprint instances: ')
+        print(self.blueprints.get_tenant_blueprints())
+        print('Tenant blueprint templates: ')
+        print(self.blueprints.get_tenant_templates())
 
-        print 'User keypairs:'
-        print self.nova.get_user_keypairs()
-        print 'Tenant VMs:'
-        print self.nova.get_tenant_vms()
-        print 'Tenant security groups (nova):'
-        print self.nova.get_tenant_security_groups()
+        print('User keypairs:')
+        print(self.nova.get_user_keypairs())
+        print('Tenant VMs:')
+        print(self.nova.get_tenant_vms())
+        print('Tenant security groups (nova):')
+        print(self.nova.get_tenant_security_groups())
 
-        print 'Tenant images:'
-        print self.glance.get_tenant_images()
+        print('Tenant images:')
+        print(self.glance.get_tenant_images())
 
-        print 'Tenant volume snapshots:'
-        print self.cinder.get_tenant_volume_snapshots()
-        print 'Tenant volumes:'
-        print self.cinder.get_tenant_volumes()
-        print 'Tenant backup volumes:'
-        print self.cinder.get_tenant_backup_volumes()
+        print('Tenant volume snapshots:')
+        print(self.cinder.get_tenant_volume_snapshots())
+        print('Tenant volumes:')
+        print(self.cinder.get_tenant_volumes())
+        print('Tenant backup volumes:')
+        print(self.cinder.get_tenant_backup_volumes())
 
         if self.neutron:
-            print 'Tenant floating ips:'
-            print self.neutron.get_tenant_floatingips()
-            print 'Tenant networks:'
-            print self.neutron.get_tenant_networks()
-            print 'Tenant security groups (neutron):'
-            print self.neutron.get_tenant_securitygroups()
-            print 'Tenant routers:'
-            print self.neutron.get_tenant_routers()
-            print 'Tenant subnets'
-            print self.neutron.get_tenant_subnets()
-            print 'Tenant ports'
-            print self.neutron.get_tenant_ports()
+            print('Tenant floating ips:')
+            print(self.neutron.get_tenant_floatingips())
+            print('Tenant networks:')
+            print(self.neutron.get_tenant_networks())
+            print('Tenant security groups (neutron):')
+            print(self.neutron.get_tenant_securitygroups())
+            print('Tenant routers:')
+            print(self.neutron.get_tenant_routers())
+            print('Tenant subnets')
+            print(self.neutron.get_tenant_subnets())
+            print('Tenant ports')
+            print(self.neutron.get_tenant_ports())
 
         if self.swift:
-            print 'Containers'
-            print self.swift.get_tenant_containers()
+            print('Containers')
+            print(self.swift.get_tenant_containers())
 
     def free_trust_id(self):
         """Free trust_id, if it exists.

@@ -25,7 +25,7 @@
 author = 'chema'
 
 import utils
-from change_password import PasswordChanger
+from skuld.change_password import PasswordChanger
 
 logger = utils.log.init_logs('phase1')
 
@@ -42,6 +42,6 @@ for user in users_to_delete.readlines():
     user_ids.append(user.strip())
 cred_list = user_manager.get_list_users_with_cred(user_ids)
 for cred in cred_list:
-    print >>users_credentials, ','.join(cred)
+    users_credentials.write(','.join(cred))
 
 users_credentials.close()

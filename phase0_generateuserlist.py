@@ -26,9 +26,9 @@ author = 'chema'
 
 from os import environ as env
 
-from expired_users import ExpiredUsers
-from settings import settings
-from osclients import OpenStackClients
+from skuld.expired_users import ExpiredUsers
+from conf import settings
+from utils.osclients import OpenStackClients
 import utils
 
 logger = utils.log.init_logs('phase0')
@@ -76,10 +76,10 @@ with open('users_to_delete.txt', 'w') as fich_delete:
     logger.debug('Generating user delete list')
     for user_id in expired_users:
         if not is_user_protected(users_by_id[user_id]):
-            print >>fich_delete, user_id
+            fich_delete.write(user_id)
 
 with open('users_to_notify.txt', 'w') as fich_notify:
     logger.debug('Generating user notification list')
     for user_id in next_to_expire:
         if not is_user_protected(users_by_id[user_id]):
-            print >>fich_notify, user_id
+            fich_notify.write(user_id)

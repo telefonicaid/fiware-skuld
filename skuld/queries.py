@@ -23,8 +23,9 @@
 # contact with opensource@tid.es
 #
 author = 'chema'
-import osclients
 from os import environ as env
+
+from utils import osclients
 
 
 class Queries(object):

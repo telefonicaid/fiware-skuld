@@ -24,8 +24,6 @@
 #
 author = 'chema'
 
-import osclients
-
 """Neutron API doesn't return the resources of the tenant, but also the
 resources the tenant has access. For a no-admin user, this includes the shared
 reources of other tenants"""
@@ -183,7 +181,6 @@ class NeutronResources(object):
                 router=port['device_id'], body=body)
         else:
             self.neutron.delete_port(port_id)
-
 
     def delete_tenant_ports(self):
         """delete all the tenant's network ports"""

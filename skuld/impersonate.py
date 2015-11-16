@@ -24,12 +24,14 @@
 #
 author = 'chema'
 import os
-from oslo_utils import timeutils
 import time
 
-import osclients
+from oslo_utils import timeutils
+
+from utils import osclients
+
 try:
-    from settings.settings import TRUSTID_VALIDITY
+    from conf.settings import TRUSTID_VALIDITY
 except ImportError:
     TRUSTID_VALIDITY = 36000
 

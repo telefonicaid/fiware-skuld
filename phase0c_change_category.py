@@ -24,14 +24,15 @@
 #
 author = 'chema'
 
-import queries
-import requests
 import logging
 import warnings
-import utils.log
+
+import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
+from skuld import queries
+import utils.log
 import settings.settings
 
 logger = utils.log.init_logs('phase0c')
@@ -42,6 +43,7 @@ q = queries.Queries()
 keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
 warnings.simplefilter('ignore', category=InsecurePlatformWarning)
+
 
 def change_user_keystone(user_id):
     """Change the user from trial to basic

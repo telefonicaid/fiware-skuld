@@ -22,14 +22,13 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-
-author = 'chema'
-
 import time
 import urllib
 import os
 
-from osclients import OpenStackClients
+from utils.osclients import OpenStackClients
+
+author = 'chema'
 
 
 i_url = 'http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img'
@@ -71,13 +70,13 @@ class ResourcePopulator(object):
         nova = osclients.get_novaclient()
         swift = osclients.get_swiftclient()
 
-        print 'Creating a container'
+        print('Creating a container')
         swift.put_container('container', dict())
 
-        print 'Creating two objects'
+        print('Creating two objects')
         swift.put_object('container', 'object', 'content')
         swift.put_object('container', 'object2', 'content2')
-        print 'Creating a volume'
+        print('Creating a volume')
         volume = cinder.volumes.create(name='cindervolume', size=1)
 
         external_net = None
@@ -88,20 +87,20 @@ class ResourcePopulator(object):
 
         properties = {'key1': 'value1'}
 
-        print 'Creating a private image'
-        image = glance.images.create(
+        print('Creating a private image')
+        glance.images.create(
             container_format='bare', name='testimage1', disk_format='qcow2',
             data='aaaaa', properties=properties, is_public=False)
 
         if can_create_shared_images:
             download_images()
-            print 'Creating a shared image'
+            print('Creating a shared image')
             cirrosfile = open(img_name)
             image_shared1 = glance.images.create(
                 container_format='bare', name='testimg2', disk_format='qcow2',
                 data=cirrosfile, properties={'key2': 'value2'}, is_public=True)
 
-            print 'Creating another shared image'
+            print('Creating another shared image')
             cirrosfile2 = open(img_name2)
             image_shared2 = glance.images.create(
                 container_format='bare', name='testima3', disk_format='qcow2',
@@ -110,28 +109,27 @@ class ResourcePopulator(object):
         else:
             image_id = glance.images.find(name=image_name)
 
-        print 'Creating a keypair'
-        keypair = nova.keypairs.create(name='testpublickey')
+        print('Creating a keypair')
+        nova.keypairs.create(name='testpublickey')
 
-        print 'Allocating a new security group'
-        secgroup = nova.security_groups.create('testsecgroup',
-                                               'a security group for testing')
+        print('Allocating a new security group')
+        nova.security_groups.create('testsecgroup a security group for testing')
 
-        print 'Reserving a flotaing ip'
+        print('Reserving a flotaing ip')
         floatingip = nova.floating_ips.create(pool=external_net)
 
         if can_create_networks:
-            print 'Creating a router'
+            print('Creating a router')
             router = neutron.create_router(
                 {'router': {'name': 'testrouter', 'admin_state_up': True}}
             )['router']
 
-            print 'Creating a network'
+            print('Creating a network')
             n = neutron.create_network(
                 {'network': {'name': 'testnetwork', 'admin_state_up': True, }})
             network = n['network']
 
-            print 'Creating a subnet'
+            print('Creating a subnet')
             subnet = neutron.create_subnet(
                 {'subnet': {'name': 'testsubnet', 'network_id': network['id'],
                             'ip_version': 4, 'cidr': '192.168.1.0/24',
@@ -152,7 +150,7 @@ class ResourcePopulator(object):
 
             """
 
-            print 'Adding interface and gateway to router'
+            print('Adding interface and gateway to router')
             neutron.add_interface_router(router['id'], {'subnet_id': subnet['id']})
             neutron.add_gateway_router(router['id'], {'network_id': external_net})
         else:
@@ -166,14 +164,14 @@ class ResourcePopulator(object):
         # The volume must be available before creating the snapshot.
         time.sleep(3)
 
-        print 'Creating a volume snapshot'
-        snapshot = cinder.volume_snapshots.create(volume.id)
+        print('Creating a volume snapshot')
+        cinder.volume_snapshots.create(volume.id)
 
         tiny = nova.flavors.find(name='m1.tiny')
-        small = nova.flavors.find(name='m1.small')
+        nova.flavors.find(name='m1.small')
         nic = {'net-id': network['id']}
 
-        print 'Creating a VM'
+        print('Creating a VM')
         server = nova.servers.create(
             'vm_testdelete', flavor=tiny, image=image_id,
             key_name='testpublickey', security_groups=['default'], nics=[nic])
@@ -199,8 +197,8 @@ class ResourcePopulator(object):
                     break
 
             nics = [{'net-id': net2}]
-            print 'Creating a second VM, with a different user'
-            server2 = nova.servers.create(
+            print('Creating a second VM, with a different user')
+            nova.servers.create(
                 'vm_testdelete2', flavor=tiny, image=image_shared2.id, nics=nics)
 
 
@@ -209,10 +207,10 @@ def download_images():
     download.
     """
     if not os.path.exists(img_name):
-        print 'Downloading ' + img_name
+        print('Downloading ' + img_name)
         urllib.urlretrieve(i_url, img_name)
     if not os.path.exists(img_name2):
-        print 'Downloading ' + img_name2
+        print('Downloading ' + img_name2)
         urllib.urlretrieve(i_url2, img_name2)
 
 resources = ResourcePopulator()

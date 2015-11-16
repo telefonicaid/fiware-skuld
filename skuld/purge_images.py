@@ -24,9 +24,10 @@
 #
 author = 'chema'
 
-from queries import Queries
-import osclients
 import logging
+
+from queries import Queries
+from utils import osclients
 
 """This scripts delete images with the metadata 'orphan_image' when there are
 no more VMs using it. It may be invoked by a cron script.

@@ -24,12 +24,11 @@
 #
 author = 'chema'
 
-from osclients import osclients, OpenStackClients
-
 import cPickle as pickle
 import os
-import time
 from os import environ as env
+
+from utils.osclients import OpenStackClients
 
 
 class OpenStackMap(object):
@@ -289,7 +288,6 @@ class OpenStackMap(object):
         self.tenants = self._convert(tenants)
         self.tenants_by_name = self._convert(tenants_by_name)
         self.roles_a = self._convert(roles_a)
-
 
     def _get_nova_data(self):
         """ get data from nova"""

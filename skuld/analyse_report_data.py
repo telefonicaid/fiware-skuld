@@ -109,11 +109,12 @@ def print_summary_report(users_to_delete, report):
             if removed:
                 total_free[key] = total_free.get(key, 0) + removed
 
-    print '\n===Summary=='
-    print 'Total deleted: ', len(report), '/', len(users_to_delete), \
-        'Completed: ', yes, 'No completed: ', no
+    print('\n===Summary==')
+    msg = 'Total deleted: {}/{} Completed: {} No completed: {}'
+    msg = msg.format(len(report), len(users_to_delete), yes, no)
+    print(msg)
 
-    print 'Resources freed: ' + str(total_free)
+    print('Resources freed: ' + str(total_free))
 
 
 def print_fails_report(report):
@@ -125,7 +126,7 @@ def print_fails_report(report):
     :return: nothing
     """
 
-    print '===Pending deletions report==='
+    print('===Pending deletions report===')
     categories = set()
     for key in report:
         if not report[key][2]:
@@ -135,9 +136,9 @@ def print_fails_report(report):
                 if after[resource]:
                     modified[resource] = after[resource]
                     categories.add(resource)
-            print key, modified
+            print(key, modified)
 
-    print 'Categories not completed: ', categories
+    print('Categories not completed: {}'.format(categories))
 
 
 def save_failed_users_list(users_to_delete, unified):
@@ -163,17 +164,17 @@ def save_failed_users_list(users_to_delete, unified):
             try:
                 user_type = q.get_type_fiware_user(user)
                 if user_type == 'basic':
-                    print >>f, user
+                    f.write(user)
             except Exception:
                 continue
 
 if __name__ == '__main__':
-    print 'getting users to delete'
+    print('getting users to delete')
     users_to_delete = get_users_to_delete()
-    print 'unifying reports'
+    print('unifying reports')
     report = get_unified_report(users_to_delete)
-    print 'saving failed users lists'
+    print('saving failed users lists')
     save_failed_users_list(users_to_delete, report)
-    print 'printing reports'
+    print('printing reports')
     print_fails_report(report)
     print_summary_report(users_to_delete, report)

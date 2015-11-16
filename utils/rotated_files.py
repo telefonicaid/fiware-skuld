@@ -27,6 +27,7 @@ author = 'chema'
 import glob
 import os
 
+
 def rotate_files(name, max_level, rename_to):
     """
     rotate name, using suffix '.001', '.002' (...) '.999' until
@@ -50,4 +51,3 @@ def rotate_files(name, max_level, rename_to):
             os.rename(path, rename_to)
         else:
             os.rename(path, next_name)
-

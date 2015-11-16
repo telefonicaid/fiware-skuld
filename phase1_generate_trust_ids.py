@@ -28,10 +28,9 @@ import logging
 import sys
 from os import environ as env
 
-from impersonate import TrustFactory
-from settings.settings import TRUSTEE
-from settings.settings import KEYSTONE_ENDPOINT
-from osclients import OpenStackClients
+from skuld.impersonate import TrustFactory
+from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
+from utils.osclients import OpenStackClients
 import utils.log
 
 
@@ -72,7 +71,7 @@ def generate_trust_ids(users_to_delete):
             count += 1
             (username, trust_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            print >>users_trusted_ids, username + ',' + trust_id
+            users_trusted_ids.write(username + ',' + trust_id)
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
         except Exception, e:

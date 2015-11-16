@@ -26,7 +26,7 @@ __author__ = 'fla'
 import json
 import requests
 from datetime import datetime
-from settings import settings
+from conf import settings
 from utils.log import logger
 
 
