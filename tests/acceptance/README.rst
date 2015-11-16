@@ -33,6 +33,13 @@ Environment preparation
 - Configure file in tests/acceptance/commons/configuration.py adding the keystone url, 
 and a valid user, password and tenant ID.
 
+Data preparation
+----------------
+
+You can find the file *create_resources.py* which allows you to generate some dummies information
+into the FIWARE Lab in order to execute the acceptance tests. Just go to the ./commons folder and
+see the file.
+
 Tests execution
 ---------------
 
