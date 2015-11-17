@@ -225,6 +225,9 @@ Top_
 Running
 =======
 
+The manual way
+--------------
+
 The recommended way of running the scripts is using the cron script. But if
 user need full control, here is a description of the process.
 
@@ -348,6 +351,62 @@ before deletion and the second the resources after deletion. The tuple has a
 boolean as a third value: it is True when all the users resources are deleted.
 A tool is provided to extract a report from free_resources-*.pickle:
 *analyse_report_data.py*
+
+Top_
+
+The classify_resources_by_owner script
+--------------------------------------
+
+A script is provided to analyse the cloud resources on each region
+and who owns them. Its main purpose is to detect anomalies,
+cloud resources that are not owned by the users who can create resources:
+community users, trial users and admins.
+
+The script at first prints a summary with the number of users of each type: community,
+trial and admin users can have resources. Basic users can log in the portal
+but can not create cloud resources. The 'other type users' are other
+users created with OpenStack tools that are not members of FIWARE. The
+'users without type' are users without a role in the system. The report about
+users with a project-id that does not exist, refers to a cloud-project-id
+that should have all users but admins.
+
+The script also print a summary of a set of resources in the specified regions.
+The following resources are supported:
+
+- vms: Virtual machines.
+- floatingips: Floating IPs.
+- networks: Networks.
+- subnets: Subnetworks (i.e. IP nets).
+- routers: routers to connect subnets.
+- security_groups: security groups to allow/deny network traffic.
+- ports: ports are created for each interface of a VM, routers, etc.
+- images: glance images. Snapshots are also images.
+- volumes: cinder volumes.
+- volume_backups: backups of cinder volumes.
+- volume_snapshot: snapshot of a volume.
+
+For example, to print information about vms and images on Spain2 and Mexico,
+run:
+
+.. code::
+
+    ./scripts/classify_resources_by_owners.py vms images --regions Spain2 Mexico --cache_dir ~/.cachedir
+
+The *--cache-dir* option is to provide the directory where the information is
+cached. By default this path is *~/openstackmap*. To get updated data, this
+directory should be deleted or empty.
+
+The report print the number of resources of that type:
+
+* total. The total sum of the following four groups.
+* resources owned by users community/trial/admin. This is the right situation.
+* resources owned by other registered users (basic, other type, without a role).
+* resources whose project-id is not the cloud-project-id of any user, but is
+  an existing project-id. A specific case are the resource whose project-id is the
+  default-project-id of the user intead of their cloud-project-id.
+* all the other resources, that is, resources with a project-id that is not the
+  cloud-project-id nor default-project-id of any user and in addition is not a
+  registered project-id. This situation happens when a project has been deleted.
 
 Top_
 
