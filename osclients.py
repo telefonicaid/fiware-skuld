@@ -567,7 +567,7 @@ class OpenStackClients(object):
                     endpoint['url'] = url
 
     def get_regions(self, service_type):
-        """Return a list of regions with endpoints in this service
+        """Return a set of regions with endpoints in this service
 
         :param service_type: the service type (e.g. compute, network...)
         :return: a list of regions

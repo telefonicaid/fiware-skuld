@@ -30,7 +30,7 @@ import cPickle as pickle
 import os
 import time
 from os import environ as env
-
+import logging
 
 class OpenStackMap(object):
     """
@@ -51,9 +51,15 @@ class OpenStackMap(object):
     # objects_strategy is DIRECT_OBJECTS
     use_wrapper = True
 
+    load_filters = True
+
+    resources_region = ['vms', 'images', 'routers', 'networks', 'subnets',
+                 'ports', 'floatingips', 'security_groups',
+                 'volumes', 'volume_backups', 'volume_snapshots']
+
     def __init__(
             self, persistence_dir='~/openstackmap', region=None, auth_url=None,
-            objects_strategy=USE_CACHE_OBJECTS):
+            objects_strategy=USE_CACHE_OBJECTS, auto_load=True):
         """
         Constructor
         :param persistence_dir: The path where the data is saved. Ignored if
@@ -72,19 +78,16 @@ class OpenStackMap(object):
            objects are cached: the new version replace the old one.
          * USE_CACHE_OBJECTS is using the objects converted to dictionaries. If
            a cached copy of the objects are available, it is used.
-
+        :param auto_load: if True, invoke self.load_all()
          Note that neutron objects returned by the API are already dictionaries
         """
+
+        self.logger = logging.getLogger(__name__)
 
         if auth_url:
             self.osclients = OpenStackClients(auth_url=auth_url)
         else:
             self.osclients = OpenStackClients()
-
-        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
-            self.osclients.override_endpoint(
-                'identity', self.osclients.region, 'admin',
-                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         if region:
             self.osclients.set_region(region)
@@ -94,6 +97,11 @@ class OpenStackMap(object):
                                 'OS_REGION_NAME variable must be defined.')
             else:
                 region = env['OS_REGION_NAME']
+
+        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
+            self.osclients.override_endpoint(
+                'identity', self.osclients.region, 'admin',
+                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
 
         self.objects_strategy = objects_strategy
 
@@ -113,6 +121,11 @@ class OpenStackMap(object):
                 os.mkdir(self.pers_region)
 
         self._init_resource_maps()
+        if auto_load:
+            self.load_all()
+
+        self.region_map = dict()
+
 
     def _init_resource_maps(self):
         """init all the resources that will be available
@@ -126,6 +139,9 @@ class OpenStackMap(object):
         self.roles_a = list()
         self.roles_by_project = dict()
         self.roles_by_user = dict()
+        self.filters = dict()
+        self.filters_by_project = dict()
+
         # Glance resources
         self.images = dict()
         # Neutron resources
@@ -199,6 +215,29 @@ class OpenStackMap(object):
         tenants = keystone.projects.list()
         roles_a = keystone.role_assignments.list()
 
+        if OpenStackMap.load_filters:
+            ef = {'service_type': 'identity', 'interface': 'public'}
+            resp = keystone.session.get('/OS-EP-FILTER/endpoint_groups',
+                                        endpoint_filter=ef)
+            filters = resp.json()['endpoint_groups']
+            projects_by_filter = dict()
+            filters_by_project = dict()
+            for f in filters:
+                filter_id = f['id']
+                resp = keystone.session.get(
+                    '/OS-EP-FILTER/endpoint_groups/' + filter_id +
+                    '/projects', endpoint_filter=ef)
+                projects = resp.json()['projects']
+                projects_by_filter[filter_id] = projects
+                for project in projects:
+                    if project['id'] not in filters_by_project:
+                        filters_by_project[project['id']] = list()
+                    filters_by_project[project['id']].append(filter_id)
+
+        else:
+            filters = list()
+            filters_by_project = dict()
+
         roles_by_user = dict()
         roles_by_project = dict()
 
@@ -227,6 +266,7 @@ class OpenStackMap(object):
         tenants_by_name = dict()
         users_by_name = dict()
 
+        filters = dict((f['id'], f) for f in filters)
         if dict_object:
             roles = dict((role.id, role.to_dict()) for role in roles)
             users = dict((user.id, user.to_dict()) for user in users)
@@ -254,6 +294,8 @@ class OpenStackMap(object):
 
             self.tenants_by_name = tenants_by_name
             self.users_by_name = users_by_name
+            self.filters = filters
+            self.filters_by_project = filters_by_project
             return
 
         if save:
@@ -283,13 +325,21 @@ class OpenStackMap(object):
                     f:
                 pickle.dump(roles_by_project, f, protocol=-1)
 
+            with open(self.pers_keystone + '/filters.pickle', 'wb') as f:
+                pickle.dump(filters, f, protocol=-1)
+
+            with open(self.pers_keystone + '/filters_byproject.pickle', 'wb') \
+                    as f:
+                pickle.dump(filters_by_project, f, protocol=-1)
+
         self.roles = self._convert(roles)
         self.users = self._convert(users)
         self.users_by_name = self._convert(users_by_name)
         self.tenants = self._convert(tenants)
         self.tenants_by_name = self._convert(tenants_by_name)
         self.roles_a = self._convert(roles_a)
-
+        self.filters = self._convert(filters)
+        self.filters_by_project = self._convert(filters_by_project)
 
     def _get_nova_data(self):
         """ get data from nova"""
@@ -476,6 +526,9 @@ class OpenStackMap(object):
             self.roles = self._load_fkeystone('roles')
             self.roles_by_project = self._load_fkeystone('roles_by_project')
             self.roles_by_user = self._load_fkeystone('roles_by_user')
+            self.filters = self._load_fkeystone('filters')
+            self.filters_by_project = self._load_fkeystone(
+                'filters_byproject')
         else:
             self._get_keystone_data()
 
@@ -492,17 +545,79 @@ class OpenStackMap(object):
 
     def load_all(self):
         """load all data"""
-        self.load_nova()
-        self.load_neutron()
-        self.load_glance()
-        self.load_cinder()
+        region = self.osclients.region
+        if region in self.osclients.get_regions('compute'):
+            self.load_nova()
+
+        if region in self.osclients.get_regions('network'):
+            self.load_neutron()
+
+        if region in self.osclients.get_regions('image'):
+            self.load_glance()
+
+        if region in self.osclients.get_regions('volume'):
+            self.load_cinder()
+
         self.load_keystone()
 
-    def change_region(self, region):
-        """change region and clean maps"""
+    def change_region(self, region, auto_load=True):
+        """change region and clean maps. Optionally load the maps.
+        :param region: the new region
+        :param auto_load: True to invoke load_all
+        :return: nothing
+        """
         self.pers_region = self.persistence_dir + '/' + region
         if not os.path.exists(self.pers_region) and self.objects_strategy\
            not in (OpenStackMap.DIRECT_OBJECTS, OpenStackMap.NO_CACHE_OBJECTS):
             os.mkdir(self.pers_region)
         self.osclients.set_region(region)
         self._init_resource_maps()
+        if auto_load:
+            self.load_all()
+
+    def preload_regions(self, regions=None, all_regions_but=None):
+        """Method to preload the data of the specified regions. If
+        regions is None, use all the available regions in the federation, but
+        the specified in all_regions_but"""
+
+        regions_compute = self.osclients.get_regions('compute')
+        regions_network = self.osclients.get_regions('network')
+        regions_image = self.osclients.get_regions('image')
+        regions_volume = self.osclients.get_regions('volume')
+        if not regions:
+            all_regions = regions_compute.union(regions_network).union(
+                regions_image).union(regions_volume)
+            if all_regions_but:
+                all_regions.difference_update(all_regions_but)
+            if self.osclients.region in all_regions:
+                # put current region the last, because change_region call
+                all_regions.remove(self.osclients.region)
+                regions = list(all_regions)
+                regions.append(self.osclients.region)
+
+        for region in regions:
+            try:
+                self.logger.info('Creating map of region ' + region)
+                self.change_region(region, False)
+                if region in regions_compute:
+                    self.load_nova()
+                if region in regions_network:
+                    self.load_neutron()
+                if region in regions_image:
+                    self.load_glance()
+                if region in regions_volume:
+                    self.load_cinder()
+                region_map = dict()
+                for resource in self.resources_region:
+                    region_map[resource] = getattr(self, resource)
+                self.region_map[region] = region_map
+
+            except Exception, e:
+                msg = 'Failed the creation of the map of {0}. Cause: {1}'
+                self.logger.error(msg.format(region, str(e)))
+                # Remove dir if it exists and is empty.
+                dir = os.path.join(self.persistence_dir, region)
+                if os.path.isdir(dir) and len(os.listdir(dir)) == 0:
+                    os.rmdir(dir)
+
+        self.load_keystone()
