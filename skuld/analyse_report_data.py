@@ -22,12 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import glob
 import cPickle as pickle
 
 import queries
+
+__author__ = 'chema'
 
 
 def get_users_to_delete():

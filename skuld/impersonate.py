@@ -22,13 +22,14 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
 import os
 import time
 
 from oslo_utils import timeutils
 
 from utils import osclients
+
+__author__ = 'chema'
 
 try:
     from conf.settings import TRUSTID_VALIDITY

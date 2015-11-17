@@ -22,10 +22,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import utils
 from skuld.change_password import PasswordChanger
+
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase1')
 

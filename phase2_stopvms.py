@@ -31,7 +31,7 @@ from skuld.user_resources import UserResources
 import conf.settings
 import utils.log
 
-author = 'chema'
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase2')
 

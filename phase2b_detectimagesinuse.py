@@ -22,12 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import cPickle as pickle
 
 from skuld.queries import Queries
 import utils
+
+__author__ = 'chema'
 
 """This scripts generate a file with a set of images ids that are in use by
 at least another tenant different than the owner of the image

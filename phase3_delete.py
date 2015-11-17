@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from os import environ as env
 import os.path
 import cPickle as pickle
@@ -31,9 +29,10 @@ import datetime
 
 from skuld.user_resources import UserResources
 
-#from conf.settings import TRUSTEE
 import conf.settings
 import utils.log
+
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase3')
 

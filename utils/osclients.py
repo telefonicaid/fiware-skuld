@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from os import environ as env
 
 from keystoneclient.auth.identity import v2, v3
@@ -32,6 +30,8 @@ from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
 from importlib import import_module
+
+__author__ = 'chema'
 
 # OpenStack modules available with their imports
 modules_available = {

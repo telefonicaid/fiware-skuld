@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from datetime import datetime
 import os.path
 
@@ -31,6 +29,8 @@ from utils import osclients
 from conf import settings
 import utils.log
 import utils.rotated_files
+
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase0')
 

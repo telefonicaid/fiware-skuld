@@ -23,7 +23,7 @@
 # contact with opensource@tid.es
 #
 
-author = 'chema'
+__author__ = 'chema'
 
 
 # snapshots are listed as images. Don't need special treatment.

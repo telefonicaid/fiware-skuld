@@ -22,11 +22,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from os import environ as env
 
 from skuld.user_resources import UserResources
+
+__author__ = 'chema'
 
 user = env['OS_USERNAME']
 password = env['OS_PASSWORD']

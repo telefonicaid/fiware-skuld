@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import logging
 import warnings
 
@@ -34,6 +32,8 @@ from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 from skuld import queries
 import utils.log
 import settings.settings
+
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase0c')
 

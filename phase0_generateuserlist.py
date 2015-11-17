@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from os import environ as env
 
 from skuld.expired_users import ExpiredUsers
@@ -33,6 +31,7 @@ import utils
 
 logger = utils.log.init_logs('phase0')
 
+__author__ = 'chema'
 
 def is_user_protected(user):
     """

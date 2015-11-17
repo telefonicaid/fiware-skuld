@@ -22,8 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
@@ -32,6 +30,8 @@ from urllib import quote
 import xml.etree.ElementTree as et
 import logging
 import warnings
+
+__author__ = 'chema'
 
 
 class BluePrintResources(object):
