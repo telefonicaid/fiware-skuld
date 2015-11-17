@@ -76,10 +76,10 @@ with open('users_to_delete.txt', 'w') as fich_delete:
     logger.debug('Generating user delete list')
     for user_id in expired_users:
         if not is_user_protected(users_by_id[user_id]):
-            fich_delete.write(user_id)
+            fich_delete.write(user_id + "\n")
 
 with open('users_to_notify.txt', 'w') as fich_notify:
     logger.debug('Generating user notification list')
     for user_id in next_to_expire:
         if not is_user_protected(users_by_id[user_id]):
-            fich_notify.write(user_id)
+            fich_notify.write(user_id + "\n")

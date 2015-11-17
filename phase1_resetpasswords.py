@@ -42,6 +42,6 @@ for user in users_to_delete.readlines():
     user_ids.append(user.strip())
 cred_list = user_manager.get_list_users_with_cred(user_ids)
 for cred in cred_list:
-    users_credentials.write(','.join(cred))
+    users_credentials.write(','.join(cred) + '\n')
 
 users_credentials.close()

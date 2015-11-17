@@ -112,10 +112,7 @@ def step_get_list_trial_users(context):
     """
     try:
         result = context.expiredusers.gerlisttrialusers()
-
-        print
-        print('      Number of trial users found: {}\n'.format(len(result)))
-        print
+        print('\n      Number of trial users found: {}\n\n'.format(len(result)))
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
 
@@ -139,9 +136,7 @@ def step_get_list_expired_users(context):
     """
     try:
         result = context.expiredusers.finalList
-        print
-        print('      Number of expired trial users found: {}\n'.format(len(result)))
-        print
+        print('\n      Number of expired trial users found: {}\n\n'.format(len(result)))
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
 

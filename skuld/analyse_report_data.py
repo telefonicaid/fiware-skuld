@@ -163,7 +163,7 @@ def save_failed_users_list(users_to_delete, unified):
             try:
                 user_type = q.get_type_fiware_user(user)
                 if user_type == 'basic':
-                    f.write(user)
+                    f.write(user + '\n')
             except Exception:
                 continue
 

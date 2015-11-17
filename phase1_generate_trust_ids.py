@@ -71,7 +71,7 @@ def generate_trust_ids(users_to_delete):
             count += 1
             (username, trust_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            users_trusted_ids.write(username + ',' + trust_id)
+            users_trusted_ids.write(username + ',' + trust_id + '\n')
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
         except Exception, e:

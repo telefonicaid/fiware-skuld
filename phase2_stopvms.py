@@ -122,4 +122,4 @@ with open('stopresources_report_' + now + '.pickle', 'wf') as f:
 
 with open('stopresources_error_report_' + now + '.log', 'w') as f:
     for user in failed_users:
-        f.write(user)
+        f.write(user + '\n')

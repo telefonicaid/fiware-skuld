@@ -110,14 +110,14 @@ class ExpiredUsers:
         (notify_list, delete_list) = self.get_yellow_red_users()
         with open('users_to_notify.txt', 'w') as users_to_notify:
             for user in notify_list:
-                users_to_notify.write(user.id)
+                users_to_notify.write(user.id + "\n")
 
         if cron_daily:
             if settings.STOP_BEFORE_DELETE == 0:
                 name = 'users_to_delete_phase3.txt'
                 with open(name, 'w') as users_to_delete_p3:
                     for user in delete_list:
-                        users_to_delete_p3.write(user.id + ',' + user.name)
+                        users_to_delete_p3.write(user.id + ',' + user.name + '\n')
             else:
                 name = 'users_to_delete.txt'
                 phase3_name = 'users_to_delete_phase3.txt'
@@ -131,16 +131,16 @@ class ExpiredUsers:
                         filtered = list(u for u in phase3 if u in basic_users)
                     with open(phase3_name, 'w') as phase3:
                         for user in filtered:
-                            phase3.write(user.id + ',' + user.name)
+                            phase3.write(user.id + ',' + user.name + '\n')
 
                 with open(name, 'w') as users_to_delete:
                     for user in delete_list:
-                        users_to_delete.write(user.id)
+                        users_to_delete.write(user.id + '\n')
 
         else:
             with open('users_to_delete.txt', 'w') as users_to_delete:
                 for user in delete_list:
-                    users_to_delete.write(user.id + ',' + user.name)
+                    users_to_delete.write(user.id + ',' + user.name + '\n')
 
     def _get_remaining_trial_time(self, user):
         """
