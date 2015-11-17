@@ -24,31 +24,71 @@
 __author__ = 'gjp'
 
 from os import environ
-from unittest import TestCase
+from unittest import TestCase, skip
 from osclients import OpenStackClients
+from mock import patch, MagicMock
 import cinderclient.v2.client
+import cinderclient.v1.client
 import neutronclient.v2_0.client
 import novaclient.v2.client
+import glanceclient.v1.client
+import keystoneclient.v2_0.client
+import keystoneclient.session
+from swiftclient.client import Connection
+from collections import defaultdict
+
+
+class MySessionMock(MagicMock):
+    # Mock of a keystone Session
+
+    def get_endpoint(self, service_type, region_name):
+
+        return "http://cloud.lab.fi-ware.org:4731/v2.0"
+
+    def get_token(self):
+
+        return "a12baba1ddde00000000000000000001"
+
+    def get_public_endpoint(self, service_type, region):
+
+        return "http://cloud.lab.fi-ware.org:4731/v2.0"
+
+    def get_access(self, session):
+
+        service = {u'endpoints': [{u'url': u'http://83.26.10.2:8080/v1/AUTH_00000000000000000000000000000001',
+                                   u'interface': u'public', u'region': u'Spain2',
+                                   u'id': u'00000000000000000000000000000002'},
+                                  {u'url': u'http://172.0.0.1:8080', u'interface': u'administator',
+                                   u'region': u'Spain2',
+                                   u'id': u'00000000000000000000000000000001'}],
+                   u'type': u'object-store', u'id': u'00000000000000000000000000000044'}
+
+        d = defaultdict(list)
+        d['catalog'].append(service)
+
+        return d
 
 
 class TestOSClients(TestCase):
 
-    def setUp(self):
-        OS_AUTH_URL = 'http://host.com:4731/v3'
-        OS_USERNAME = 'user'
-        OS_PASSWORD = 'password'
-        OS_TENANT_NAME = 'user cloud'
-        OS_TENANT_ID = ''
-        OS_REGION_NAME = 'Spain2'
-        OS_TRUST_ID = ''
+    mock_session = MySessionMock()
 
-        environ.setdefault('OS_AUTH_URL', OS_AUTH_URL)
-        environ.setdefault('OS_USERNAME', OS_USERNAME)
-        environ.setdefault('OS_PASSWORD', OS_PASSWORD)
-        environ.setdefault('OS_TENANT_NAME', OS_TENANT_NAME)
-        environ.setdefault('OS_TENANT_ID', OS_TENANT_ID)
-        environ.setdefault('OS_REGION_NAME', OS_REGION_NAME)
-        environ.setdefault('OS_TRUST_ID', OS_TRUST_ID)
+    def setUp(self):
+        self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
+        self.OS_USERNAME = 'user'
+        self.OS_PASSWORD = 'password'
+        self.OS_TENANT_NAME = 'user cloud'
+        self.OS_TENANT_ID = '00000000000000000000000000000001'
+        self.OS_REGION_NAME = 'Spain2'
+        self.OS_TRUST_ID = ''
+
+        environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
+        environ.setdefault('OS_USERNAME', self.OS_USERNAME)
+        environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
+        environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
+        environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
+        environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
+        environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
 
     def test_implement_client(self):
         """test_implement_client check that we could implement an empty client."""
@@ -95,6 +135,16 @@ class TestOSClients(TestCase):
         osclients = OpenStackClients(modules="cinder")
         cinderClient = osclients.get_cinderclient()
 
+        # api_version = cinderClient.get_volume_api_version_from_endpoint() --> This should return "2" against a server
+        self.assertIsInstance(cinderClient, cinderclient.v2.client.Client)
+
+    def test_get_cinderclient_v1(self):
+        """test_get_cinderclient_v1 check that we could retrieve a Session client to work with cinder using
+        an older client (v1)."""
+        osclients = OpenStackClients(modules="cinder")
+        cinderClient = osclients.get_cinderclientv1()
+        # api_version = cinderClient.get_volume_api_version_from_endpoint() --> This should return "1" against a server
+
         self.assertIsInstance(cinderClient, cinderclient.v2.client.Client)
 
     def test_get_cinderclient_unknown_module(self):
@@ -121,3 +171,236 @@ class TestOSClients(TestCase):
         novaClient = osclients.get_novaclient()
 
         self.assertIsInstance(novaClient, novaclient.v2.client.Client)
+
+    @patch('osclients.session', mock_session)
+    def test_get_glanceclient(self):
+        """test_get_glanceclient check that we could retrieve a Session client to work with glance"""
+
+        osclients = OpenStackClients(modules="glance")
+        osclients.set_keystone_version(use_v3=False)
+        glanceClient = osclients.get_glanceclient()
+
+        self.assertIsInstance(glanceClient, glanceclient.v1.client.Client)
+
+    @patch('osclients.session', mock_session)
+    def test_get_swiftclient(self):
+        """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v3"""
+
+        osclients = OpenStackClients(modules="swift")
+        swiftClient = osclients.get_swiftclient()
+
+        self.assertIsInstance(swiftClient, Connection)
+
+    @patch('osclients.session', mock_session)
+    def test_get_swiftclient_with_keystone_v2(self):
+        """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v2"""
+
+        osclients = OpenStackClients(modules="swift")
+        osclients.use_v3 = False
+        swiftClient = osclients.get_swiftclient()
+
+        self.assertIsInstance(swiftClient, Connection)
+
+    def test_get_keystoneclient_v2(self):
+        """test_get_keystoneclient_v2 check that we could retrieve a Session client to work with keystone v2"""
+        osclients = OpenStackClients()
+        osclients.use_v3 = False
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v2_0.client.Client)
+
+    def test_get_keystoneclient_v2_with_trust_id(self):
+        """test_get_keystoneclient_v2_with_trust_id check that we could retrieve a Session client to work
+        with keystone v2 and using trust_id"""
+
+        osclients = OpenStackClients()
+        osclients.use_v3 = False
+        trust_id = "randomid0000000000000000000000001"
+        osclients.set_credential(self.OS_USERNAME, self.OS_PASSWORD, trust_id=trust_id)
+
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v2_0.client.Client)
+
+    def test_get_keystoneclient_v2_with_tenant_name(self):
+        """test_get_keystoneclient_v2_with_tenant_name check that we could retrieve a Session client to work
+        with keystone v2 and using tenant_name"""
+
+        osclients = OpenStackClients()
+        osclients.use_v3 = False
+        osclients.set_credential(self.OS_USERNAME, self.OS_PASSWORD, tenant_name=self.OS_TENANT_NAME)
+
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v2_0.client.Client)
+
+    def test_get_keystoneclient_v2_with_tenant_id(self):
+        """test_get_keystoneclient_v2_with_tenant_id check that we could retrieve a Session client to work
+        with keystone v2 and using tenant_id"""
+
+        osclients = OpenStackClients()
+        osclients.use_v3 = False
+        osclients.set_credential(self.OS_USERNAME, self.OS_PASSWORD, tenant_id=self.OS_TENANT_ID)
+
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v2_0.client.Client)
+
+    def test_get_keystoneclient_v3(self):
+        """test_get_keystoneclient_v3 check that we could retrieve a Session client to work with keystone v3"""
+        osclients = OpenStackClients()
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v3.client.Client)
+
+    def test_get_keystoneclient_v3_with_trust_id(self):
+        """test_get_keystoneclient_v3_with_trust_id check that we could retrieve a Session client to work
+        with keystone v3 and using trust_id"""
+        osclients = OpenStackClients()
+        trust_id = "randomid0000000000000000000000001"
+        osclients.set_credential(self.OS_USERNAME, self.OS_PASSWORD, trust_id=trust_id)
+
+        keystoneClient = osclients.get_keystoneclient()
+
+        self.assertIsInstance(keystoneClient, keystoneclient.v3.client.Client)
+
+    def test_set_credential_to_osclients(self):
+        """test_set_credential_to_osclients check that we could set credentials using method set_credential"""
+        username = "new_user"
+        password = "new_password"
+        tenant_name = "new_user cloud"
+        tenant_id = "00000000000000000000000000000002"
+        trust_id = "randomid0000000000000000000000001"
+
+        # FIST CHECK: Credentials from ENV
+        osclients = OpenStackClients()
+        self.assertEqual(osclients._OpenStackClients__username, self.OS_USERNAME)
+        self.assertEqual(osclients._OpenStackClients__tenant_id, self.OS_TENANT_ID)
+
+        # SECOND CHECK: updating Credentials with tenant_id
+        osclients.set_credential(username, password,
+                       tenant_id=tenant_id)
+        self.assertEqual(osclients._OpenStackClients__tenant_id, tenant_id)
+
+        # THIRD CHECK: updating Credentials with tenant_name
+        osclients.set_credential(username, password,
+                       tenant_name=tenant_name)
+        self.assertEqual(osclients._OpenStackClients__tenant_name, tenant_name)
+
+        # FOURTH CHECK: updating Credentials with trust_id
+        osclients.set_credential(username, password,
+                       trust_id=trust_id)
+        self.assertEqual(osclients._OpenStackClients__trust_id, trust_id)
+
+        # FIFTH CHECK: updating Credentials without trust_id, tenant_id and tenant_name
+        osclients.set_credential(username, password)
+        self.assertIsNone(osclients._OpenStackClients__trust_id)
+        self.assertIsNone(osclients._OpenStackClients__tenant_name)
+        self.assertIsNone(osclients._OpenStackClients__tenant_id)
+
+        # Creating a client to check that set_credential destroy the session with v3
+        novaclient = osclients.get_novaclient()
+        self.assertIsNotNone(osclients._session_v3)
+        osclients.set_credential(username, password)
+        self.assertIsNone(osclients._session_v3)
+
+        # Creating a client to check that set_credential destroy the session with v2
+        osclients.use_v3 = False
+        novaclient = osclients.get_novaclient()
+        self.assertIsNotNone(osclients._session_v2)
+        osclients.set_credential(username, password)
+        self.assertIsNone(osclients._session_v2)
+
+    def test_set_region(self):
+        """test_set_region check that we could change the region after create the client"""
+
+        # FIST CHECK: Region is recovered from ENV
+        osclients = OpenStackClients()
+        self.assertEqual(osclients.region, self.OS_REGION_NAME)
+
+        # Check that region is updated to a new Value.
+        region = "Budapest"
+        osclients.set_region(region)
+        self.assertEqual(osclients.region, region)
+
+    def test_get_session_without_auth_url(self):
+        """test_get_session_without_auth_url check that we could not retrieve a session without auth_url"""
+
+        osclients = OpenStackClients()
+        osclients.auth_url = None
+
+        # Checking v3
+        try:
+            osclients.get_session()
+        except Exception as ex:
+            self.assertRaises(ex)
+
+        # Checking v2
+        osclients.use_v3 = False
+        try:
+            osclients.get_session()
+        except Exception as ex:
+            self.assertRaises(ex)
+
+    def test_get_session_with_different_auth_url(self):
+        """test_get_session_without_auth_url check that we could retrieve a session with auth_url formats"""
+
+        auth_url_v2_1 = "http://cloud.lab.fi-ware.org:4731/v2.0"
+        auth_url_v2_2 = "http://cloud.lab.fi-ware.org:4731/v2.0/"
+
+        auth_url_v3_1 = "http://cloud.lab.fi-ware.org:4731/v3"
+        auth_url_v3_2 = "http://cloud.lab.fi-ware.org:4731/v3/"
+
+        osclients = OpenStackClients()
+
+        # Checking v3
+        osclients.auth_url = auth_url_v2_1
+        session = osclients.get_session()
+        self.assertIsInstance(session, keystoneclient.session.Session)
+
+        session.invalidate()
+        osclients._session_v3 = None
+
+        osclients.auth_url = auth_url_v2_2
+        session = osclients.get_session()
+        self.assertIsInstance(session, keystoneclient.session.Session)
+
+        session.invalidate()
+        osclients._session_v3 = None
+
+        # Checking v2
+        osclients.use_v3 = False
+        osclients.auth_url = auth_url_v3_1
+        session = osclients.get_session()
+        self.assertIsInstance(session, keystoneclient.session.Session)
+
+        session.invalidate()
+        osclients._session_v2 = None
+
+        osclients.auth_url = auth_url_v3_2
+        session = osclients.get_session()
+        self.assertIsInstance(session, keystoneclient.session.Session)
+
+        session.invalidate()
+        osclients._session_v2 = None
+
+    def test_get_session_without_username(self):
+        """test_get_session_without_username check that we could not retrieve a session without username"""
+
+        osclients = OpenStackClients()
+
+        osclients.set_credential("", self.OS_PASSWORD,
+                       tenant_id=self.OS_TENANT_ID)
+
+        # Checking v3
+        try:
+            osclients.get_session()
+        except Exception as ex:
+            self.assertRaises(ex)
+
+        # Checking v2
+        osclients.use_v3 = False
+        try:
+            osclients.get_session()
+        except Exception as ex:
+            self.assertRaises(ex)
