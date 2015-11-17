@@ -30,6 +30,7 @@ import logging
 
 __author__ = 'chema'
 
+
 class OpenStackMap(object):
     """
     This class build a map from the resources (VMs, networks, images,
@@ -123,7 +124,6 @@ class OpenStackMap(object):
             self.load_all()
 
         self.region_map = dict()
-
 
     def _init_resource_maps(self):
         """init all the resources that will be available

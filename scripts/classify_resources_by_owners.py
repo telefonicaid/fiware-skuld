@@ -23,10 +23,8 @@
 # contact with opensource@tid.es
 #
 import logging
-
-from osclients import osclients
-import openstackmap
-from settings.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
+from skuld.openstackmap import OpenStackMap
+from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
     ADMIN_ROLE_ID
 import utils.log
 import sys
@@ -49,10 +47,10 @@ class ClassifyResources(object):
         """
         self.logger = logging.getLogger(__name__)
         if regions:
-            self.map = openstackmap.OpenStackMap(cache_dir, auto_load=False)
+            self.map = OpenStackMap(cache_dir, auto_load=False)
             self.map.preload_regions(regions)
         else:
-            self.map = openstackmap.OpenStackMap(cache_dir)
+            self.map = OpenStackMap(cache_dir)
 
         # This groups should be disjoint
         self.admin_users = set()
@@ -184,8 +182,6 @@ class ClassifyResources(object):
             elements = getattr(self.map, member)
             region = self.map.osclients.region
 
-
-
         if member in special_cases:
             attr = special_cases[member]
             for element in elements.values():
@@ -267,7 +263,7 @@ if __name__ == '__main__':
     description = 'A tool to classify users and the resources on any region'
     parser = argparse.ArgumentParser(description=description)
 
-    res_types = hidden_set(openstackmap.OpenStackMap.resources_region)
+    res_types = hidden_set(OpenStackMap.resources_region)
     res_types.add_hidden('none')
     res_types.add_hidden('all')
 
@@ -279,7 +275,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--omit-user-summary', action='store_true',
                         help='do not print the summary about user types')
-    help='data is cached in this directory (default is %(default)s)'
+
+    help = 'data is cached in this directory (default is %(default)s)'
     parser.add_argument('--cache-dir', help=help, default='~/openstackmap')
 
     meta = parser.parse_args()

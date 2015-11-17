@@ -126,7 +126,7 @@ class TestExpiredUsers(TestCase):
         expectedmessage = "Error, you need to have an admin token. Execute the get_admin_token() method previously."
 
         try:
-            result = expiredusers.get_list_trial_users()
+            expiredusers.get_list_trial_users()
         except ValueError as e:
             self.assertEqual(e.message, expectedmessage)
 
@@ -248,7 +248,7 @@ class TestExpiredUsers(TestCase):
         expectedmessage = "Error, you need to have an admin token. Execute the get_admin_token() method previously."
 
         try:
-            result = expiredusers.get_list_expired_users()
+            expiredusers.get_list_expired_users()
         except ValueError as e:
             self.assertEqual(e.message, expectedmessage)
 

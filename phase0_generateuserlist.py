@@ -33,6 +33,7 @@ logger = utils.log.init_logs('phase0')
 
 __author__ = 'chema'
 
+
 def is_user_protected(user):
     """
     Return true if the user must not be deleted, because their address has a

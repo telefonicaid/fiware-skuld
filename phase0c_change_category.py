@@ -31,14 +31,13 @@ from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
 from skuld import queries
 import utils.log
-import settings.settings
-
+from conf.settings import TRIAL_ROLE_ID, BASIC_ROLE_ID, HORIZON_ENDPOINT
 __author__ = 'chema'
 
 logger = utils.log.init_logs('phase0c')
 
-trial = settings.settings.TRIAL_ROLE_ID
-basic = settings.settings.BASIC_ROLE_ID
+trial = TRIAL_ROLE_ID
+basic = BASIC_ROLE_ID
 q = queries.Queries()
 keystone = q.osclients.get_keystoneclientv3()
 warnings.simplefilter('ignore', category=InsecureRequestWarning)
@@ -72,7 +71,7 @@ def change_user_via_idm(user_id):
     headers = {'X-Auth-Token': q.osclients.get_token()}
 
     # NOTE(garcianavalon) sometimes in settings people use the end /
-    horizon_url = settings.settings.HORIZON_ENDPOINT
+    horizon_url = HORIZON_ENDPOINT
     if horizon_url.endswith('/'):
         horizon_url = horizon_url[:-1]
 

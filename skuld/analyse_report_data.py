@@ -66,7 +66,6 @@ def get_unified_report(users_to_delete):
     names = glob.glob('freeresources_report_*.pickle')
     names.sort()
     for name in names:
-        timestamp = name[lpreffix:-lsuffix]
         users = pickle.load(open(name, 'rb'))
         for user in users:
             if user not in users_to_delete:

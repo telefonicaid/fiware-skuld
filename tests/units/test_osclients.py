@@ -61,7 +61,7 @@ class TestOSClients(TestCase):
         raising an exception."""
 
         try:
-            osclients = OpenStackClients(modules="fakeOpenstackModule")
+            OpenStackClients(modules="fakeOpenstackModule")
         except Exception as ex:
             self.assertRaises(ex)
 
@@ -102,7 +102,7 @@ class TestOSClients(TestCase):
         there is no modules defined"""
         try:
             osclients = OpenStackClients(modules="")
-            cinderClient = osclients.get_cinderclient()
+            osclients.get_cinderclient()
         except Exception as ex:
             self.assertRaises(ex)
 

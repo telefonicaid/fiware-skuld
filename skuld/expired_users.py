@@ -132,7 +132,7 @@ class ExpiredUsers:
         logger.info("Number of Trial Users to expire in the following days: %d",
                     len(self.yellowList))
 
-        return (self.yellowList, self.finalList)
+        return self.yellowList, self.finalList
 
     def get_list_expired_users(self):
         """

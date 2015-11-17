@@ -35,7 +35,7 @@ MULTIPLE_CHOICE = 300
 
 
 @given(u'a valid tenantName, username and password')
-def step_impl(context):
+def step_valid_data(context):
     """
     Just starting point.
     :param context: Context of the acceptance test execution.
@@ -45,7 +45,7 @@ def step_impl(context):
 
 
 @given(u'a connectivity to the Keystone service')
-def step_impl(context):
+def step_check_connectivity_to_keystone(context):
     """
     Check if we can contact with the Keystone service defined in the KEYSTONE_URL.
     :param context: Context of the acceptance test execution.
@@ -64,7 +64,7 @@ def step_impl(context):
 
 @when(u'I request a valid token from the Keystone')
 @given(u'a valid token from the Keystone')
-def step_impl(context):
+def step_get_valid_token(context):
     """
     Request a valid administration token from the Keystone service.
     :param context: Context of the acceptance test execution.
@@ -79,7 +79,7 @@ def step_impl(context):
 
 
 @then(u'the keystone return me a json message with a valid token')
-def step_impl(context):
+def step_check_returned_token(context):
     """
     Return the valid token corresponding to an administrator user.
     :param context: Context of the acceptance test execution.
@@ -94,7 +94,7 @@ def step_impl(context):
 
 @when(u'I request a list of trial users from the Keystone')
 @given(u'a list of trial users from the Keystone')
-def step_impl(context):
+def step_request_trial_users_list(context):
     """
     Request the list of trial users from the Keystone.
     :param context: Context of the acceptance test execution.
@@ -104,7 +104,7 @@ def step_impl(context):
 
 
 @then(u'the Keystone returns a list with all the trial users registered')
-def step_impl(context):
+def step_get_list_trial_users(context):
     """
     Returns the list of the expired users.
     :param context: Context of the acceptance test execution.
@@ -121,7 +121,7 @@ def step_impl(context):
 
 
 @when(u'I request a list of expired users')
-def step_impl(context):
+def step_request_list_expired_users(context):
     """
     From the list of trial users, returns the list of expired users.
     :param context: Context of the acceptance test execution.
@@ -131,7 +131,7 @@ def step_impl(context):
 
 
 @then(u'the component returns a list with all the expired trial users')
-def step_impl(context):
+def step_get_list_expired_users(context):
     """
     Recover the list of expired trial users.
     :param context: Context of the acceptance test execution.
@@ -160,7 +160,7 @@ def given_a_wrong_tenant_username_and_password(context, tenantname, username, pa
 
 
 @then(u'the component return an exception with the message "{message}"')
-def step_impl(context, message):
+def step_message_for_wrong_data(context, message):
     """
     Check that the component return the error message.
     :param context: Context of the acceptance test execution.
