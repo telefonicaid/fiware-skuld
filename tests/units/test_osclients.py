@@ -268,7 +268,7 @@ class TestOSClients(TestCase):
         tenant_id = "00000000000000000000000000000002"
         trust_id = "randomid0000000000000000000000001"
 
-        # FIST CHECK: Credentials from ENV
+        # FIRST CHECK: Credentials from ENV
         osclients = OpenStackClients()
         self.assertEqual(osclients._OpenStackClients__username, self.OS_USERNAME)
         self.assertEqual(osclients._OpenStackClients__tenant_id, self.OS_TENANT_ID)
@@ -310,7 +310,7 @@ class TestOSClients(TestCase):
     def test_set_region(self):
         """test_set_region check that we could change the region after create the client"""
 
-        # FIST CHECK: Region is recovered from ENV
+        # FIRST CHECK: Region is recovered from ENV
         osclients = OpenStackClients()
         self.assertEqual(osclients.region, self.OS_REGION_NAME)
 
