@@ -25,7 +25,7 @@
 import glob
 import cPickle as pickle
 
-import queries
+import skuld.queries
 
 __author__ = 'chema'
 
@@ -152,7 +152,7 @@ def save_failed_users_list(users_to_delete, unified):
     :param unified: the report obtained with get_unified_report()
 
     """
-    q = queries.Queries()
+    q = skuld.queries.Queries()
     with open('users_to_delete_failed.txt', 'w') as f:
         users_deleted = set()
         users_deleted.update(unified.keys())
