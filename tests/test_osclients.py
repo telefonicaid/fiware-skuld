@@ -24,7 +24,7 @@
 __author__ = 'gjp'
 
 from os import environ
-from unittest import TestCase, skip
+from unittest import TestCase
 from osclients import OpenStackClients
 from mock import patch, MagicMock
 import cinderclient.v2.client
@@ -48,10 +48,6 @@ class MySessionMock(MagicMock):
     def get_token(self):
 
         return "a12baba1ddde00000000000000000001"
-
-    def get_public_endpoint(self, service_type, region):
-
-        return "http://cloud.lab.fi-ware.org:4731/v2.0"
 
     def get_access(self, session):
 
