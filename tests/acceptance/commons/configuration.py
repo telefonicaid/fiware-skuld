@@ -23,3 +23,11 @@
 # contact with opensource@tid.es
 #
 __author__ = 'fla'
+
+
+KEYSTONE_URL = 'http://cloud.lab.fiware.org:4730/'
+FAKE_TENANT_NAME = 'afake'
+TENANT_NAME = ''
+USERNAME = ''
+PASSWORD = ''
+TOKEN_LENGTH = 32

@@ -22,30 +22,30 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 from os import environ as env
 
-from expired_users import ExpiredUsers
-from settings import settings
-from osclients import OpenStackClients
-import utils
+from skuld.expired_users import ExpiredUsers
+from conf import settings
+from utils.osclients import OpenStackClients
+import utils.log
 
 logger = utils.log.init_logs('phase0')
 
+__author__ = 'chema'
 
-def is_user_protected(user):
+
+def is_user_protected(usertocheck):
     """
     Return true if the user must not be deleted, because their address has a
     domain in setting.DONT_DELETE_DOMAINS, and print a warning.
-    :param user: user to check
+    :param usertocheck: user to check
     :return: true if the user must not be deleted
     """
-    domain = user.name.partition('@')[2]
+    domain = usertocheck.name.partition('@')[2]
     if domain in settings.DONT_DELETE_DOMAINS:
         logger.warning(
             'User with name %(name)s should not be deleted due to its domain',
-            {'name': user.name})
+            {'name': usertocheck.name})
         return True
     else:
         return False
@@ -76,10 +76,10 @@ with open('users_to_delete.txt', 'w') as fich_delete:
     logger.debug('Generating user delete list')
     for user_id in expired_users:
         if not is_user_protected(users_by_id[user_id]):
-            print >>fich_delete, user_id
+            fich_delete.write(user_id + "\n")
 
 with open('users_to_notify.txt', 'w') as fich_notify:
     logger.debug('Generating user notification list')
     for user_id in next_to_expire:
         if not is_user_protected(users_by_id[user_id]):
-            print >>fich_notify, user_id
+            fich_notify.write(user_id + "\n")

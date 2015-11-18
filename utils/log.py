@@ -22,11 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'fla'
-from settings import settings
+from conf import settings
 import logging
 import os
 from logging.handlers import RotatingFileHandler
+
+__author__ = 'fla'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

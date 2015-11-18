@@ -22,13 +22,13 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import sys
 import logging
 
-from openstackmap import OpenStackMap
+from skuld.openstackmap import OpenStackMap
 import utils.log
+
+__author__ = 'chema'
 
 
 class SpecialPortRemover(object):
@@ -115,12 +115,11 @@ class SpecialPortRemover(object):
                 self.logger.error('Error deleting port' + port.id + 'Reason: '
                                   + str(e))
         if len(ports):
-            print 'Deleted {0}/{1} ports'.format(deleted, len(ports))
+            print('Deleted {0}/{1} ports'.format(deleted, len(ports)))
         else:
-            print 'There were not any ports to delete'
+            print('There were not any ports to delete')
 
 if __name__ == '__main__':
     logger = utils.log.init_logs('phase2c_deletespecialports')
     remover = SpecialPortRemover()
     remover.delete_special_ports()
-

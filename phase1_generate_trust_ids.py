@@ -22,17 +22,16 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import logging
 import sys
 from os import environ as env
 
-from impersonate import TrustFactory
-from settings.settings import TRUSTEE
-from settings.settings import KEYSTONE_ENDPOINT
-from osclients import OpenStackClients
+from skuld.impersonate import TrustFactory
+from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
+from utils.osclients import OpenStackClients
 import utils.log
+
+__author__ = 'chema'
 
 
 def generate_trust_ids(users_to_delete):
@@ -72,7 +71,7 @@ def generate_trust_ids(users_to_delete):
             count += 1
             (username, trust_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            print >>users_trusted_ids, username + ',' + trust_id
+            users_trusted_ids.write(username + ',' + trust_id + '\n')
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
         except Exception, e:

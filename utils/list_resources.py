@@ -22,23 +22,23 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-import cPickle as pickle
+from os import environ as env
 
-from skuld.queries import Queries
-import utils.log
+from skuld.user_resources import UserResources
 
 __author__ = 'chema'
 
-"""This scripts generate a file with a set of images ids that are in use by
-at least another tenant different than the owner of the image
+user = env['OS_USERNAME']
+password = env['OS_PASSWORD']
+user_resources = None
+if 'OS_TRUST_ID' in env:
+    trust_id = env['OS_TRUST_ID']
+    user_resources = UserResources(user, password, trust_id=trust_id)
+elif 'OS_TENANT_ID' in env:
+    tenant_id = env['OS_TENANT_ID']
+    user_resources = UserResources(user, password, tenant_id=tenant_id)
+elif 'OS_TENANT_NAME' in env:
+    tenant_name = env['OS_TENANT_NAME']
+    user_resources = UserResources(user, password, tenant_name=tenant_name)
 
-Invoke this script before deleting the users if you don't want to remove
-the images of the tenant in use by other tenants.
-"""
-q = Queries()
-logger = utils.log.init_logs('phase2b')
-
-image_set = q.get_imageset_othertenants()
-print(image_set)
-with open('imagesinuse.pickle', 'wb') as f:
-    pickle.dump(image_set, f, protocol=-1)
+user_resources.print_tenant_resources()

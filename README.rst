@@ -1,8 +1,9 @@
+.. _Top:
 =============================
 FIWARE Trial Users Management
 =============================
 
-| |Build Status|
+| |Build Status| |StackOverflow|
 
 .. contents:: :local:
 
@@ -16,6 +17,9 @@ expired Trial Users in any FIWARE Lab node and finally change the user type
 from Trial User to Basic User.
 
 This project is part of FIWARE_.
+
+Top_
+
 
 Description
 ===========
@@ -112,6 +116,9 @@ change_password.py
     A tool to change the password of any OpenStack user
 queries.py
     Some useful methods to get information from OpenStack servers
+
+Top_
+
 
 Build and Install
 =================
@@ -212,9 +219,14 @@ expect the password of the TRUSTEE, can use the environment variables
 TRUSTEE_USER and TRUSTEE_PASSWORD, but it is also possible to use the settings
 file.
 
+Top_
+
 
 Running
 =======
+
+The manual way
+--------------
 
 The recommended way of running the scripts is using the cron script. But if
 user need full control, here is a description of the process.
@@ -312,7 +324,7 @@ phase3:
 .. code::
 
     from osclients import osclients
-    from settings import settings
+    from conf import settings
 
     typeuser = settings.BASIC_ROLE_ID
     ids = set(line.strip() for line in open('users_to_delete.txt').readlines())
@@ -339,6 +351,65 @@ before deletion and the second the resources after deletion. The tuple has a
 boolean as a third value: it is True when all the users resources are deleted.
 A tool is provided to extract a report from free_resources-*.pickle:
 *analyse_report_data.py*
+
+Top_
+
+The classify_resources_by_owner script
+--------------------------------------
+
+A script is provided to analyse the cloud resources on each region
+and who owns them. Its main purpose is to detect anomalies,
+cloud resources that are not owned by the users who can create resources:
+community users, trial users and admins.
+
+The script at first prints a summary with the number of users of each type: community,
+trial and admin users can have resources. Basic users can log in the portal
+but can not create cloud resources. The 'other type users' are other
+users created with OpenStack tools that are not members of FIWARE. The
+'users without type' are users without a role in the system. The report about
+users with a project-id that does not exist, refers to a cloud-project-id
+that should have all users but admins.
+
+The script also print a summary of a set of resources in the specified regions.
+The following resources are supported:
+
+- vms: Virtual machines.
+- floatingips: Floating IPs.
+- networks: Networks.
+- subnets: Subnetworks (i.e. IP nets).
+- routers: routers to connect subnets.
+- security_groups: security groups to allow/deny network traffic.
+- ports: ports are created for each interface of a VM, routers, etc.
+- images: glance images. Snapshots are also images.
+- volumes: cinder volumes.
+- volume_backups: backups of cinder volumes.
+- volume_snapshot: snapshot of a volume.
+
+For example, to print information about vms and images on Spain2 and Mexico,
+run:
+
+.. code::
+
+    ./scripts/classify_resources_by_owners.py vms images --regions Spain2 Mexico --cache_dir ~/.cachedir
+
+The *--cache-dir* option is to provide the directory where the information is
+cached. By default this path is *~/openstackmap*. To get updated data, this
+directory should be deleted or empty.
+
+The report print the number of resources of that type:
+
+* total. The total sum of the following four groups.
+* resources owned by users community/trial/admin. This is the right situation.
+* resources owned by other registered users (basic, other type, without a role).
+* resources whose project-id is not the cloud-project-id of any user, but is
+  an existing project-id. A specific case are the resource whose project-id is the
+  default-project-id of the user intead of their cloud-project-id.
+* all the other resources, that is, resources with a project-id that is not the
+  cloud-project-id nor default-project-id of any user and in addition is not a
+  registered project-id. This situation happens when a project has been deleted.
+
+Top_
+
 
 Testing
 =======
@@ -374,32 +445,46 @@ Environment preparation
 Tests execution
 ***************
 
-1) Change to the tests/acceptance_tests folder of the project if not already on it
+1) Change to the tests/acceptance folder of the project if not already on it
 2) Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
 3) Run lettuce_tools with appropriate params (see available ones with the -h option)
 
 Tools
 -----
 
-The script *create_resources.py* may be used to create resources in a real
-infrastructure. OS_USERNAME, OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID,
+The script *tests/acceptance/commons/create_resources.py* may be used to create
+resources in a real infrastructure. OS_USERNAME, OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID,
 OS_PASSWORD and OS_AUTH_URL must be set accordingly. Then run:
 
 .. code::
 
     export PYTHONPATH=.
-    tests/create_resources.py
-    tests/list_resources.py
+    tests/acceptance/commons/create_resources.py
+    utils/list_resources.py
 
-The script *tests/list_resources.py* is useful to list the resources created
-and to compare the resources before and after running the scripts. Another
-advantage is that the script support OS_TRUST_ID, while other tools as nova
-does not.
+The script *utils/list_resources.py* is useful to list the resources
+created and to compare the resources before and after running the scripts. Another
+advantage is that the script support OS_TRUST_ID, while other tools as nova does not.
+
+Top_
+
 
 Deletion of Unaccepted Terms & Conditions users
 ===============================================
 
 You can find here details about `Deletion of users that does not accept new Terms and Conditions <scripts/unacceptedTermsAndConditions>`_
+
+Top_
+
+
+Support
+=======
+
+Ask your thorough programming questions using `stackoverflow`_ and your general questions on `FIWARE Q&A`_.
+In both cases please use the tag *fiware-skuld*.
+
+Top_
+
 
 License
 =======
@@ -411,7 +496,12 @@ License
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-skuld
    :alt: Build status
+.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+   :target: https://stackoverflow.com/questions/tagged/fiware-skuld
+   :alt: Help? Ask questions
 
 .. REFERENCES
 
 .. _FIWARE: http://www.fiware.org/
+.. _stackoverflow: http://stackoverflow.com/questions/ask
+.. _`FIWARE Q&A`: https://ask.fiware.org
