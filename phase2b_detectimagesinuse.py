@@ -25,7 +25,7 @@
 import cPickle as pickle
 
 from skuld.queries import Queries
-import utils
+import utils.log
 
 __author__ = 'chema'
 

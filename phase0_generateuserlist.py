@@ -27,25 +27,25 @@ from os import environ as env
 from skuld.expired_users import ExpiredUsers
 from conf import settings
 from utils.osclients import OpenStackClients
-import utils
+import utils.log
 
 logger = utils.log.init_logs('phase0')
 
 __author__ = 'chema'
 
 
-def is_user_protected(user):
+def is_user_protected(usertocheck):
     """
     Return true if the user must not be deleted, because their address has a
     domain in setting.DONT_DELETE_DOMAINS, and print a warning.
-    :param user: user to check
+    :param usertocheck: user to check
     :return: true if the user must not be deleted
     """
-    domain = user.name.partition('@')[2]
+    domain = usertocheck.name.partition('@')[2]
     if domain in settings.DONT_DELETE_DOMAINS:
         logger.warning(
             'User with name %(name)s should not be deleted due to its domain',
-            {'name': user.name})
+            {'name': usertocheck.name})
         return True
     else:
         return False
