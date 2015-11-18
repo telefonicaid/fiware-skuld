@@ -22,26 +22,27 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
+import utils.log
+from skuld.change_password import PasswordChanger
 
-import utils
-from change_password import PasswordChanger
+__author__ = 'chema'
 
 logger = utils.log.init_logs('phase1')
 
 try:
     users_to_delete = open('users_to_delete.txt')
+
+    users_credentials = open('users_credentials.txt', 'w')
+
+    user_manager = PasswordChanger()
+    user_ids = list()
+    for user in users_to_delete.readlines():
+        user_ids.append(user.strip())
+    cred_list = user_manager.get_list_users_with_cred(user_ids)
+
+    for cred in cred_list:
+        users_credentials.write(','.join(cred) + '\n')
+
+    users_credentials.close()
 except Exception:
     logger.error('The users_to_delete.txt file must exists')
-
-users_credentials = open('users_credentials.txt', 'w')
-
-user_manager = PasswordChanger()
-user_ids = list()
-for user in users_to_delete.readlines():
-    user_ids.append(user.strip())
-cred_list = user_manager.get_list_users_with_cred(user_ids)
-for cred in cred_list:
-    print >>users_credentials, ','.join(cred)
-
-users_credentials.close()

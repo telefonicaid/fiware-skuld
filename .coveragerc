@@ -1,8 +1,7 @@
 [report]
 omit =
     tests/*
-    settings/*
+    conf/*
     */__init__.py
-    */site-packages/*
 
 

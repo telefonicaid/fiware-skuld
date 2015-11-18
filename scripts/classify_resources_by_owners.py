@@ -22,17 +22,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import logging
-
-from osclients import osclients
-import openstackmap
-from settings.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
+from skuld.openstackmap import OpenStackMap
+from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
     ADMIN_ROLE_ID
 import utils.log
 import sys
 import argparse
+
+__author__ = 'chema'
 
 
 class ClassifyResources(object):
@@ -49,10 +47,10 @@ class ClassifyResources(object):
         """
         self.logger = logging.getLogger(__name__)
         if regions:
-            self.map = openstackmap.OpenStackMap(cache_dir, auto_load=False)
+            self.map = OpenStackMap(cache_dir, auto_load=False)
             self.map.preload_regions(regions)
         else:
-            self.map = openstackmap.OpenStackMap(cache_dir)
+            self.map = OpenStackMap(cache_dir)
 
         # This groups should be disjoint
         self.admin_users = set()
@@ -153,19 +151,16 @@ class ClassifyResources(object):
             self.logger.error('There are users both in admin and trial')
 
     def print_users_summary(self):
-        print
-        print 'Total users: ', len(self.map.users)
-        print '---- Users by type:'
-        print 'Basic users: ', len(self.basic_users)
-        print 'Community users: ', len(self.community_users)
-        print 'Trial users: ', len(self.trial_users)
-        print 'Admin users: ', len(self.admin_users)
-        print 'Other type users: ', len(self.other_users)
-        print 'Users without type: ', len(self.not_found_users)
-        print '----'
-        print 'Users with a project-id that does not exist: ', \
-            len(self.broken_users)
-        print
+        print('\nTotal users: {}'.format(len(self.map.users)))
+        print('---- Users by type:')
+        print('Basic users: {}'.format(len(self.basic_users)))
+        print('Community users: {}'.format(len(self.community_users)))
+        print('Trial users: {}'.format(len(self.trial_users)))
+        print('Admin users: {}'.format(len(self.admin_users)))
+        print('Other type users: {}'.format(len(self.other_users)))
+        print('Users without type: {}'.format(len(self.not_found_users)))
+        print('----')
+        print('Users with a project-id that does not exist: {}\n'.format(len(self.broken_users)))
 
     def classify_resource(self, member, region=None):
         special_cases = {'images': 'owner',
@@ -184,14 +179,12 @@ class ClassifyResources(object):
             elements = getattr(self.map, member)
             region = self.map.osclients.region
 
-
-
         if member in special_cases:
             attr = special_cases[member]
             for element in elements.values():
                 element['tenant_id'] = element[attr]
-        print '==Resources: {0}. Region: {1} '.format(member, region)
-        print 'Total:', len(elements)
+        print('==Resources: {0}. Region: {1} '.format(member, region))
+        print('Total: {}'.format(len(elements)))
         return self.classify_resource_raw(elements)
 
     def classify_resource_raw(self, element_list):
@@ -235,12 +228,12 @@ class ClassifyResources(object):
                 unkown_tenant.append(element)
 
         msg = 'Owned by users community/trial/admin: {0} ({1}/{2}/{3})'
-        print msg.format(ok, community, trial, admin)
+        print(msg.format(ok, community, trial, admin))
         msg = 'Owned by users basic/other type/unknown type: {0} ({1}/{2}/{3})'
-        print msg.format(len(owned), basic, other_type, unknown_type)
+        print(msg.format(len(owned), basic, other_type, unknown_type))
         m = 'Owned by another projects id: {0} (using default_project_id {1})'
-        print m.format(len(unkown_owner), default_project_id)
-        print 'Project id does not exist:', len(unkown_tenant)
+        print(m.format(len(unkown_owner), default_project_id))
+        print('Project id does not exist:'.format(len(unkown_tenant)))
 
         return owned, unkown_owner, unkown_tenant
 
@@ -267,7 +260,7 @@ if __name__ == '__main__':
     description = 'A tool to classify users and the resources on any region'
     parser = argparse.ArgumentParser(description=description)
 
-    res_types = hidden_set(openstackmap.OpenStackMap.resources_region)
+    res_types = hidden_set(OpenStackMap.resources_region)
     res_types.add_hidden('none')
     res_types.add_hidden('all')
 
@@ -279,7 +272,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--omit-user-summary', action='store_true',
                         help='do not print the summary about user types')
-    help='data is cached in this directory (default is %(default)s)'
+
+    help = 'data is cached in this directory (default is %(default)s)'
     parser.add_argument('--cache-dir', help=help, default='~/openstackmap')
 
     meta = parser.parse_args()

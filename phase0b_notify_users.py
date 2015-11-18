@@ -22,20 +22,21 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
-import requests
 import warnings
 import os.path
 import logging
 import cPickle as pickle
+import sys
+
+import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
-from osclients import osclients
-from settings.settings import HORIZON_ENDPOINT
+from utils.osclients import osclients
+from conf.settings import HORIZON_ENDPOINT
 import utils.log
-import sys
+
+__author__ = 'chema'
 
 
 class Notifier(object):
@@ -88,7 +89,6 @@ class Notifier(object):
         # Replace file
         with open(filename, 'wf') as f:
             pickle.dump(user_ids, f, protocol=-1)
-
 
 
 if __name__ == '__main__':

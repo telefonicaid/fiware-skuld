@@ -22,23 +22,22 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-import cPickle as pickle
-
-from skuld.queries import Queries
-import utils.log
-
 __author__ = 'chema'
 
-"""This scripts generate a file with a set of images ids that are in use by
-at least another tenant different than the owner of the image
+import logging
 
-Invoke this script before deleting the users if you don't want to remove
-the images of the tenant in use by other tenants.
-"""
+from skuld.queries import Queries
+from utils import osclients
+
+"""This scripts delete images with the metadata 'orphan_image' when there are
+no more VMs using it. It may be invoked by a cron script.
+
+An 'orphan image' is an image that was preserved when the other resources of
+the user was deleted, because it was in use by VMs of other tenants."""
 q = Queries()
-logger = utils.log.init_logs('phase2b')
-
-image_set = q.get_imageset_othertenants()
-print(image_set)
-with open('imagesinuse.pickle', 'wb') as f:
-    pickle.dump(image_set, f, protocol=-1)
+images = q.get_orphan_images_without_use()
+if images:
+    glance = osclients.OpenStackClients().get_glanceclient()
+    for image in images:
+        logging.info('Deleting image ' + image)
+        glance.images.delete(image)

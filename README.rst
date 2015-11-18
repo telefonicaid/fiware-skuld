@@ -324,7 +324,7 @@ phase3:
 .. code::
 
     from osclients import osclients
-    from settings import settings
+    from conf import settings
 
     typeuser = settings.BASIC_ROLE_ID
     ids = set(line.strip() for line in open('users_to_delete.txt').readlines())
@@ -445,27 +445,26 @@ Environment preparation
 Tests execution
 ***************
 
-1) Change to the tests/acceptance_tests folder of the project if not already on it
+1) Change to the tests/acceptance folder of the project if not already on it
 2) Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
 3) Run lettuce_tools with appropriate params (see available ones with the -h option)
 
 Tools
 -----
 
-The script *create_resources.py* may be used to create resources in a real
-infrastructure. OS_USERNAME, OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID,
+The script *tests/acceptance/commons/create_resources.py* may be used to create
+resources in a real infrastructure. OS_USERNAME, OS_TENANT_NAME/OS_TENANT_ID/OS_TRUST_ID,
 OS_PASSWORD and OS_AUTH_URL must be set accordingly. Then run:
 
 .. code::
 
     export PYTHONPATH=.
-    tests/create_resources.py
-    tests/list_resources.py
+    tests/acceptance/commons/create_resources.py
+    utils/list_resources.py
 
-The script *tests/list_resources.py* is useful to list the resources created
-and to compare the resources before and after running the scripts. Another
-advantage is that the script support OS_TRUST_ID, while other tools as nova
-does not.
+The script *utils/list_resources.py* is useful to list the resources
+created and to compare the resources before and after running the scripts. Another
+advantage is that the script support OS_TRUST_ID, while other tools as nova does not.
 
 Top_
 

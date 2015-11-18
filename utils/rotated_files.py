@@ -22,10 +22,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-author = 'chema'
-
 import glob
 import os
+
+__author__ = 'chema'
+
 
 def rotate_files(name, max_level, rename_to):
     """
@@ -50,4 +51,3 @@ def rotate_files(name, max_level, rename_to):
             os.rename(path, rename_to)
         else:
             os.rename(path, next_name)
-
