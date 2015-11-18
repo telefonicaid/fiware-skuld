@@ -168,7 +168,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(novaClient, novaclient.v2.client.Client)
 
-    @patch('osclients.session', mock_session)
+    @patch('utils.osclients.session', mock_session)
     def test_get_glanceclient(self):
         """test_get_glanceclient check that we could retrieve a Session client to work with glance"""
 
@@ -178,7 +178,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(glanceClient, glanceclient.v1.client.Client)
 
-    @patch('osclients.session', mock_session)
+    @patch('utils.osclients.session', mock_session)
     def test_get_swiftclient(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v3"""
 
@@ -187,7 +187,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(swiftClient, Connection)
 
-    @patch('osclients.session', mock_session)
+    @patch('utils.osclients.session', mock_session)
     def test_get_swiftclient_with_keystone_v2(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v2"""
 
