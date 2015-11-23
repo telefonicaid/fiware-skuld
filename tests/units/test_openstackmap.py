@@ -61,6 +61,8 @@ class MySessionMock(MagicMock):
                 endpoint_override=None, connect_retries=0, logger=None,
                 **kwargs):
 
+        resp = Response()
+
         if url == '/servers/detail?all_tenants=1':
             text = '{"servers": [{"status": "ACTIVE", "updated": "2015-11-23T08:08:58Z", ' \
                  '"hostId": "000000000000000123456789abcdef4fdde65ad633c1589e98a4d408", ' \
@@ -91,10 +93,9 @@ class MySessionMock(MagicMock):
                  ' "accessIPv6": "", "progress": 0, "OS-EXT-STS:power_state": 1, "config_drive": "",' \
                  ' "metadata": {"region": "Spain2"}}]}'
 
-            resp = Response()
             resp.status_code = 200
             resp._content = text
-            return resp
+
         elif url == '/volumes/detail?all_tenants=1':
             text = '{"volumes": [{"status": "in-use", "display_name": "datos", "attachments":' \
                    ' [{"server_id": "123a0a4c-226d-4a93-889f-8fd3bff92002", "attachment_id":' \
@@ -110,10 +111,8 @@ class MySessionMock(MagicMock):
                    '"os-vol-mig-status-attr:name_id": null, "metadata": {"readonly": "False", "attached_mode": "rw"},' \
                    ' "id": "00000000-0341-4036-i347-e125056b452c", "os-vol-mig-status-attr:migstat": null,' \
                    ' "size": 20}]}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
 
         elif url == '/snapshots/detail?all_tenants=1':
             text = '{"snapshots": [{"status": "error", "display_name": "testVV", "created_at": ' \
@@ -128,17 +127,13 @@ class MySessionMock(MagicMock):
                    ' "ab76543d81312345bd6297a02584cbcc", "metadata": {}, "id": ' \
                    '"86034934-aec3-41b2-9b31-5f4b5a7e9c7b",' \
                    ' "size": 1}]}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
 
         elif url == '/backups/detail':
             text = '{"backups": []}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
 
         elif url == '/roles':
             text = '{"links": {"self": "http://cloud.host.fi-ware.org:4731/v3/roles", "previous": null, ' \
@@ -160,10 +155,9 @@ class MySessionMock(MagicMock):
                    ' "service"}, {"is_default": true, "id": "0bcb7fa6e85046cb9e89de123456789h", "links": {"self":' \
                    ' "http://cloud.host.fi-ware.org:4731/v3/roles/0bcb7fa6e85046cb9e89de123456789h"},' \
                    ' "name": "admin"}]}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
+
         elif url == '/users':
             text = '{"users": [{"username": "user", "name": "user", "links": {"self": ' \
                    '"http://cloud.host.fi-ware.org:4731/v3/users/00000000000000000000000000000001"}, ' \
@@ -171,10 +165,9 @@ class MySessionMock(MagicMock):
                    ' "00000000000000000000000000000001", "cloud_project_id": "00000000000000000000000000000001", ' \
                    '"id": "00000000000000000000000000000001"}], "links": {"self": ' \
                    '"http://cloud.host.fi-ware.org:4731/v3/users", "previous": null, "next": null}}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
+
         elif url == '/projects':
             text = '{"links": {"self": "http://cloud.host.fi-ware.org:4731/v3/projects", "previous": null, ' \
                    '"next": null}, "projects": [{"is_cloud_project": true, "description": ' \
@@ -183,20 +176,19 @@ class MySessionMock(MagicMock):
                    ' "links": {"self": ' \
                    '"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001"}, "enabled":' \
                    ' true, "id": "00000000000000000000000000000001", "domain_id": "default", "name": "user cloud"}]}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
+
         elif url == '/role_assignments':
             text = '{"role_assignments": [{"scope": {"project": {"id": "00000000000000000000000000000001"}},' \
                    ' "role": {"id": "00000000000000000000000000000001"}, "user": {"id":' \
                    ' "00000000000000000000000000000001"}, "links": {"assignment": ' \
                    '"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001' \
                    '/users/00000000000000000000000000000001"}}]}'
-            resp = Response()
             resp._content = text
             resp.status_code = 200
-            return resp
+
+        return resp
 
 
 class TestOpenstackMap(TestCase):
