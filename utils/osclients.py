@@ -560,10 +560,19 @@ class OpenStackClients(object):
         This is a hack, but it is useful for example when the admin
         interface is an internal IP but there is also a tunnel to access
         from outside. This is equivalent to Nova's bypass-url option.
+
+        If region is not found, but there is only a region, it is modified
+        also. This is useful for example in a federation, where there is
+        only a keystone server in one of the regions.
         """
-        for endpoint in self.get_endpoints(service_type):
-            if endpoint['region'] == region and\
-               endpoint['interface'] == interface:
+        endpoints = list(endp for endp in self.get_endpoints(service_type)
+                         if endp['interface'] == interface)
+
+        if len(endpoints) == 1:
+            endpoints[0]['url'] = url
+        else:
+            for endpoint in endpoints:
+                if endpoint['region'] == region:
                     endpoint['url'] = url
 
     def get_regions(self, service_type):
