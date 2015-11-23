@@ -92,7 +92,7 @@ for line in lines:
     try:
         count += 1
         if use_trust_ids:
-            (user, trust_id) = line.strip().split(',')
+            (user, trust_id, user_id) = line.strip().split(',')
             logger.info('Obtaining resources of user {0} ({1}/{2})'.format(
                 user, count, total))
             user_resources = UserResources(trustee, password,
@@ -117,7 +117,7 @@ for line in lines:
                 break
         if all_free:
             report[user_id] = (resources_before, resources_before, True)
-            msg = 'User {0} does not have any reources to free'
+            msg = 'User {0} does not have any resources to free'
             logger.info(msg.format(user_resources.user_id))
 
             if free_trust_id:
