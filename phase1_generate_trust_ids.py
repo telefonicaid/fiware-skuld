@@ -29,6 +29,8 @@ from os import environ as env
 from skuld.impersonate import TrustFactory
 from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
 from utils.osclients import OpenStackClients
+from skuld.check_users import CheckUsers
+
 import utils.log
 
 __author__ = 'chema'
@@ -47,6 +49,7 @@ def generate_trust_ids(users_to_delete):
 
     osclients = OpenStackClients()
     users_trusted_ids = open('users_trusted_ids.txt', 'w')
+    check_users = CheckUsers()
 
     # Use an alternative URL that allow direct access to the keystone admin
     # endpoint, because the registered one uses an internal IP address.
