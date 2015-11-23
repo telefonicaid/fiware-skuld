@@ -399,9 +399,12 @@ class OpenStackClients(object):
             session=self.get_session(), region_name=self.region)
 
     def get_cinderclientv1(self):
-        """Get a cinder clientv1. The API is older than the v2 provided with
-         get_cinderclient, but there is still a lot of
-         servers that do not have registered the version 2 end-point.
+        """Get a cinder client asking for the 'volume' endpoint instead of the
+        default v2 version. This method is provided for compatibility with
+        servers that do not provide an endpoint with the v2 version. Be aware
+        that, apparently, both clients are the same (the v2 version). However,
+        the object's method get_volume_api_version_from_endpoint shows the
+        real version in use.
 
          A client is different for each region (although all clients share the
          same session and it is possible to have simultaneously clients to
