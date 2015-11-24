@@ -36,7 +36,7 @@ class MySessionMock(MagicMock):
     # Mock of a keystone Session
 
     def get_endpoint(self, auth, **kwargs):
-        
+
         endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
         return endpoint
 
@@ -224,10 +224,9 @@ class TestOpenstackMap(TestCase):
         a region Name."""
 
         del os.environ['OS_REGION_NAME']
-        try:
-            myopenstackmap = OpenStackMap(auth_url=self.OS_AUTH_URL, auto_load=False)
-        except Exception as ex:
-            self.assertRaises(ex)
+
+        with self.assertRaises(Exception):
+            OpenStackMap(auth_url=self.OS_AUTH_URL, auto_load=False)
 
     @patch('utils.osclients.session', mock_session)
     @patch.object(os, 'mkdir')
