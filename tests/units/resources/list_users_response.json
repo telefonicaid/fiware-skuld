@@ -1,0 +1,21 @@
+{  
+   "users":[  
+      {  
+         "username":"user",
+         "name":"user",
+         "links":{  
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/00000000000000000000000000000001"
+         },
+         "enabled":true,
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"00000000000000000000000000000001"
+      }
+   ],
+   "links":{  
+      "self":"http://cloud.host.fi-ware.org:4731/v3/users",
+      "previous":null,
+      "next":null
+   }
+}

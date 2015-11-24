@@ -1,0 +1,20 @@
+{  
+   "links":{  
+      "self":"http://cloud.host.fi-ware.org:4731/v3/projects",
+      "previous":null,
+      "next":null
+   },
+   "projects":[  
+      {  
+         "is_cloud_project":true,
+         "description":"This organization is intended to be used in the cloud environment. As long as you are a trial or community user this organization will be authorized as purchaser in the Cloud Application.",
+         "links":{  
+            "self":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001"
+         },
+         "enabled":true,
+         "id":"00000000000000000000000000000001",
+         "domain_id":"default",
+         "name":"user cloud"
+      }
+   ]
+}
