@@ -128,6 +128,10 @@ class TestOpenstackMap(TestCase):
         environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
         environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
 
+    def tearDown(self):
+        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
+            del os.environ['KEYSTONE_ADMIN_ENDPOINT']
+
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
     def test_implement_openstackmap(self, mock_exists, mock_os):
@@ -162,7 +166,6 @@ class TestOpenstackMap(TestCase):
         openstackmap = OpenStackMap(auto_load=False)
         self.assertTrue(mock_os.called)
         self.assertIsNotNone(openstackmap)
-        del os.environ['KEYSTONE_ADMIN_ENDPOINT']
 
     @patch('utils.osclients.session', mock_session)
     @patch.object(os, 'mkdir')
@@ -179,7 +182,6 @@ class TestOpenstackMap(TestCase):
         openstackmap.load_nova()
         self.assertTrue(mock_os.called)
         self.assertIsNotNone(openstackmap)
-        del os.environ['KEYSTONE_ADMIN_ENDPOINT']
 
     @patch('utils.osclients.session', mock_session)
     def test_load_nova2(self):
@@ -197,7 +199,6 @@ class TestOpenstackMap(TestCase):
         openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
         openstackmap.load_cinder()
         self.assertIsNotNone(openstackmap)
-        del os.environ['KEYSTONE_ADMIN_ENDPOINT']
 
     @patch('utils.osclients.session', mock_session)
     def test_load_keystone(self):
@@ -207,4 +208,3 @@ class TestOpenstackMap(TestCase):
         openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
         openstackmap.load_keystone()
         self.assertIsNotNone(openstackmap)
-        del os.environ['KEYSTONE_ADMIN_ENDPOINT']
