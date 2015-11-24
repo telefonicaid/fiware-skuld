@@ -36,9 +36,9 @@ class MySessionMock(MagicMock):
     # Mock of a keystone Session
 
     def get_endpoint(self, auth, **kwargs):
-
-        if kwargs.get("service_type") == "volume":
-            return "http://cloud.host.fi-ware.org:4731/v2.0"
+        
+        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
+        return endpoint
 
     def get_access(self, session):
 
