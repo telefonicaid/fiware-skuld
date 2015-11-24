@@ -54,12 +54,7 @@ class MySessionMock(MagicMock):
 
         return d
 
-    def request(self, url, method, json=None, original_ip=None,
-                user_agent=None, redirect=None, authenticated=None,
-                endpoint_filter=None, auth=None, requests_auth=None,
-                raise_exc=True, allow_reauth=True, log=True,
-                endpoint_override=None, connect_retries=0, logger=None,
-                **kwargs):
+    def request(self, url, method, **kwargs):
 
         resp = Response()
 
