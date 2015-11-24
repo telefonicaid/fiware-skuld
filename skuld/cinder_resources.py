@@ -35,7 +35,7 @@ class CinderResources(object):
         :param openstackclients: an OpenStackClients method (module osclients)
         :return: nothing
         """
-        self.cinder = openstackclients.get_cinderclient()
+        self.cinder = openstackclients.get_cinderclientv1()
         self.osclients = openstackclients
 
     def on_region_changed(self):
@@ -44,11 +44,11 @@ class CinderResources(object):
 
     def get_tenant_volumes(self):
         """Return a list with all the volumes of the tenant
-        :return: a list of tuples (volume_id, user_id)
+        :return: a list of volume_id
         """
         volumes = list()
         for volume in self.cinder.volumes.list():
-            volumes.append((volume.id, volume.user_id))
+            volumes.append(volume.id)
         return volumes
 
     def delete_tenant_volumes(self):
@@ -58,11 +58,11 @@ class CinderResources(object):
 
     def get_tenant_backup_volumes(self):
         """Return a list with all the volume backups of the tenant
-        :return: a list of tuples (volume_id, user_id)
+        :return: a list of volume_id
         """
         volumes = list()
         for volume in self.cinder.backups.list():
-            volumes.append((volume.id, volume.user_id))
+            volumes.append(volume.id)
         return volumes
 
     def delete_tenant_backup_volumes(self):

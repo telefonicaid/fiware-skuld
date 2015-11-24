@@ -48,7 +48,6 @@ logger.setLevel(logging.DEBUG)
 
 
 def _init_logger(logger, phase):
-    LOGFILE = 'delete_user_resources.log'
     log_handler = RotatingFileHandler(LOGFILE, maxBytes=1048576, backupCount=5)
     fmt = '%(asctime)s %(levelname)s {0} [-] %(message)s'.format(phase)
     formatter = logging.Formatter(fmt)
@@ -64,15 +63,15 @@ def init_logs(phase):
     logger = logging.getLogger('__main__')
     # Complete this if the program has new modules
     _init_logger(logger, phase)
-    _init_logger(logging.getLogger('user_resources'), phase)
-    _init_logger(logging.getLogger('glance_resources'), phase)
-    _init_logger(logging.getLogger('cinder_resources'), phase)
-    _init_logger(logging.getLogger('nova_resources'), phase)
-    _init_logger(logging.getLogger('neutron_resources'), phase)
-    _init_logger(logging.getLogger('blueprint_resources'), phase)
-    _init_logger(logging.getLogger('swift_resources'), phase)
-    _init_logger(logging.getLogger('impersonate'), phase)
-    _init_logger(logging.getLogger('osclients'), phase)
+    _init_logger(logging.getLogger('skuld.user_resources'), phase)
+    _init_logger(logging.getLogger('skuld.glance_resources'), phase)
+    _init_logger(logging.getLogger('skuld.cinder_resources'), phase)
+    _init_logger(logging.getLogger('skuld.nova_resources'), phase)
+    _init_logger(logging.getLogger('skuld.neutron_resources'), phase)
+    _init_logger(logging.getLogger('skuld.blueprint_resources'), phase)
+    _init_logger(logging.getLogger('skuld.swift_resources'), phase)
+    _init_logger(logging.getLogger('skuld.impersonate'), phase)
+    _init_logger(logging.getLogger('utils.osclients'), phase)
     _init_logger(logging.getLogger('phase0b_notify_users'), phase)
 
     # init root logger, to show messages also in stderr

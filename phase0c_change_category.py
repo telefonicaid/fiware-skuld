@@ -85,7 +85,7 @@ def change_user_via_idm(user_id):
 if __name__ == '__main__':
     users = open('users_to_delete.txt')
     for line in users.readlines():
-        user_id = line.strip()
+        user_id = line.strip().split(',')[0]
         if user_id == '':
             continue
         logger.info('Changing user {0} from trial to basic'.format(user_id))

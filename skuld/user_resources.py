@@ -88,7 +88,7 @@ class UserResources(object):
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.user_id = self.clients.get_session().get_user_id()
         session = self.clients.get_session()
-        self.user_name = session.auth.get_access(session)
+        self.user_name = username
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)

@@ -399,9 +399,12 @@ class OpenStackClients(object):
             session=self.get_session(), region_name=self.region)
 
     def get_cinderclientv1(self):
-        """Get a cinder clientv1. The API is older than the v2 provided with
-         get_cinderclient, but there is still a lot of
-         servers that do not have registered the version 2 end-point.
+        """Get a cinder client asking for the 'volume' endpoint instead of the
+        default v2 version. This method is provided for compatibility with
+        servers that do not provide an endpoint with the v2 version. Be aware
+        that, apparently, both clients are the same (the v2 version). However,
+        the object's method get_volume_api_version_from_endpoint shows the
+        real version in use.
 
          A client is different for each region (although all clients share the
          same session and it is possible to have simultaneously clients to
@@ -560,10 +563,19 @@ class OpenStackClients(object):
         This is a hack, but it is useful for example when the admin
         interface is an internal IP but there is also a tunnel to access
         from outside. This is equivalent to Nova's bypass-url option.
+
+        If region is not found, but there is only a region, it is modified
+        also. This is useful for example in a federation, where there is
+        only a keystone server in one of the regions.
         """
-        for endpoint in self.get_endpoints(service_type):
-            if endpoint['region'] == region and\
-               endpoint['interface'] == interface:
+        endpoints = list(endp for endp in self.get_endpoints(service_type)
+                         if endp['interface'] == interface)
+
+        if len(endpoints) == 1:
+            endpoints[0]['url'] = url
+        else:
+            for endpoint in endpoints:
+                if endpoint['region'] == region:
                     endpoint['url'] = url
 
     def get_regions(self, service_type):
