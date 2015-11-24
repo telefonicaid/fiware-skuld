@@ -1,0 +1,32 @@
+{  
+   "snapshots":[  
+      {  
+         "status":"error",
+         "display_name":"testVV",
+         "created_at":"2015-08-26T10:47:48.000000",
+         "display_description":"",
+         "os-extended-snapshot-attributes:progress":"0%",
+         "volume_id":"8eca285e-cab9-47b8-8a92-379cff8825cc",
+         "os-extended-snapshot-attributes:project_id":"00000000000000000000000000000001",
+         "metadata":{  
+
+         },
+         "id":"00000000-5bce-410f-a953-ec09c89ed58e",
+         "size":1
+      },
+      {  
+         "status":"error",
+         "display_name":null,
+         "created_at":"2015-09-24T06:46:17.000000",
+         "display_description":null,
+         "os-extended-snapshot-attributes:progress":"0%",
+         "volume_id":"5bc15d1f-6b9a-1234-8000-0eba8888806",
+         "os-extended-snapshot-attributes:project_id":"ab76543d81312345bd6297a02584cbcc",
+         "metadata":{  
+
+         },
+         "id":"86034934-aec3-41b2-9b31-5f4b5a7e9c7b",
+         "size":1
+      }
+   ]
+}
