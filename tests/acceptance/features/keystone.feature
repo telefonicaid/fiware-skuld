@@ -6,7 +6,7 @@ Feature: Get the list of expired users from the IdM.
 
 
     @happy_path
-    Scenario: 01: Verify the obtention of administrator token
+    Scenario: 01: Verify the response of administrator token
       Given a valid tenantName, username and password
       And a connectivity to the Keystone service
       When I request a valid token from the Keystone
