@@ -497,7 +497,11 @@ class OpenStackClients(object):
            * type: the type of the service (e.g. compute)
         """
         session = self.get_session()
-        return session.auth.get_access(session)['catalog']
+        access = session.auth.get_access(session)
+        if 'catalog' in access:
+            return access['catalog']
+        else:
+            return access['serviceCatalog']
 
     def get_endpoints(self, service_type):
         """Get the endpoints for a service.
