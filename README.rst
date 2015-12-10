@@ -3,7 +3,7 @@
 FIWARE Trial Users Management
 =============================
 
-| |Build Status| |StackOverflow|
+| |Build Status| |Coveralls| |StackOverflow|
 
 .. contents:: :local:
 
@@ -499,6 +499,10 @@ License
 .. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
    :target: https://stackoverflow.com/questions/tagged/fiware-skuld
    :alt: Help? Ask questions
+.. |Coveralls| image:: https://coveralls.io/repos/telefonicaid/fiware-skuld/badge.svg?branch=develop&service=github
+   :target: https://coveralls.io/github/telefonicaid/fiware-skuld?branch=develop
+   :alt: Unit tests coverage
+
 
 .. REFERENCES
 
