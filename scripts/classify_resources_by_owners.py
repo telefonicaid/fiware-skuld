@@ -43,7 +43,7 @@ class ClassifyResources(object):
         It also build the sets about users and tenants
         :param cache_dir: the directory where the data is cached.
         :param regions: a list with the regions whose maps are preload. If None
-          all the available regions.
+          only the current region.
         """
         self.logger = logging.getLogger(__name__)
         if regions:
@@ -76,10 +76,27 @@ class ClassifyResources(object):
 
         self._process_users()
 
+        # Read all the filters
+        self.filter_by_region = dict()
+        self.empty_filter = None
+        for filter in self.map.filters.values():
+            filter_cond = filter['filters']
+            if not filter_cond:
+                self.empty_filter = filter.id
+            elif 'region_id' in filter_cond:
+                self.filter_by_region[filter_cond['region_id']] = filter.id
+
+        if regions:
+            self.regions = regions
+        else:
+            self.regions = [self.map.osclients.region]
+
+
     def _process_users(self):
+        """get information about all the users. This information is used
+        by the other methods, as print_users_summary"""
         projects = set(self.map.tenants.keys())
         for user in self.map.users.values():
-
             if 'cloud_project_id' in user:
                 cloud_project_id = user.cloud_project_id
                 self.user_cloud_projects.add(cloud_project_id)
@@ -101,22 +118,22 @@ class ClassifyResources(object):
             roles = self.map.roles_by_user[user.id]
             user_type = None
             for rol in roles:
-                if rol[0] == BASIC_ROLE_ID:
+                if rol == BASIC_ROLE_ID:
                     user_type = 'basic'
                     self.basic_users.add(user.id)
                     if cloud_project_id:
                         self.basic_cloud_projects.add(cloud_project_id)
-                elif rol[0] == COMMUNITY_ROLE_ID:
+                elif rol == COMMUNITY_ROLE_ID:
                     user_type = 'community'
                     self.community_users.add(user.id)
                     if cloud_project_id:
                         self.community_cloud_projects.add(cloud_project_id)
-                elif rol[0] == TRIAL_ROLE_ID:
+                elif rol == TRIAL_ROLE_ID:
                     user_type = 'trial'
                     self.trial_users.add(user.id)
                     if cloud_project_id:
                         self.trial_cloud_projects.add(cloud_project_id)
-                elif rol[0] == ADMIN_ROLE_ID:
+                elif rol == ADMIN_ROLE_ID:
                     user_type = 'admin'
                     self.admin_users.add(user.id)
                     # use default_project_id with admin users, because
@@ -151,6 +168,8 @@ class ClassifyResources(object):
             self.logger.error('There are users both in admin and trial')
 
     def print_users_summary(self):
+        """print a summary of users by their type. Also includes a summary
+        by region of the number of community /trial users"""
         print('\nTotal users: {}'.format(len(self.map.users)))
         print('---- Users by type:')
         print('Basic users: {}'.format(len(self.basic_users)))
@@ -160,9 +179,32 @@ class ClassifyResources(object):
         print('Other type users: {}'.format(len(self.other_users)))
         print('Users without type: {}'.format(len(self.not_found_users)))
         print('----')
-        print('Users with a project-id that does not exist: {}\n'.format(len(self.broken_users)))
+        print('Users with a project-id that does not exist: {}\n'.format(
+            len(self.broken_users)))
+
+        for region in self.regions:
+            print('---Region: ' + region)
+            print('Community: {0}'.format(len(self.filter_projects(
+                self.community_cloud_projects, region))))
+            print('Trial: {0}'.format(len(self.filter_projects(
+                self.trial_cloud_projects, region))))
 
     def classify_resource(self, member, region=None):
+        """
+        This is a wrapper to classify_resource_raw. It locates the
+        resources by name and region, change the owner tenant_id of the
+        attribute when it has a different name and then call
+        classify_resource_raw. See the documentation of classify_resource_raw
+
+        :param member: the member. It can be: subnets, routers, networks, vms,
+                       volume_backups, volumes, images, volume_snapshots,
+                       ports, security_groups, floatingips
+
+        :param region: the region
+        :return: a tuple with three lists, see classify_resource_raw.
+        """
+
+        # Resources where the tenant-id attribute has a different name
         special_cases = {'images': 'owner',
                          'volumes': 'os-vol-tenant-attr:tenant_id',
                          'volume_snapshots':
@@ -185,12 +227,37 @@ class ClassifyResources(object):
                 element['tenant_id'] = element[attr]
         print('==Resources: {0}. Region: {1} '.format(member, region))
         print('Total: {}'.format(len(elements)))
-        return self.classify_resource_raw(elements)
+        return self.classify_resource_raw(elements, region)
 
-    def classify_resource_raw(self, element_list):
+    def classify_resource_raw(self, element_list, region_name):
+        """
+        This method receives a dictionary of resources (e.g. vms, volumes...)
+        and prints a summary about who owned them:
+
+        *resources owned by legal users: community / admin /trial users
+        *resources with an unexpected owner: basic / other / unknown
+        *resources not using cloud_project_id / using default_project_id
+        *resources with a project id that does not exists.
+
+        It also returns a tuple with four list of elements:
+        *resources owned by community or trial or admin but in bad region (i.e.
+        the project id is not authorised in that region)
+        *resources that are not owned by any community/trial/admin users
+        *resources that are not owned by any know user
+        *resources that whose tenant_id (project_id) does not exist.
+
+        The elements of the resource list must use tenant-id attribute to
+        identify the owner of the resource.
+
+        :param element_list: resources list to classify.
+        :param region_name: region of the resources. It is used for checking if
+                            the project-id is authorised in that region.
+        :return: a tuple with four list of resources with some anomaly.
+        """
         owned = list()
         unkown_owner = list()
         unkown_tenant = list()
+        forbidden_region = list()
 
         ok = 0
         community = 0
@@ -200,17 +267,25 @@ class ClassifyResources(object):
         other_type = 0
         unknown_type = 0
         default_project_id = 0
+        bad_region = 0
+
+        filtered = self.filter_projects(
+            self.comtrialadmin_cloud_projects, region_name)
 
         for element in element_list.values():
             tenant_id = element['tenant_id']
             if tenant_id in self.comtrialadmin_cloud_projects:
-                ok += 1
-                if tenant_id in self.community_cloud_projects:
-                    community += 1
-                elif tenant_id in self.trial_cloud_projects:
-                    trial += 1
+                if tenant_id in filtered:
+                    ok += 1
+                    if tenant_id in self.community_cloud_projects:
+                        community += 1
+                    elif tenant_id in self.trial_cloud_projects:
+                        trial += 1
+                    else:
+                        admin += 1
                 else:
-                    admin += 1
+                    bad_region += 1
+                    forbidden_region.append(element)
             elif tenant_id in self.user_cloud_projects:
                 owned.append(element)
                 if tenant_id in self.basic_cloud_projects:
@@ -227,31 +302,68 @@ class ClassifyResources(object):
             else:
                 unkown_tenant.append(element)
 
-        msg = 'Owned by users community/trial/admin: {0} ({1}/{2}/{3})'
+        msg = 'All OK. Owned by users community/trial/admin: {0} ({1}/{2}/{3})'
         print(msg.format(ok, community, trial, admin))
+        msg = 'Owned by users communtiy/trial/admin but bad region: {0}'
+        print(msg.format(bad_region))
         msg = 'Owned by users basic/other type/unknown type: {0} ({1}/{2}/{3})'
         print(msg.format(len(owned), basic, other_type, unknown_type))
         m = 'Owned by another projects id: {0} (using default_project_id {1})'
         print(m.format(len(unkown_owner), default_project_id))
-        print('Project id does not exist:'.format(len(unkown_tenant)))
+        print('Project id does not exist: {0}'.format(len(unkown_tenant)))
 
-        return owned, unkown_owner, unkown_tenant
+        return forbidden_region, owned, unkown_owner, unkown_tenant
 
+    def filter_projects(self, projects, region):
+        """Filter the list of projects: only are selected the projects which
+        are authorised in the specified region.
+
+        :param projects: a list of project ids
+        :param region: a region name
+        :return: a filtered set of project ids: only the project authorised to
+           use the region resources are included.
+        """
+        projects_in_region = set()
+        fil_reg = self.filter_by_region[region]
+        for project_id in projects:
+            if project_id not in self.map.filters_by_project:
+                projects_in_region.add(project_id)
+            else:
+                for filter_id in self.map.filters_by_project[project_id]:
+                    if filter_id == self.empty_filter or filter_id == fil_reg:
+                        projects_in_region.add(project_id)
+                        break
+        return projects_in_region
 
 class hidden_set(set):
+    """Helper class that extends a set to allow a new method add_hidden.
+    The hidden elements are supported by "in" operator but are invisible to
+    iterators and other methods.
+
+    This class is needed to support "none" as resource type without showing
+    this value in the help. This is hack with argparse to allow parameters
+    where the list of values can be empty, using  "none" as default value."""
+
     def __init__(self, baselist):
+        """constructor extending set, with another set to the hidden elements
+        """
         super(hidden_set, self).__init__(baselist)
         self.hidden_set = set()
         self.baselist = baselist
 
     def add_hidden(self, hidden):
+        """add a hidden element; the in operator works but it is invisible for
+        other methods"""
         self.hidden_set.add(hidden)
 
     def __contains__(self, element):
+        """overwrite this method to support in with hidden elements"""
         return super(hidden_set, self).__contains__(element) or\
             element in self.hidden_set
 
     def to_list(self):
+        """override this methods to return the list used in iterators and other
+        methods"""
         return self.baselist
 
 if __name__ == '__main__':
