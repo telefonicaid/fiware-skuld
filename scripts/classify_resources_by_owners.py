@@ -116,25 +116,25 @@ class ClassifyResources(object):
                 continue
 
             roles = self.map.roles_by_user[user.id]
-            user_type = None
+            user_has_type = False
             for rol in roles:
                 if rol == BASIC_ROLE_ID:
-                    user_type = 'basic'
+                    user_has_type = True
                     self.basic_users.add(user.id)
                     if cloud_project_id:
                         self.basic_cloud_projects.add(cloud_project_id)
                 elif rol == COMMUNITY_ROLE_ID:
-                    user_type = 'community'
+                    user_has_type = True
                     self.community_users.add(user.id)
                     if cloud_project_id:
                         self.community_cloud_projects.add(cloud_project_id)
                 elif rol == TRIAL_ROLE_ID:
-                    user_type = 'trial'
+                    user_has_type = True
                     self.trial_users.add(user.id)
                     if cloud_project_id:
                         self.trial_cloud_projects.add(cloud_project_id)
                 elif rol == ADMIN_ROLE_ID:
-                    user_type = 'admin'
+                    user_has_type = True
                     self.admin_users.add(user.id)
                     # use default_project_id with admin users, because
                     # cloud_project_id does not exist.
@@ -142,7 +142,7 @@ class ClassifyResources(object):
                         self.admin_cloud_projects.add(user.default_project_id)
                         self.user_cloud_projects.add(cloud_project_id)
 
-            if not user_type:
+            if not user_has_type:
                 self.other_users.add(user.id)
                 if cloud_project_id:
                     self.other_users_cloud_projects.add(cloud_project_id)
@@ -240,9 +240,9 @@ class ClassifyResources(object):
         *resources with a project id that does not exists.
 
         It also returns a tuple with four list of elements:
-        *resources owned by community or trial or admin but in bad region (i.e.
-        the project id is not authorised in that region)
-        *resources that are not owned by any community/trial/admin users
+        *resources owned by community / admin / trial users but in the wrong
+           region (i.e. the project id is not authorised in that region)
+        *resources that are not owned by any community /admin /trial users
         *resources that are not owned by any know user
         *resources that whose tenant_id (project_id) does not exist.
 
@@ -352,12 +352,12 @@ class hidden_set(set):
         self.baselist = baselist
 
     def add_hidden(self, hidden):
-        """add a hidden element; the in operator works but it is invisible for
-        other methods"""
+        """add a hidden element; the 'in' operator finds it but it is
+        an invisible element for the other methods of the set"""
         self.hidden_set.add(hidden)
 
     def __contains__(self, element):
-        """overwrite this method to support in with hidden elements"""
+        """extend the 'in' operator to support hidden elements"""
         return super(hidden_set, self).__contains__(element) or\
             element in self.hidden_set
 
