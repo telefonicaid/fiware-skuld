@@ -27,15 +27,24 @@
 import argparse
 import base64
 
-from utils.osclients import OpenStackClients
-
+from utils import osclients
+import os
 
 class PasswordChanger(object):
     """Class to change/reset the password of any user"""
-    def __init__(self):
+    def __init__(self, osclients_o=None):
         """constructor of the object. It expect the environment variables with
         the admin credential"""
-        self.keystone = OpenStackClients().get_keystoneclient()
+
+        if not osclients_o:
+            osclients_o = osclients.OpenStackClients()
+
+        if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
+            osclients_o.override_endpoint(
+                'identity', osclients_o.region, 'admin',
+                os.environ['KEYSTONE_ADMIN_ENDPOINT'])
+
+        self.keystone = osclients_o.get_keystoneclient()
         self.users_by_id = dict()
         for user in self.keystone.users.list():
             self.users_by_id[user.id] = user

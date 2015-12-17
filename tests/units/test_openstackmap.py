@@ -32,7 +32,7 @@ from requests import Response
 from httplib import OK
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
-LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE
+LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
 
 import os
 
@@ -88,8 +88,13 @@ class MySessionMock(MagicMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/users':
+        elif url == '/users' or url == '/users?name=user':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/users/00000000000000000000000000000001':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
