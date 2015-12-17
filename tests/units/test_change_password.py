@@ -27,21 +27,20 @@ from os import environ
 from unittest import TestCase
 from skuld import change_password
 from mock import patch
-from test_openstackmap import MySessionMock
+from test_openstackmap import MySessionMock, OS_TENANT_ID
 
 
 class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
 
     def setUp(self):
-        self.mock_id = '00000000000000000000000000000001'
         self.mock_user_name = 'user'
 
         self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
         self.OS_USERNAME = 'user'
         self.OS_PASSWORD = 'password'
         self.OS_TENANT_NAME = 'user cloud'
-        self.OS_TENANT_ID = '00000000000000000000000000000001'
+        self.OS_TENANT_ID = OS_TENANT_ID
         self.OS_REGION_NAME = 'Spain2'
         self.OS_TRUST_ID = ''
         self.OS_KEYSTONE_ADMIN_ENDPOINT = 'http://cloud.lab.fiware.org:4730'
@@ -65,14 +64,14 @@ class TestChangePassword(TestCase):
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
         passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byid(self.mock_id)
-        self.assertEqual(self.mock_id, user.id)
+        user = passwordChanger.get_user_byid(OS_TENANT_ID)
+        self.assertEqual(OS_TENANT_ID, user.id)
 
     @patch('utils.osclients.session', mock_session2)
     def test_get_list_users_with_cred(self):
         """test_get_list_users_with_cred check that we could patch the Password to a list of users"""
         passwordChanger = change_password.PasswordChanger()
         mylist = []
-        mylist.append(self.mock_id)
+        mylist.append(OS_TENANT_ID)
         result = passwordChanger.get_list_users_with_cred(mylist)
         self.assertIsNotNone(result)
