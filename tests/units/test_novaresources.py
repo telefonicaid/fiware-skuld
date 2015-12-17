@@ -53,6 +53,7 @@ class TestNovaResources(unittest.TestCase):
         self.nova_resources.tenant_id = 'tenant_id'
 
     def test_on_region_changed(self):
+        """test method on_region_changed. Check that a new client is got"""
         old_client = self.nova_resources.novaclient
         self.nova_resources.on_region_changed()
         # check than nova client object has changed
