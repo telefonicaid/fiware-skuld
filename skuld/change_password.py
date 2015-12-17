@@ -33,7 +33,7 @@ import os
 class PasswordChanger(object):
     """Class to change/reset the password of any user"""
     def __init__(self, osclients_o=None):
-        """constructor of the object. It expect the environment variables with
+        """constructor of the object. It receives the environment variables with
         the admin credential"""
 
         if not osclients_o:

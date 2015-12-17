@@ -34,6 +34,9 @@ class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
 
     def setUp(self):
+        self.mock_id = '00000000000000000000000000000001'
+        self.mock_user_name = 'user'
+
         self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
         self.OS_USERNAME = 'user'
         self.OS_PASSWORD = 'password'
@@ -54,25 +57,22 @@ class TestChangePassword(TestCase):
     @patch('utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):
         """test_get_user_by_name check that we could get a user by name."""
-        name = "user"
         passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byname(name)
-        self.assertEqual(name, user.name)
+        user = passwordChanger.get_user_byname(self.mock_user_name)
+        self.assertEqual(self.mock_user_name, user.name)
 
     @patch('utils.osclients.session', mock_session2)
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
-        id = "00000000000000000000000000000001"
         passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byid(id)
-        self.assertEqual(id, user.id)
+        user = passwordChanger.get_user_byid(self.mock_id)
+        self.assertEqual(self.mock_id, user.id)
 
     @patch('utils.osclients.session', mock_session2)
     def test_get_list_users_with_cred(self):
         """test_get_list_users_with_cred check that we could patch the Password to a list of users"""
-        id = "00000000000000000000000000000001"
         passwordChanger = change_password.PasswordChanger()
         mylist = []
-        mylist.append(id)
+        mylist.append(self.mock_id)
         result = passwordChanger.get_list_users_with_cred(mylist)
         self.assertIsNotNone(result)
