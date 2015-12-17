@@ -86,6 +86,8 @@ class TestNovaResources(unittest.TestCase):
         self.assertEquals(result[3][2], 'OTHER')
 
     def test_stop_tenant_vms(self):
+        """test stop_tenant_vms. If checks that the stop method of the mock
+        is called for all the VMs in ACTIVE state"""
         vms = self.prepare_vms(self.nova_resources.novaclient)
         count = self.nova_resources.stop_tenant_vms()
         self.assertEquals(count, 3)
