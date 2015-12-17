@@ -117,7 +117,7 @@ class TestNovaResources(unittest.TestCase):
             self.assertEquals(result[i], i)
 
     def test_delete_user_keypairs(self):
-        """check that delete method is called in each keypair"""
+        """check that delete method is called for each keypair"""
         keypairs = self.prepare_keypairs(self.nova_resources.novaclient)
         self.nova_resources.delete_user_keypairs()
         for i in range(3):
