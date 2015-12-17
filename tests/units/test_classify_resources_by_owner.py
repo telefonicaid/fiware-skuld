@@ -31,12 +31,14 @@ from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
 
 __author__ = 'chema'
 
+
 class _DictAttr(dict):
     """dictionary that allows access as d['key'] and d.key"""
     def __init__(self):
         """constructor"""
         self.__dict__ = self
         dict.__init__(self, dict())
+
 
 class TestClassifyResources(unittest.TestCase):
 
@@ -282,8 +284,8 @@ class TestClassifyResources(unittest.TestCase):
 
 
 class TestHiddenSet(unittest.TestCase):
-    """Test HiddenSet, a class with hiddent set elements where
-    the in operator works but are not listed."""
+    """Test HiddenSet, a class with hidden set elements where
+    the 'in' operator works but are not listed."""
     def test_class(self):
         """Create a class with two elements and add a hidden one
         Verify that the in operator works with the three elements
@@ -300,4 +302,3 @@ class TestHiddenSet(unittest.TestCase):
         self.assertIn('element3_hidden', hset)
         self.assertNotIn('other_element', hset)
         self.assertEqual(len(hset), 2)
-
