@@ -29,6 +29,7 @@ from skuld.nova_resources import NovaResources
 
 __author__ = 'chema'
 
+
 class TestNovaResourcesContructor(unittest.TestCase):
     """class for testing the constructor of NovaResources"""
     def test_constructor(self):
@@ -40,6 +41,7 @@ class TestNovaResourcesContructor(unittest.TestCase):
         self.assertEquals(nova_resources.osclients, osclients)
         self.assertEquals(nova_resources.novaclient, 'fake_nova_client')
         self.assertEquals(nova_resources.tenant_id, 'id')
+
 
 class TestNovaResources(unittest.TestCase):
     """class for testing the methods of NovaResources"""
@@ -98,7 +100,6 @@ class TestNovaResources(unittest.TestCase):
         for vm in vms:
             self.assertTrue(vm.delete.called)
 
-
     def prepare_keypairs(self, mock):
         """create mock to check operatios with keypairs"""
         keypairs = list()
@@ -147,7 +148,6 @@ class TestNovaResources(unittest.TestCase):
         self.assertTrue(len(security_groups) == 4)
         for security_id in security_groups:
             self.assertTrue(security_id < 4)
-
 
     def test_delete_tenant_security_groups(self):
         """check that delete call is invoked in security groups with
