@@ -234,7 +234,7 @@ class ClassifyResources(object):
         This method receives a dictionary of resources (e.g. vms, volumes...)
         and prints a summary about who owned them:
 
-        *resources owned by legal users: community / admin /trial users
+        *resources owned by legal users: community / admin / trial users
         *resources with an unexpected owner: basic / other / unknown
         *resources not using cloud_project_id / using default_project_id
         *resources with a project id that does not exists.
@@ -242,7 +242,7 @@ class ClassifyResources(object):
         It also returns a tuple with four list of elements:
         *resources owned by community / admin / trial users but in the wrong
            region (i.e. the project id is not authorised in that region)
-        *resources that are not owned by any community /admin /trial users
+        *resources that are not owned by any community / admin / trial users
         *resources that are not owned by any know user
         *resources that whose tenant_id (project_id) does not exist.
 
