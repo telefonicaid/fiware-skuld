@@ -91,6 +91,7 @@ class OpenStackClients(object):
         self._session_v3 = None
         self._saved_session_v2 = None
         self._saved_session_v3 = None
+        self._token = None
 
         if 'OS_USERNAME' in env:
             self.__username = env['OS_USERNAME']
@@ -165,8 +166,17 @@ class OpenStackClients(object):
         else:
             raise Exception('Module ' + module_name + ' was not loaded')
 
+    def _clear_sessions(self):
+        """clear (invalidate) sessions"""
+        if self._session_v2:
+            self._session_v2.invalidate()
+            self._session_v2 = None
+        if self._session_v3:
+            self._session_v3.invalidate()
+            self._session_v3 = None
+
     def set_credential(self, username=None, password=None, tenant_name=None,
-                       tenant_id=None, trust_id=None):
+                       tenant_id=None, trust_id=None, token=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
@@ -195,8 +205,12 @@ class OpenStackClients(object):
         used.
         :return: Nothing.
         """
-        self.__username = username
-        self.__password = password
+
+        if username and password:
+            self.__username = username
+            self.__password = password
+        else:
+            raise Exception('A username and password must be provided')
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
@@ -214,13 +228,15 @@ class OpenStackClients(object):
             self.__tenant_id = None
             self.__tenant_name = None
 
-        # clear sessions
-        if self._session_v2:
-            self._session_v2.invalidate()
-            self._session_v2 = None
-        if self._session_v3:
-            self._session_v3.invalidate()
-            self._session_v3 = None
+        self._clear_sessions()
+
+    def set_token(self, token):
+        """Alternative method to set_credential. Authenticate using an
+        existing token. This may be useful for example in a proxy that gets
+        a token header. After authentication, the token obtained is a new
+        one, that is get_token() method returns a different token."""
+        self._token = token
+        self._clear_sessions()
 
     def set_region(self, region):
         """Set the region. By default this datum is filled in the constructor
@@ -331,8 +347,8 @@ class OpenStackClients(object):
         else:
             auth_url = self.auth_url
 
-        if not self.__username:
-            raise Exception('Username must be provided')
+        if not self.__username and not self._token:
+            raise Exception('Username and password or a token must be provided')
 
         other_params = dict()
         if self.__trust_id:
@@ -342,12 +358,17 @@ class OpenStackClients(object):
         elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
 
-        auth = v3.Password(
-            auth_url=auth_url,
-            username=self.__username,
-            password=self.__password,
-            project_domain_name='default', user_domain_name='default',
-            **other_params)
+        if self.__username:
+            auth = v3.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                project_domain_name='default', user_domain_name='default',
+                **other_params)
+        else:
+            auth = v3.Token(
+                auth_url=auth_url,
+                token=self._token)
 
         self._session_v3 = session.Session(auth=auth)
 
