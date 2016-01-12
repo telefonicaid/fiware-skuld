@@ -316,7 +316,7 @@ class OpenStackMap(object):
                     f:
                 pickle.dump(tenants_by_name, f)
 
-            with open(self.pers_keystone + '/asignments.pickle', 'wb') as f:
+            with open(self.pers_keystone + '/roles_a.pickle', 'wb') as f:
                 pickle.dump(roles_a, f, protocol=-1)
 
             with open(self.pers_keystone + '/roles_by_user.pickle', 'wb') as f:
@@ -329,7 +329,7 @@ class OpenStackMap(object):
             with open(self.pers_keystone + '/filters.pickle', 'wb') as f:
                 pickle.dump(filters, f, protocol=-1)
 
-            with open(self.pers_keystone + '/filters_byproject.pickle', 'wb') \
+            with open(self.pers_keystone + '/filters_by_project.pickle', 'wb') \
                     as f:
                 pickle.dump(filters_by_project, f, protocol=-1)
 
@@ -461,7 +461,7 @@ class OpenStackMap(object):
             with open(self.pers_region + '/networks.pickle', 'wb') as f:
                 pickle.dump(nets, f, protocol=-1)
 
-            with open(self.pers_region + '/subnetworks.pickle', 'wb') as f:
+            with open(self.pers_region + '/subnets.pickle', 'wb') as f:
                 pickle.dump(snets, f, protocol=-1)
 
             with open(self.pers_region + '/routers.pickle', 'wb') as f:
@@ -470,7 +470,7 @@ class OpenStackMap(object):
             with open(self.pers_region + '/floatingips.pickle', 'wb') as f:
                 pickle.dump(floatingips, f, protocol=-1)
 
-            with open(self.pers_region + '/securitygroups.pickle', 'wb') as f:
+            with open(self.pers_region + '/security_groups.pickle', 'wb') as f:
                 pickle.dump(sec_grps, f, protocol=-1)
 
             with open(self.pers_region + '/ports.pickle', 'wb') as f:
@@ -513,10 +513,20 @@ class OpenStackMap(object):
             self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_region + '/networks.pickle'):
             self.networks = self._load('networks')
-            self.subnets = self._load('subnetworks')
+            # legacy
+            if os.path.exists(self.pers_region + '/subnetworks.pickle'):
+                self.subnets = self._load('subnetworks')
+            else:
+                self.subnets = self._load('subnets')
+
             self.routers = self._load('routers')
             self.floatingips = self._load('floatingips')
-            self.security_groups = self._load('securitygroups')
+            # legacy
+            if os.path.exists(self.pers_region + '/securitygroups.pickle'):
+               self.security_groups = self._load('securitygroups')
+            else:
+                self.security_groups = self._load('security_groups')
+
             self.ports = self._load('ports')
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
@@ -534,13 +544,21 @@ class OpenStackMap(object):
             self.users_by_name = self._load_fkeystone('users_by_name')
             self.tenants = self._load_fkeystone('tenants')
             self.tenants_by_name = self._load_fkeystone('tenants_by_name')
-            self.roles_a = self._load_fkeystone('asignments')
+            # legacy code
+            if os.path.exists(self.pers_keystone + '/asignments.pickle'):
+                self.roles_a = self._load_fkeystone('asignments')
+            else:
+                self.roles_a = self._load_fkeystone('roles_a')
             self.roles = self._load_fkeystone('roles')
             self.roles_by_project = self._load_fkeystone('roles_by_project')
             self.roles_by_user = self._load_fkeystone('roles_by_user')
             self.filters = self._load_fkeystone('filters')
-            self.filters_by_project = self._load_fkeystone(
-                'filters_byproject')
+            # legacy code
+            if os.path.exists(self.pers_keystone + '/filters_byproject.pickle'):
+                self.filters_by_project = self._load_fkeystone('filters_byproject')
+            else:
+                self.filters_by_project = self._load_fkeystone('filters_by_project')
+
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
                 raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about keystone')
