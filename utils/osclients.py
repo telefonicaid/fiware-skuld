@@ -176,7 +176,7 @@ class OpenStackClients(object):
             self._session_v3 = None
 
     def set_credential(self, username=None, password=None, tenant_name=None,
-                       tenant_id=None, trust_id=None, token=None):
+                       tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
