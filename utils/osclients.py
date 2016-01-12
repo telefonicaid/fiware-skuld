@@ -209,8 +209,6 @@ class OpenStackClients(object):
         if username and password:
             self.__username = username
             self.__password = password
-        else:
-            raise Exception('A username and password must be provided')
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
