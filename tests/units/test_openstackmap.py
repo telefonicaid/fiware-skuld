@@ -33,6 +33,8 @@ from httplib import OK
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
 LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE
+import tempfile
+import cPickle as pickle
 
 import os
 
@@ -208,3 +210,70 @@ class TestOpenstackMap(TestCase):
         openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
         openstackmap.load_keystone()
         self.assertIsNotNone(openstackmap)
+
+class TestOpenstackMapCacheOnly(TestCase):
+    keystone_objects = ['users', 'users_by_name', 'tenants', 'tenants_by_name', 'roles_a',
+                        'filters', 'filters_by_project', 'roles', 'roles_by_user', 'roles_by_project']
+
+    def setUp(self):
+        """Create fake pickle objects to be used as cache"""
+        self.tmpdir = tempfile.mkdtemp()
+        os.mkdir(self.tmpdir + os.path.sep + 'keystone')
+        os.mkdir(self.tmpdir + os.path.sep + 'region1')
+        os.mkdir(self.tmpdir + os.path.sep + 'region2')
+        sample_dict = {id: 'value1'}
+        for resource in self.keystone_objects:
+            with open(self.tmpdir + '/keystone/' + resource + '.pickle', 'wb') as f:
+                pickle.dump(sample_dict, f, protocol=-1)
+
+        for resource in OpenStackMap.resources_region:
+            with open(self.tmpdir + '/region1/' + resource + '.pickle', 'wb') as f:
+                pickle.dump(sample_dict, f, protocol=-1)
+
+        with open(self.tmpdir + '/region2/vms.pickle', 'wb') as f:
+            pickle.dump(sample_dict, f, protocol=-1)
+
+        self.map = OpenStackMap(
+            self.tmpdir, region='region1', auto_load=False, objects_strategy=OpenStackMap.USE_CACHE_OBJECTS_ONLY)
+
+    def tearDown(self):
+        for dir in os.listdir(self.tmpdir):
+            for name in os.listdir(self.tmpdir + os.path.sep + dir):
+                print self.tmpdir + os.path.sep + dir + os.path.sep + name
+                os.unlink(self.tmpdir + os.path.sep + dir + os.path.sep + name)
+        os.rmdir(self.tmpdir + '/keystone')
+        os.rmdir(self.tmpdir + '/region1')
+        os.rmdir(self.tmpdir + '/region2')
+        os.rmdir(self.tmpdir)
+
+    def test_load_all(self):
+        """test the load_all method"""
+        self.map.load_all()
+        for resource in OpenStackMap.resources_region:
+            data = getattr(self.map, resource)
+            self.assertTrue(data)
+
+        for resource in self.keystone_objects:
+            data = getattr(self.map, resource)
+            self.assertTrue(data)
+
+    def test_load_nova_region2(self):
+        """test the load_nova in region2"""
+        self.map.change_region('region2', False)
+        self.map.load_nova()
+
+    def test_load_all_region2(self):
+        """test the load_all in region2 (is invoked by change_region)"""
+        self.map.change_region('region2')
+
+    def test_load_neutron_region2_failed(self):
+        """test the load_neutron in region2: it must fail"""
+        self.map.change_region('region2', False)
+        with self.assertRaises(Exception):
+            self.map.load_neutron()
+
+    def test_preload_regions(self):
+        """test the preload_regions method"""
+        self.map.preload_regions()
+        self.assertEquals(len(self.map.region_map), 2)
+        self.assertTrue(self.map.region_map['region2']['vms'])
