@@ -234,6 +234,8 @@ class OpenStackClients(object):
         a token header. After authentication, the token obtained is a new
         one, that is get_token() method returns a different token."""
         self._token = token
+        self.__username = None
+        self.__password = None
         self._clear_sessions()
 
     def set_region(self, region):
