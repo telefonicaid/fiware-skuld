@@ -23,21 +23,22 @@
 
 __author__ = 'gjp'
 
+import os
 from os import environ
 from unittest import TestCase
-from skuld.openstackmap import OpenStackMap
 from mock import patch, MagicMock
 from collections import defaultdict
 from requests import Response
 from httplib import OK
-from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
-    LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
-LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE
 import tempfile
 import cPickle as pickle
+from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
+    LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
+LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
 
-import os
+from skuld.openstackmap import OpenStackMap
 
+OS_TENANT_ID = '00000000000000000000000000000001'
 
 class MySessionMock(MagicMock):
     # Mock of a keystone Session
@@ -90,8 +91,13 @@ class MySessionMock(MagicMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/users':
+        elif url == '/users' or url == '/users?name=user':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/users/' + OS_TENANT_ID:
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
@@ -117,7 +123,7 @@ class TestOpenstackMap(TestCase):
         self.OS_USERNAME = 'user'
         self.OS_PASSWORD = 'password'
         self.OS_TENANT_NAME = 'user cloud'
-        self.OS_TENANT_ID = '00000000000000000000000000000001'
+        self.OS_TENANT_ID = OS_TENANT_ID
         self.OS_REGION_NAME = 'Spain2'
         self.OS_TRUST_ID = ''
         self.OS_KEYSTONE_ADMIN_ENDPOINT = 'http://cloud.lab.fiware.org:4730'

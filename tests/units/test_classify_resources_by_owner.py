@@ -129,10 +129,10 @@ class TestClassifyResources(unittest.TestCase):
 
         # create roles for users 1..8 (user9 and user10 will be unknown)
         roles = {
-            '1': [BASIC_ROLE_ID], '2': [BASIC_ROLE_ID],
-            '3': [COMMUNITY_ROLE_ID], '4': [COMMUNITY_ROLE_ID],
-            '5': [TRIAL_ROLE_ID], '6':  [TRIAL_ROLE_ID],
-            admin_user: [ADMIN_ROLE_ID], '8': ['OTHER']}
+            '1': [(BASIC_ROLE_ID, 0)], '2': [(BASIC_ROLE_ID, 0)],
+            '3': [(COMMUNITY_ROLE_ID, 0)], '4': [(COMMUNITY_ROLE_ID, 0)],
+            '5': [(TRIAL_ROLE_ID, 0)], '6':  [(TRIAL_ROLE_ID, 0)],
+            admin_user: [(ADMIN_ROLE_ID, 0)], '8': [('OTHER', 0)]}
 
         config = {
             'return_value.users': users,

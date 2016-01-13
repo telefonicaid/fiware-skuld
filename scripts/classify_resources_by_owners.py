@@ -118,22 +118,22 @@ class ClassifyResources(object):
             roles = self.map.roles_by_user[user.id]
             user_has_type = False
             for rol in roles:
-                if rol == BASIC_ROLE_ID:
+                if rol[0] == BASIC_ROLE_ID:
                     user_has_type = True
                     self.basic_users.add(user.id)
                     if cloud_project_id:
                         self.basic_cloud_projects.add(cloud_project_id)
-                elif rol == COMMUNITY_ROLE_ID:
+                elif rol[0] == COMMUNITY_ROLE_ID:
                     user_has_type = True
                     self.community_users.add(user.id)
                     if cloud_project_id:
                         self.community_cloud_projects.add(cloud_project_id)
-                elif rol == TRIAL_ROLE_ID:
+                elif rol[0] == TRIAL_ROLE_ID:
                     user_has_type = True
                     self.trial_users.add(user.id)
                     if cloud_project_id:
                         self.trial_cloud_projects.add(cloud_project_id)
-                elif rol == ADMIN_ROLE_ID:
+                elif rol[0] == ADMIN_ROLE_ID:
                     user_has_type = True
                     self.admin_users.add(user.id)
                     # use default_project_id with admin users, because
