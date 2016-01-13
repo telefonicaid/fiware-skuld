@@ -38,19 +38,26 @@ class ClassifyResources(object):
        belonging to users that should not have resources, or resources without
        an owner"""
 
-    def __init__(self, cache_dir, regions=None):
+    def __init__(self, cache_dir, regions=None, offline_mode=False):
         """Constructor
         It also build the sets about users and tenants
         :param cache_dir: the directory where the data is cached.
         :param regions: a list with the regions whose maps are preload. If None
           only the current region.
+        :param offline_mode: if True, never connect with servers, use only the
+                             cached data.
         """
         self.logger = logging.getLogger(__name__)
+        if offline_mode:
+            strategy = OpenStackMap.USE_CACHE_OBJECTS_ONLY
+        else:
+            strategy = OpenStackMap.USE_CACHE_OBJECTS
+
         if regions:
-            self.map = OpenStackMap(cache_dir, auto_load=False)
+            self.map = OpenStackMap(cache_dir, objects_strategy=strategy, auto_load=False)
             self.map.preload_regions(regions)
         else:
-            self.map = OpenStackMap(cache_dir)
+            self.map = OpenStackMap(cache_dir, objects_strategy=strategy)
 
         # This groups should be disjoint
         self.admin_users = set()
@@ -387,13 +394,18 @@ if __name__ == '__main__':
 
     help = 'data is cached in this directory (default is %(default)s)'
     parser.add_argument('--cache-dir', help=help, default='~/openstackmap')
+    parser.add_argument('--offline-mode', help='only use cached data', action='store_true')
 
     meta = parser.parse_args()
+    if meta.offline_mode:
+        offline_mode = True
+    else:
+        offline_mode = False
 
     if meta.regions:
-        object = ClassifyResources(meta.cache_dir, meta.regions)
+        object = ClassifyResources(meta.cache_dir, meta.regions, offline_mode)
     else:
-        object = ClassifyResources(meta.cache_dir)
+        object = ClassifyResources(meta.cache_dir, offline_mode=offline_mode)
 
     if not meta.omit_user_summary:
         object.print_users_summary()
