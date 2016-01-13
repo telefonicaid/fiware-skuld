@@ -34,42 +34,45 @@ import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
 import keystoneclient.session
+import keystoneclient.auth.identity.v3.token
 from swiftclient.client import Connection
 from collections import defaultdict
 
+# catalog
+service = {
+    u'endpoints': [
+        {u'url': u'http://83.26.10.2:8080/v1/AUTH_00000000000000000000000000000001',
+                   u'interface': u'public', u'region': u'Spain2',
+                   u'id': u'00000000000000000000000000000002'},
+        {u'url': u'http://172.0.0.1:8080', u'interface': u'admin',
+                   u'region': u'Spain2',
+                   u'id': u'00000000000000000000000000000001'}],
+    u'type': u'object-store', u'id': u'00000000000000000000000000000044'}
 
 class MySessionMock(MagicMock):
     # Mock of a keystone Session
 
     def get_endpoint(self, service_type, region_name):
-
+        """return a endpoint"""
         return "http://cloud.lab.fi-ware.org:4731/v2.0"
 
     def get_token(self):
-
+        """return a token"""
         return "a12baba1ddde00000000000000000001"
 
     def get_access(self, session):
-
-        service = {u'endpoints': [{u'url': u'http://83.26.10.2:8080/v1/AUTH_00000000000000000000000000000001',
-                                   u'interface': u'public', u'region': u'Spain2',
-                                   u'id': u'00000000000000000000000000000002'},
-                                  {u'url': u'http://172.0.0.1:8080', u'interface': u'administator',
-                                   u'region': u'Spain2',
-                                   u'id': u'00000000000000000000000000000001'}],
-                   u'type': u'object-store', u'id': u'00000000000000000000000000000044'}
+        """return a catalog"""
 
         d = defaultdict(list)
         d['catalog'].append(service)
-
         return d
-
 
 class TestOSClients(TestCase):
 
     mock_session = MySessionMock()
 
     def setUp(self):
+        """define environment"""
         self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
         self.OS_USERNAME = 'user'
         self.OS_PASSWORD = 'password'
@@ -380,7 +383,7 @@ class TestOSClients(TestCase):
         session.invalidate()
         osclients._session_v2 = None
 
-    def test_get_session_without_username(self):
+    def test_get_session_without_username_nor_token(self):
         """test_get_session_without_username check that we could not retrieve a session without username"""
 
         osclients = OpenStackClients()
@@ -400,3 +403,80 @@ class TestOSClients(TestCase):
             osclients.get_session()
         except Exception as ex:
             self.assertRaises(ex)
+
+    def test_get_session_using_token(self):
+        """test creating a session using a token instead of a password"""
+
+        osclients = OpenStackClients()
+
+        osclients.set_token('faketoken')
+        session = osclients.get_session()
+        self.assertIsInstance(session, keystoneclient.session.Session)
+        self.assertTrue(type(session.auth) == keystoneclient.auth.identity.v3.token.Token)
+
+
+class TestOSClientsOverrideEndpoint(TestCase):
+    """Class to test the endpoint override feature"""
+
+    def setUp(self):
+        d = defaultdict(list)
+        d['catalog'].append(service)
+        self.access = d
+        self.osclients = OpenStackClients()
+        self.url = 'http://fake.org:9090'
+        self.original_url = service['endpoints'][1]['url']
+
+    def restore_catalog(self):
+        """restore catalog"""
+        service['endpoints'][1]['url'] = self.original_url
+
+    def tearDown(self):
+        """restore objects"""
+        self.restore_catalog()
+
+    def override_endpoint(self):
+        """method that override the endpoint"""
+        self.osclients.override_endpoint('object-store', 'Spain2', 'admin', self.url)
+
+    def assertOverrideEndpoint(self):
+        """check that the override has been done"""
+        self.assertEquals(self.osclients.get_admin_endpoint('object-store', 'Spain2'), self.url)
+
+    def test_override_endpoint_session(self):
+        """test that invoking override endpoint does not create a session"""
+        self.override_endpoint()
+
+        self.assertFalse(self.osclients._session_v2)
+        self.assertFalse(self.osclients._session_v3)
+
+    def test_override_endpoint(self):
+        """check that a session catalog is overriden"""
+        mock = MagicMock()
+        config = {'auth.get_access.return_value': self.access}
+        mock.configure_mock(**config)
+        self.osclients._session_v3 = mock
+        self.override_endpoint()
+        self.assertOverrideEndpoint()
+
+
+    @patch('utils.osclients.session')
+    def test_override_endpoint_multiple(self, mock):
+        """test that override works with an already created session and then
+        with a new one without invoking the method again"""
+        config = {'Session.return_value.auth.get_access.return_value': self.access}
+        mock.configure_mock(**config)
+        session = self.osclients.get_session()
+        self.override_endpoint()
+        self.assertOverrideEndpoint()
+
+        # invalidate and create a new session; ensure than catalog is again
+        # the original. Setting a new token invalidate the session. The new
+        # one is created at the invocation of get_admin_endpoint.
+        self.restore_catalog()
+        self.osclients.set_token('faketoken')
+
+        # check again
+        self.assertOverrideEndpoint()
+
+
+
