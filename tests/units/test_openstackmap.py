@@ -267,10 +267,14 @@ class TestOpenstackMapCacheOnly(TestCase):
         """test the load_nova in region2"""
         self.map.change_region('region2', False)
         self.map.load_nova()
+        self.assertTrue(self.map.vms)
 
     def test_load_all_region2(self):
         """test the load_all in region2 (is invoked by change_region)"""
         self.map.change_region('region2')
+        self.assertTrue(self.map.vms)
+        # region2 has vms, but not other resources as networks
+        self.assertFalse(self.map.networks)
 
     def test_load_neutron_region2_failed(self):
         """test the load_neutron in region2: it must fail"""
