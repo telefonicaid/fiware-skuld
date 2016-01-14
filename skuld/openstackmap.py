@@ -631,10 +631,10 @@ class OpenStackMap(object):
         if auto_load:
             self.load_all()
 
-    def preload_regions(self, regions=None, all_regions_but=None):
+    def preload_regions(self, regions=None, all_regions_excluded=None):
         """Method to preload the data of the specified regions. If
         regions is None, use all the available regions in the federation, but
-        the specified in all_regions_but.
+        the specified in all_regions_excluded.
 
         The data for each region will be available at the region_map dictionary.
 
@@ -676,12 +676,12 @@ class OpenStackMap(object):
         if not regions:
             """ not regions specified, so all existing regions with some
                 resource (compute, network, image or volume) are considered.
-                If all_regions_but is defined, then that regions are excluded
+                If all_regions_excluded is defined, then these regions are excluded
             """
             all_regions = regions_compute.union(regions_network).union(
                 regions_image).union(regions_volume)
-            if all_regions_but:
-                all_regions.difference_update(all_regions_but)
+            if all_regions_excluded:
+                all_regions.difference_update(all_regions_excluded)
             # Move the current region to the end of the list.
             # This is because the direct map dictionaries (vms, networks, etc.)
             # and the region field are updated with the change_region() call.
