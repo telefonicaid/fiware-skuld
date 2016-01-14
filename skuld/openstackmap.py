@@ -152,6 +152,7 @@ class OpenStackMap(object):
         self.subnets = dict()
         self.routers = dict()
         self.floatingips = dict()
+        self.floatingips_by_ip = dict()
         self.ports = dict()
         self.security_groups = dict()
         # Nova resources
@@ -533,6 +534,11 @@ class OpenStackMap(object):
                 raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about neutron')
             self._get_neutron_data()
 
+        # make indexes
+        self.floatingips_by_ip = dict((f['floating_ip_address'], f)
+                                      for f in self.floatingips.values()
+                                      if 'floating_ip_address' in f)
+
     def load_keystone(self):
         """load keystone data: users, tenants, roles, roles_a,
            users_by_name, tenants_by_name, roles_by_project, roles_by_user
@@ -628,7 +634,14 @@ class OpenStackMap(object):
     def preload_regions(self, regions=None, all_regions_but=None):
         """Method to preload the data of the specified regions. If
         regions is None, use all the available regions in the federation, but
-        the specified in all_regions_but"""
+        the specified in all_regions_but.
+
+        The data for each region will be available at the region_map dictionary.
+
+        It must be noted that this method could affect the current region
+        and the values of the direct maps (vms, networks...). This is because it
+        calls change_region/load_<service_name> methods. If regions is provided, then
+        the last region in the list will be the new current region"""
 
         if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
             regions_in_disk = set(os.listdir(self.persistence_dir))
@@ -661,17 +674,22 @@ class OpenStackMap(object):
             regions_volume = self.osclients.get_regions('volume')
 
         if not regions:
+            """ not regions specified, so all existing regions with some
+                resource (compute, network, image or volume) are considered.
+                If all_regions_but is defined, then that regions are excluded
+            """
             all_regions = regions_compute.union(regions_network).union(
                 regions_image).union(regions_volume)
             if all_regions_but:
                 all_regions.difference_update(all_regions_but)
+            # Move the current region to the end of the list.
+            # This is because the direct map dictionaries (vms, networks, etc.)
+            # and the region field are updated with the change_region() call.
+
             if self.osclients.region in all_regions:
-                # put current region the last, because change_region call
                 all_regions.remove(self.osclients.region)
-                regions = list(all_regions)
-                regions.append(self.osclients.region)
-            else:
-                regions = list(all_regions)
+            regions = list(all_regions)
+            regions.append(self.osclients.region)
 
         for region in regions:
             try:
