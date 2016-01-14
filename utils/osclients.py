@@ -91,6 +91,7 @@ class OpenStackClients(object):
         self._session_v3 = None
         self._saved_session_v2 = None
         self._saved_session_v3 = None
+        self._token = None
 
         if 'OS_USERNAME' in env:
             self.__username = env['OS_USERNAME']
@@ -147,6 +148,8 @@ class OpenStackClients(object):
                 self._modules_imported[module] = \
                     import_module(modules_available[module])
 
+        self.endpoints_to_override = list()
+
     def _require_module(self, module_name):
         """
         Require module. If self._autoloadmodules, load it if not available.
@@ -163,7 +166,16 @@ class OpenStackClients(object):
         else:
             raise Exception('Module ' + module_name + ' was not loaded')
 
-    def set_credential(self, username, password, tenant_name=None,
+    def _clear_sessions(self):
+        """clear (invalidate) sessions"""
+        if self._session_v2:
+            self._session_v2.invalidate()
+            self._session_v2 = None
+        if self._session_v3:
+            self._session_v3.invalidate()
+            self._session_v3 = None
+
+    def set_credential(self, username=None, password=None, tenant_name=None,
                        tenant_id=None, trust_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidated. It is possible to save and then restore the
@@ -193,8 +205,10 @@ class OpenStackClients(object):
         used.
         :return: Nothing.
         """
-        self.__username = username
-        self.__password = password
+
+        if username and password:
+            self.__username = username
+            self.__password = password
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
@@ -212,13 +226,17 @@ class OpenStackClients(object):
             self.__tenant_id = None
             self.__tenant_name = None
 
-        # clear sessions
-        if self._session_v2:
-            self._session_v2.invalidate()
-            self._session_v2 = None
-        if self._session_v3:
-            self._session_v3.invalidate()
-            self._session_v3 = None
+        self._clear_sessions()
+
+    def set_token(self, token):
+        """Alternative method to set_credential. Authenticate using an
+        existing token. This may be useful for example in a proxy that gets
+        a token header. After authentication, the token obtained is a new
+        one, that is get_token() method returns a different token."""
+        self._token = token
+        self.__username = None
+        self.__password = None
+        self._clear_sessions()
 
     def set_region(self, region):
         """Set the region. By default this datum is filled in the constructor
@@ -302,6 +320,12 @@ class OpenStackClients(object):
             **other_params)
 
         self._session_v2 = session.Session(auth=auth)
+
+        # apply override endpoints, if session version matches.
+        if not self.use_v3:
+            for override in self.endpoints_to_override:
+                self._apply_override_endpoint_v2(**override)
+
         return self._session_v2
 
     def get_session_v3(self):
@@ -323,8 +347,8 @@ class OpenStackClients(object):
         else:
             auth_url = self.auth_url
 
-        if not self.__username:
-            raise Exception('Username must be provided')
+        if not self.__username and not self._token:
+            raise Exception('Username and password or a token must be provided')
 
         other_params = dict()
         if self.__trust_id:
@@ -334,14 +358,25 @@ class OpenStackClients(object):
         elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
 
-        auth = v3.Password(
-            auth_url=auth_url,
-            username=self.__username,
-            password=self.__password,
-            project_domain_name='default', user_domain_name='default',
-            **other_params)
+        if self.__username:
+            auth = v3.Password(
+                auth_url=auth_url,
+                username=self.__username,
+                password=self.__password,
+                project_domain_name='default', user_domain_name='default',
+                **other_params)
+        else:
+            auth = v3.Token(
+                auth_url=auth_url,
+                token=self._token)
 
         self._session_v3 = session.Session(auth=auth)
+
+        # apply override endpoints
+        if self.use_v3:
+            for override in self.endpoints_to_override:
+                self._apply_override_endpoint(**override)
+
         return self._session_v3
 
     def get_neutronclient(self):
@@ -533,17 +568,32 @@ class OpenStackClients(object):
         endpoints = self.get_endpoints(service_type)
         url = None
         for endpoint in endpoints:
-            if endpoint['interface'] != interface:
-                continue
-            if not region:
-                if url:
-                    raise Exception('A region must be specified')
+            if 'interface' in endpoint:
+                # v3
+                if endpoint['interface'] != interface:
+                    continue
+                if not region:
+                    if url:
+                        raise Exception('A region must be specified')
+                    else:
+                        url = endpoint['url']
                 else:
-                    url = endpoint['url']
+                    if endpoint['region'] == region:
+                        url = endpoint['url']
+                        break
             else:
-                if endpoint['region'] == region:
-                    url = endpoint['url']
-                    break
+                #v2
+                if not region:
+                    if url:
+                        raise Exception('A region must be specified')
+                    else:
+                        if interface == 'admin':
+                            url = endpoint['adminURL']
+                        elif interface == 'internal':
+                            url = endpoint['internalURL']
+                        else:
+                            url = endpoint['publicURL']
+
         if not url:
             raise Exception('endpoint not found')
         else:
@@ -561,6 +611,39 @@ class OpenStackClients(object):
         """See get_interface_endpoint"""
         return self.get_interface_endpoint(service_type, 'admin', region)
 
+    def _apply_override_endpoint(self, service_type, region, interface, url):
+        """This method apply the changes registered in override_endpoint.
+        See the documentation of that method.
+        """
+        endpoints = list(endp for endp in self.get_endpoints(service_type)
+                 if endp['interface'] == interface)
+
+        if len(endpoints) == 1:
+            endpoints[0]['url'] = url
+        else:
+            for endpoint in endpoints:
+                if endpoint['region'] == region:
+                    endpoint['url'] = url
+
+    def _apply_override_endpoint_v2(self, service_type, region, interface, url):
+        """This method apply the changes registered in override_endpoint.
+        See the documentation of that method.
+        """
+        endpoints = self.get_endpoints(service_type)
+
+        endpoint_to_change = None
+        if len(endpoints) == 1:
+            endpoint_to_change = endpoints[0]
+        else:
+            for endpoint in endpoints:
+                if endpoint['region'] == region:
+                    endpoint_to_change = endpoint
+
+        if endpoint_to_change:
+            key = interface + 'URL'
+            if key in endpoint_to_change:
+                endpoint_to_change[key] = url
+
     def override_endpoint(self, service_type, region, interface, url):
         """Override the URL of a endpoint obtained in a request.
 
@@ -571,16 +654,19 @@ class OpenStackClients(object):
         If region is not found, but there is only a region, it is modified
         also. This is useful for example in a federation, where there is
         only a keystone server in one of the regions.
-        """
-        endpoints = list(endp for endp in self.get_endpoints(service_type)
-                         if endp['interface'] == interface)
 
-        if len(endpoints) == 1:
-            endpoints[0]['url'] = url
-        else:
-            for endpoint in endpoints:
-                if endpoint['region'] == region:
-                    endpoint['url'] = url
+        The overrides are saved to be applied each time a new session is
+        created. If a session already exists, the changes are also applied now.
+
+        Be aware that override endpoint only works when the session version
+        match with self.use_v3."""
+        endpoint = dict(service_type=service_type, region=region,
+                        interface=interface, url=url)
+        self.endpoints_to_override.append(endpoint)
+        if self._session_v3 and self.use_v3:
+            self._apply_override_endpoint(**endpoint)
+        elif self._session_v2 and not self.use_v3:
+            self._apply_override_endpoint_v2(**endpoint)
 
     def get_regions(self, service_type):
         """Return a set of regions with endpoints in this service

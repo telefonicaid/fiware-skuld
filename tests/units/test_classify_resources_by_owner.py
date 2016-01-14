@@ -46,6 +46,18 @@ class TestClassifyResources(unittest.TestCase):
     def testConstructorBasic(self, mock):
         """check constructor without parameters"""
         classify = ClassifyResources('/fakedir')
+        mock.assert_called_with('/fakedir', objects_strategy=mock.USE_CACHE_OBJECTS)
+
+        self.assertFalse(mock.return_value.preload_regions.called)
+        self.assertTrue(mock.return_value.filters.values.called)
+        self.assertTrue(mock.return_value.users.values.called)
+        self.assertTrue(mock.return_value.tenants.keys.called)
+
+    @patch('scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
+    def testConstructorOfflineMode(self, mock):
+        """check constructor with offline_mode=True"""
+        classify = ClassifyResources('/fakedir', offline_mode=True)
+        mock.assert_called_with('/fakedir', objects_strategy=mock.USE_CACHE_OBJECTS_ONLY)
         self.assertFalse(mock.return_value.preload_regions.called)
         self.assertTrue(mock.return_value.filters.values.called)
         self.assertTrue(mock.return_value.users.values.called)

@@ -42,8 +42,8 @@ class OpenStackMap(object):
     """
 
     # objects strategy see the __init__ method documentation
-    DIRECT_OBJECTS, NO_CACHE_OBJECTS, REFRESH_OBJECTS, USE_CACHE_OBJECTS = \
-        range(4)
+    DIRECT_OBJECTS, NO_CACHE_OBJECTS, REFRESH_OBJECTS, USE_CACHE_OBJECTS, USE_CACHE_OBJECTS_ONLY = \
+        range(5)
 
     # If use_wrapper is True, dictionaries are wrapped to allow access to
     # resource['field'] also as resource.field. This is not used when
@@ -77,6 +77,10 @@ class OpenStackMap(object):
            objects are cached: the new version replace the old one.
          * USE_CACHE_OBJECTS is using the objects converted to dictionaries. If
            a cached copy of the objects are available, it is used.
+         * USE_CACHE_OBJECTS_ONLY is using the objects converted to dictionaries.
+           This strategy used cached objects only. It never contacts with the
+           servers, even when the object is not available in the local cache.
+
         :param auto_load: if True, invoke self.load_all()
          Note that neutron objects returned by the API are already dictionaries
         """
@@ -120,6 +124,7 @@ class OpenStackMap(object):
                 os.mkdir(self.pers_region)
 
         self._init_resource_maps()
+
         if auto_load:
             self.load_all()
 
@@ -147,6 +152,7 @@ class OpenStackMap(object):
         self.subnets = dict()
         self.routers = dict()
         self.floatingips = dict()
+        self.floatingips_by_ip = dict()
         self.ports = dict()
         self.security_groups = dict()
         # Nova resources
@@ -271,7 +277,6 @@ class OpenStackMap(object):
             roles_a = list(asig.to_dict() for asig in roles_a)
             for tenant in tenants.values():
                 tenants_by_name[tenant['name']] = tenant
-            tenants_by_name = dict()
             for user in users.values():
                 users_by_name[user['name']] = user
         else:
@@ -312,7 +317,7 @@ class OpenStackMap(object):
                     f:
                 pickle.dump(tenants_by_name, f)
 
-            with open(self.pers_keystone + '/asignments.pickle', 'wb') as f:
+            with open(self.pers_keystone + '/roles_a.pickle', 'wb') as f:
                 pickle.dump(roles_a, f, protocol=-1)
 
             with open(self.pers_keystone + '/roles_by_user.pickle', 'wb') as f:
@@ -325,7 +330,7 @@ class OpenStackMap(object):
             with open(self.pers_keystone + '/filters.pickle', 'wb') as f:
                 pickle.dump(filters, f, protocol=-1)
 
-            with open(self.pers_keystone + '/filters_byproject.pickle', 'wb') \
+            with open(self.pers_keystone + '/filters_by_project.pickle', 'wb') \
                     as f:
                 pickle.dump(filters_by_project, f, protocol=-1)
 
@@ -457,7 +462,7 @@ class OpenStackMap(object):
             with open(self.pers_region + '/networks.pickle', 'wb') as f:
                 pickle.dump(nets, f, protocol=-1)
 
-            with open(self.pers_region + '/subnetworks.pickle', 'wb') as f:
+            with open(self.pers_region + '/subnets.pickle', 'wb') as f:
                 pickle.dump(snets, f, protocol=-1)
 
             with open(self.pers_region + '/routers.pickle', 'wb') as f:
@@ -466,7 +471,7 @@ class OpenStackMap(object):
             with open(self.pers_region + '/floatingips.pickle', 'wb') as f:
                 pickle.dump(floatingips, f, protocol=-1)
 
-            with open(self.pers_region + '/securitygroups.pickle', 'wb') as f:
+            with open(self.pers_region + '/security_groups.pickle', 'wb') as f:
                 pickle.dump(sec_grps, f, protocol=-1)
 
             with open(self.pers_region + '/ports.pickle', 'wb') as f:
@@ -481,79 +486,133 @@ class OpenStackMap(object):
 
     def load_nova(self):
         """load nova data: vms"""
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
+        if (self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS or
+            self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_region + '/vms.pickle'):
             self.vms = self._load('vms')
         else:
+            if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about nova')
+
             self._get_nova_data()
 
     def load_glance(self):
         """load glance data: images"""
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
+        if (self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS or
+            self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_region + '/images.pickle'):
             self.images = self._load('images')
         else:
+            if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about glance')
             self._get_glance_data()
 
     def load_neutron(self):
         """load neutron (network) data: networks, subnets, routers,
            floatingips, security_groups, ports"""
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
+        if (self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS or
+            self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_region + '/networks.pickle'):
             self.networks = self._load('networks')
-            self.subnets = self._load('subnetworks')
+            # legacy
+            if os.path.exists(self.pers_region + '/subnetworks.pickle'):
+                self.subnets = self._load('subnetworks')
+            else:
+                self.subnets = self._load('subnets')
+
             self.routers = self._load('routers')
             self.floatingips = self._load('floatingips')
-            self.security_groups = self._load('securitygroups')
+            # legacy
+            if os.path.exists(self.pers_region + '/securitygroups.pickle'):
+               self.security_groups = self._load('securitygroups')
+            else:
+                self.security_groups = self._load('security_groups')
+
             self.ports = self._load('ports')
         else:
+            if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about neutron')
             self._get_neutron_data()
+
+        # make indexes
+        self.floatingips_by_ip = dict((f['floating_ip_address'], f)
+                                      for f in self.floatingips.values()
+                                      if 'floating_ip_address' in f)
 
     def load_keystone(self):
         """load keystone data: users, tenants, roles, roles_a,
            users_by_name, tenants_by_name, roles_by_project, roles_by_user
         """
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
+        if (self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS or
+            self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_keystone + '/users.pickle'):
             self.users = self._load_fkeystone('users')
             self.users_by_name = self._load_fkeystone('users_by_name')
             self.tenants = self._load_fkeystone('tenants')
             self.tenants_by_name = self._load_fkeystone('tenants_by_name')
-            self.roles_a = self._load_fkeystone('asignments')
+            # legacy code
+            if os.path.exists(self.pers_keystone + '/asignments.pickle'):
+                self.roles_a = self._load_fkeystone('asignments')
+            else:
+                self.roles_a = self._load_fkeystone('roles_a')
             self.roles = self._load_fkeystone('roles')
             self.roles_by_project = self._load_fkeystone('roles_by_project')
             self.roles_by_user = self._load_fkeystone('roles_by_user')
             self.filters = self._load_fkeystone('filters')
-            self.filters_by_project = self._load_fkeystone(
-                'filters_byproject')
+            # legacy code
+            if os.path.exists(self.pers_keystone + '/filters_byproject.pickle'):
+                self.filters_by_project = self._load_fkeystone('filters_byproject')
+            else:
+                self.filters_by_project = self._load_fkeystone('filters_by_project')
+
         else:
+            if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about keystone')
+
             self._get_keystone_data()
 
     def load_cinder(self):
         """load cinder data: volumes, volume_backups, volume_snapshots
         """
-        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS and \
+        if (self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS or
+            self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY) and \
                 os.path.exists(self.pers_region + '/volumes.pickle'):
             self.volumes = self._load('volumes')
             self.volume_backups = self._load('volume_backups')
             self.volume_snapshots = self._load('volume_snapshots')
         else:
+            if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about cinder')
+
             self._get_cinder_data()
 
     def load_all(self):
         """load all data"""
         region = self.osclients.region
-        if region in self.osclients.get_regions('compute'):
-            self.load_nova()
+        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+            if os.path.exists(self.pers_region + '/vms.pickle'):
+                self.load_nova()
 
-        if region in self.osclients.get_regions('network'):
-            self.load_neutron()
+            if os.path.exists(self.pers_region + '/networks.pickle'):
+                self.load_neutron()
 
-        if region in self.osclients.get_regions('image'):
-            self.load_glance()
+            if os.path.exists(self.pers_region + '/images.pickle'):
+                self.load_glance()
 
-        if region in self.osclients.get_regions('volume'):
-            self.load_cinder()
+            if os.path.exists(self.pers_region + '/volumes.pickle'):
+                self.load_cinder()
+        else:
+            if region in self.osclients.get_regions('compute'):
+                self.load_nova()
+
+            if region in self.osclients.get_regions('network'):
+                self.load_neutron()
+
+            if region in self.osclients.get_regions('image'):
+                self.load_glance()
+
+            if region in self.osclients.get_regions('volume'):
+                self.load_cinder()
 
         self.load_keystone()
 
@@ -572,25 +631,65 @@ class OpenStackMap(object):
         if auto_load:
             self.load_all()
 
-    def preload_regions(self, regions=None, all_regions_but=None):
+    def preload_regions(self, regions=None, all_regions_excluded=None):
         """Method to preload the data of the specified regions. If
         regions is None, use all the available regions in the federation, but
-        the specified in all_regions_but"""
+        the specified in all_regions_excluded.
 
-        regions_compute = self.osclients.get_regions('compute')
-        regions_network = self.osclients.get_regions('network')
-        regions_image = self.osclients.get_regions('image')
-        regions_volume = self.osclients.get_regions('volume')
+        The data for each region will be available at the region_map dictionary.
+
+        It must be noted that this method could affect the current region
+        and the values of the direct maps (vms, networks...). This is because it
+        calls change_region/load_<service_name> methods. If regions is provided, then
+        the last region in the list will be the new current region"""
+
+        if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
+            regions_in_disk = set(os.listdir(self.persistence_dir))
+            if 'keystone' in regions_in_disk:
+                regions_in_disk.remove('keystone')
+
+            regions_compute = set()
+            regions_network = set()
+            regions_image = set()
+            regions_volume = set()
+
+            for region in regions_in_disk:
+                path = self.persistence_dir + os.path.sep + region
+                if os.path.exists(path + os.path.sep + 'vms.pickle'):
+                    regions_compute.add(region)
+
+                if os.path.exists(path + os.path.sep + 'networks.pickle'):
+                    regions_network.add(region)
+
+                if os.path.exists(path + os.path.sep + 'images.pickle'):
+                    regions_image.add(region)
+
+                if os.path.exists(path + os.path.sep + 'volumes.pickle'):
+                    regions_volume.add(region)
+
+        else:
+            regions_compute = self.osclients.get_regions('compute')
+            regions_network = self.osclients.get_regions('network')
+            regions_image = self.osclients.get_regions('image')
+            regions_volume = self.osclients.get_regions('volume')
+
         if not regions:
+            """ not regions specified, so all existing regions with some
+                resource (compute, network, image or volume) are considered.
+                If all_regions_excluded is defined, then these regions are excluded
+            """
             all_regions = regions_compute.union(regions_network).union(
                 regions_image).union(regions_volume)
-            if all_regions_but:
-                all_regions.difference_update(all_regions_but)
+            if all_regions_excluded:
+                all_regions.difference_update(all_regions_excluded)
+            # Move the current region to the end of the list.
+            # This is because the direct map dictionaries (vms, networks, etc.)
+            # and the region field are updated with the change_region() call.
+
             if self.osclients.region in all_regions:
-                # put current region the last, because change_region call
                 all_regions.remove(self.osclients.region)
-                regions = list(all_regions)
-                regions.append(self.osclients.region)
+            regions = list(all_regions)
+            regions.append(self.osclients.region)
 
         for region in regions:
             try:
