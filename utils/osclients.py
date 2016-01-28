@@ -123,6 +123,26 @@ class OpenStackClients(object):
         else:
             self.__trust_id = None
 
+        if 'OS_PROJECT_DOMAIN_ID' in env:
+            self.__project_domain_id = env['OS_PROJECT_DOMAIN_ID']
+        else:
+            self.__project_domain_id = None
+
+        if 'OS_PROJECT_DOMAIN_NAME' in env:
+            self.__project_domain_name = env['OS_PROJECT_DOMAIN_NAME']
+        else:
+            self.__project_domain_name = None
+
+        if 'OS_USER_DOMAIN_ID' in env:
+            self.__user_domain_id = env['OS_USER_DOMAIN_ID']
+        else:
+            self.__user_domain_id = None
+
+        if 'OS_USEr_DOMAIN_NAME' in env:
+            self.__user_domain_name = env['OS_USER_DOMAIN_NAME']
+        else:
+            self.__user_domain_name = None
+
         # dynamic imports
 
         self._modules_imported = dict()
@@ -175,15 +195,17 @@ class OpenStackClients(object):
             self._session_v3.invalidate()
             self._session_v3 = None
 
-    def set_credential(self, username=None, password=None, tenant_name=None,
-                       tenant_id=None, trust_id=None):
+    def set_credential(
+            self, username=None, password=None, tenant_name=None, tenant_id=None,
+            trust_id=None, user_domain_name=None, user_domain_id=None,
+            project_domain_name=None, project_domain_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
 
         This method must be called before invoking some of the get_ methods
         unless the OS_USERNAME, OS_PASSWORD is provided (in that case, also
-        OS_TENANT_NAME, OS_TENANT_ID and OS_TRUST_ID are considered)
+        OS_TENANT_NAME, OS_TENANT_ID, OS_TRUST_ID etc. are considered)
 
         The tenant may be a name or a tenant_id. However, when trust_id is
         provided neither tenant_name nor tenant_id must be
@@ -191,7 +213,15 @@ class OpenStackClients(object):
 
         With the admin account also has sense do not provide
         tenant/tenant_id/trust_id (this is an unscoped token, and it works
-        with many keystone operations).
+        with many keystone operations). With an ordinary user theoretically
+        the tenant may be also omitted, and then the scope is the default
+        project.
+
+        The domain is the namespace where the user/tenant name is valid (when
+        using ids, this is not required, because ids are always globally unique).
+        The domain concept was introduced in the third version of keystone API.
+        Domain may be specified by name or by id. When it is not provided, it is
+        assumed id=default.
 
         :param username: the username of the user
         :param password: the password of the user
@@ -203,12 +233,28 @@ class OpenStackClients(object):
         passed them the generated trust_id. When trust_id is provided, do not
         fill tenant_name nor tenant_id because the tenant of the trustor is
         used.
+        :param user_domain_id: when using API v3, the domain is the namespace
+        where the user name is unique.
+        :param user_domain_name: when using API v3, the domain is the namespace
+        where the user name is unique.
+        :param project_domain_id: when using API v3, the domain is the namespace
+        where the project (tenant) name is unique.
+        :param project_domain_name: when using API v3, the domain is the namespace
+        where the project (tenant) name is unique.
+
         :return: Nothing.
         """
 
         if username and password:
             self.__username = username
             self.__password = password
+
+        if user_domain_id:
+            self.__user_domain_id = user_domain_id
+        elif user_domain_name:
+            self.__user_domain_name = user_domain_name
+
+
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
@@ -225,6 +271,12 @@ class OpenStackClients(object):
             self.__trust_id = None
             self.__tenant_id = None
             self.__tenant_name = None
+
+        if project_domain_id:
+            self.__project_domain_id = project_domain_id
+        elif user_domain_name:
+            self.__project_domain_name = project_domain_name
+
 
         self._clear_sessions()
 
@@ -359,12 +411,23 @@ class OpenStackClients(object):
             other_params['project_id'] = self.__tenant_id
 
         if self.__username:
+            if self.__project_domain_id:
+                other_params['project_domain_id'] = self.__project_domain_id
+            elif self.__project_domain_name:
+                other_params['project_domain_name'] = self.__project_domain_name
+            else:
+                other_params['project_domain_id'] = 'default'
+
+            if self.__user_domain_id:
+                other_params['user_domain_id'] = self.__user_domain_id
+            elif self.__user_domain_name:
+                other_params['user_domain_name'] = self.__user_domain_name
+            else:
+                other_params['user_domain_id'] = 'default'
+
             auth = v3.Password(
-                auth_url=auth_url,
-                username=self.__username,
-                password=self.__password,
-                project_domain_name='default', user_domain_name='default',
-                **other_params)
+                auth_url=auth_url, username=self.__username,
+                password=self.__password, **other_params)
         else:
             auth = v3.Token(
                 auth_url=auth_url,
