@@ -88,6 +88,7 @@ file=/etc/neutron/l3_agent.ini
 
 file=/etc/neutron/dhcp_agent.ini
 ./openstack-config --set $file DEFAULT dhcp_driver neutron.agent.linux.dhcp.Dnsmasq
+./openstack-config --set $file DEFAULT interface_driver neutron.agent.linux.interface.OVSInterfaceDriver
 ./openstack-config --set $file DEFAULT use_namespaces True
 ./openstack-config --set $file DEFAULT dhcp_delete_namespaces True
 ./openstack-config --set $file DEFAULT verbose True
