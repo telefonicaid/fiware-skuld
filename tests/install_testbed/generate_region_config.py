@@ -35,7 +35,7 @@ default_values = {
     'REGION': 'Spain2',
     'CONTROLLER': '127.0.0.1',
     'VM_ACCESS_IP': '$CONTROLLER',
-    'EXTERNAL_INTERFACE': 'extdev0',
+    'EXTERNAL_INTERFACE': 'eth1',
     'NOVA_IPS': '192.168.56',
     'NEUTRON_IPS': '192.168.57',
 }
