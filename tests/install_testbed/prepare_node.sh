@@ -22,10 +22,19 @@
 #
 # Author: Chema
 
-# Arbitray IP, but be aware that must be in $NEUTRON_IPS range.
-IP_EXTDEV0=192.168.57.1/24
-#apt-get update
-#apt-get install -y openvpn
-# TODO: this is a temporal workaround
-ip tuntap add mode tap extdev0
-ip address add dev extdev0 $IP_EXTDEV0
+# if interface does not have IP, assign it. It only works with
+# netmask 255.255.255.0 addresses, using the .1 IP.
+
+if [ ! "$(ip a show dev $EXTERNAL_INTERFACE |grep 'inet ')" ]
+then
+cat <<EOF > /etc/network/interfaces.d/eth1.cfg
+auto $EXTERNAL_INTERFACE
+iface eth1 inet static
+   address ${NEUTRON_IPS}.1
+   netmask 255.255.255.0
+EOF
+sudo ifup eth1
+fi
+
+#ip tuntap add mode tap extdev0
+#ip address add dev extdev0 $IP_EXTDEV0
