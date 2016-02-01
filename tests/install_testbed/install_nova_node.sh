@@ -24,7 +24,7 @@
 
 . ./config_vars
 
-MY_IP=${VM_ACCESS_IP:-$(curl -s /dev/null http://ifconfig.me/ip)}
+MY_IP=`ip a| awk "/inet $NOVA_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
 
 
 apt-get install -y nova-compute sysfsutils
@@ -45,7 +45,7 @@ file=/etc/nova/nova.conf
 ./openstack-config --set $file DEFAULT vnc_enabled True
 ./openstack-config --set $file DEFAULT vncserver_listen 0.0.0.0
 ./openstack-config --set $file DEFAULT vncserver_proxyclient_address $MY_IP
-./openstack-config --set $file DEFAULT novncproxy_base_url = http://$CONTROLLER_PUBLIC_IP:6080/vnc_auto.html
+./openstack-config --set $file DEFAULT novncproxy_base_url = http://$PUBLIC_CONTROLLER:6080/vnc_auto.html
 ./openstack-config --set $file glance host $CONTROLLER
 
 ## Si no hay virtualizacion hardware, (kvm) configuramos para virtualizacion software qemu (lenta)

@@ -34,9 +34,9 @@ default_values = {
     'KEYSTONE_HOST': '127.0.0.1',
     'REGION': 'Spain2',
     'CONTROLLER': '127.0.0.1',
-    'VM_ACCESS_IP': '$CONTROLLER',
-    'EXTERNAL_INTERFACE': 'eth1',
-    'NOVA_IPS': '192.168.56',
+    'PUBLIC_CONTROLLER': '127.0.0.1',
+    'EXTERNAL_INTERFACE': 'eth2',
+    'NOVA_IPS': '127.0.0',
     'NEUTRON_IPS': '192.168.57',
 }
 
@@ -52,14 +52,9 @@ export IDENTITY_URI="http://$KEYSTONE_HOST:35357"
 # values.
 export REGION="{REGION}"
 export CONTROLLER="{CONTROLLER}"
+export PUBLIC_CONTROLLER="{PUBLIC_CONTROLLER}"
 
 # Set the IP used to connect to remotely control the VM. If undefined, it is
-# used the IP visible on Internet, asking to http://ifconfig.me/ip.
-# When using nova, usually this is the floating IP, but
-# not all nova installations use public IPs and a transparent proxy also might
-# affect the result.
-export VM_ACCESS_IP={VM_ACCESS_IP}
-
 # Database. These are only default values,
 # they may be changed at your convenience.
 export GLANCE_DB="glance"
@@ -71,7 +66,9 @@ export NEUTRON_DBUSER="$NEUTRON_DB"
 
 # Other defaults
 export EXTERNAL_INTERFACE='{EXTERNAL_INTERFACE}'
+# Used to get management interface
 export NOVA_IPS='{NOVA_IPS}'
+# Used to get tunnel interface
 export NEUTRON_IPS='{NEUTRON_IPS}'
 
 # Passwords are generated automatically.

@@ -48,20 +48,20 @@ default_region_json = """{
     {"username": "admin-$REGION", "password": "$ADMIN_REGION_PASS"}
   ],
 "services": [
-    { "name": "glance", "type": "image", "public": "http://127.0.0.1:9292",
-      "admin": "http://127.0.0.1:9292", "internal": "http://127.0.0.1:9292" },
-    { "name": "nova", "type": "compute", "public": "http://127.0.0.1:8774/v2/%(tenant_id)s",
-      "admin": "http://127.0.0.1:8774/v2/%(tenant_id)s", "internal": "http://127.0.0.1:8774/v2/%(tenant_id)s" },
-    { "name": "cinder", "type": "volume", "public": "http://127.0.0.1:8776/v1/%(tenant_id)s",
-      "admin": "http://127.0.0.1:8776/v1/%(tenant_id)s", "internal": "http://127.0.0.1:8776/v1/%(tenant_id)s" },
-    { "name": "cinderv2", "type": "volumev2", "public": "http://127.0.0.1:8776/v2/%(tenant_id)s",
-      "admin": "http://127.0.0.1:8776/v2/%(tenant_id)s", "internal": "http://127.0.0.1:8776/v2/%(tenant_id)s" },
-    { "name": "neutron", "type": "network", "public": "http://127.0.0.1:9696",
-      "admin": "http://127.0.0.1:9696", "internal": "http://127.0.0.1:9696" },
-    { "name": "neutron", "type": "network", "public": "http://127.0.0.1:9696",
-      "admin": "http://127.0.0.1:9696", "internal": "http://127.0.0.1:9696" },
-    { "name": "swift", "type": "object-store", "public": "http://127.0.0.1:8080/v1/AUTH_%(tenant_id)s",
-      "admin": "http://127.0.0.1:8080/v1/AUTH_%(tenant_id)s", "internal": "http://127.0.0.1:8080/v1/AUTH_%(tenant_id)s"}
+    { "name": "glance", "type": "image", "public": "http://$PUBLIC_CONTROLLER:9292",
+      "admin": "http://$CONTROLLER:9292", "internal": "http://$CONTROLLER:9292" },
+    { "name": "nova", "type": "compute", "public": "http://$PUBLIC_CONTROLLER:8774/v2/%(tenant_id)s",
+      "admin": "http://$CONTROLLER:8774/v2/%(tenant_id)s", "internal": "http://$CONTROLLER:8774/v2/%(tenant_id)s" },
+    { "name": "cinder", "type": "volume", "public": "http://$PUBLIC_CONTROLLER:8776/v1/%(tenant_id)s",
+      "admin": "http://$CONTROLLER:8776/v1/%(tenant_id)s", "internal": "http://$CONTROLLER:8776/v1/%(tenant_id)s" },
+    { "name": "cinderv2", "type": "volumev2", "public": "http://$PUBLIC_CONTROLLER:8776/v2/%(tenant_id)s",
+      "admin": "http://$CONTROLLER:8776/v2/%(tenant_id)s", "internal": "http://$CONTROLLER:8776/v2/%(tenant_id)s" },
+    { "name": "neutron", "type": "network", "public": "http://$PUBLIC_CONTROLLER:9696",
+      "admin": "http://$CONTROLLER:9696", "internal": "http://$CONTROLLER:9696" },
+    { "name": "neutron", "type": "network", "public": "http://$PUBLIC_CONTROLLER:9696",
+      "admin": "http://$CONTROLLER:9696", "internal": "http://$CONTROLLER:9696" },
+    { "name": "swift", "type": "object-store", "public": "http://$PUBLIC_CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
+      "admin": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s", "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"}
   ]
 }"""
 
