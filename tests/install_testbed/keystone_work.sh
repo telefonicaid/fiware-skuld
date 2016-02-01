@@ -48,7 +48,7 @@ export PYTHONPATH=~/fiware-skuld
 
 # register region data and create service project if it does not exist
 . config_vars
-. credential
+. ~/credential
 ./register_region.py
 
 # append tenant id of service to configuration file

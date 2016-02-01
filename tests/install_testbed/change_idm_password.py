@@ -28,9 +28,11 @@ __author__ = 'chema'
 
 from skuld.change_password import PasswordChanger
 from utils.osclients import OpenStackClients
+import os.path
 
 file_path = '/home/ubuntu/idm/conf/settings.py'
 credential ="""export OS_AUTH_URL=http://127.0.0.1:5000/v3/
+export OS_AUTH_URL_V2=http://127.0.0.1:5000/v2.0/
 export OS_USERNAME=idm
 export OS_TENANT_NAME=idm
 export OS_PROJECT_DOMAIN_ID=default
@@ -45,10 +47,9 @@ osclients.set_credential('idm', 'idm', 'idm')
 password_changer = PasswordChanger(osclients)
 idm = password_changer.get_user_byname('idm')
 new_password = password_changer.reset_password(idm)
-print new_password
 
 # Generate the credential file
-with open('credential', 'w') as f:
+with open(os.path.expanduser('~/credential'), 'w') as f:
     f.write(credential)
     f.write('export OS_PASSWORD=' + new_password + '\n')
 
