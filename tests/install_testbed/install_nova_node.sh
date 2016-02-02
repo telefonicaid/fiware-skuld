@@ -29,7 +29,7 @@ MY_IP=`ip a| awk "/inet $MANAGEMENT_IPS/  {print gensub(/\/.+/,\"\",\"g\",\\$2)}
 
 apt-get install -y nova-compute sysfsutils
 
-## Configurar nova.conf
+## Configure nova.conf
 file=/etc/nova/nova.conf
 ./openstack-config --set $file DEFAULT rpc_backend rabbit
 ./openstack-config --set $file DEFAULT rabbit_host $CONTROLLER
@@ -48,10 +48,11 @@ file=/etc/nova/nova.conf
 ./openstack-config --set $file DEFAULT novncproxy_base_url http://$PUBLIC_CONTROLLER:6080/vnc_auto.html
 ./openstack-config --set $file glance host $CONTROLLER
 
-## Si no hay virtualizacion hardware, (kvm) configuramos para virtualizacion software qemu (lenta)
+## Use qemu when KVM is not available. This is slow, but it works even inside a VM
+## without nested virtualization.
 file=/etc/nova/nova-compute.conf
 egrep -c '(vmx|svm)' /proc/cpuinfo || ./openstack-config --set $file libvirt virt_type qemu
 
-# Reiniciar los servicios
+# Restart the services
 service nova-compute restart
 rm -f /var/lib/nova/nova.sqlite
