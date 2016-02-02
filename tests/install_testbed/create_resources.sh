@@ -25,9 +25,9 @@
 . config_vars
 
 neutron net-create ext-net --router:external True --provider:physical_network external --provider:network_type flat
-neutron subnet-create ext-net --name ext-subnet --allocation-pool start=${NEUTRON_IPS}.2,end=${NEUTRON_IPS}.254  --disable-dhcp --gateway ${NEUTRON_IPS}.1 ${NEUTRON_IPS}.0/24
+neutron subnet-create ext-net --name ext-subnet --allocation-pool start=192.168.58.200,end=192.168.58.219  --disable-dhcp --gateway 192.168.58.1 192.168.58.0.0/24
 neutron net-create shared-net
-neutron subnet-create shared-net --name shared-subnet --gateway 192.168.2.1 192.168.2.0/24
+neutron subnet-create shared-net --name shared-subnet --gateway 192.168.59.1 192.168.59.0/24
 neutron router-create shared-router
 neutron router-interface-add shared-router shared-subnet
 neutron router-gateway-set shared-router ext-net
