@@ -123,6 +123,7 @@ class GenerateTemplateRegion(object):
             f.write('\n# Admin credential\n')
             f.write('export OS_REGION_NAME=$REGION\n')
             f.write('export OS_AUTH_URL=http://$KEYSTONE_HOST:5000/v3/\n')
+            f.write('export OS_AUTH_URL_V2=http://$KEYSTONE_HOST:5000/v2.0/\n')
             f.write('export OS_PASSWORD=$ADMIN_REGION_PASS\n')
             f.write('export OS_USERNAME=admin-$REGION\n')
             f.write('export OS_TENANT_NAME=$OS_USERNAME\n')
