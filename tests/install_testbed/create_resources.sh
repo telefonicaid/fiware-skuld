@@ -36,4 +36,8 @@ wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --is-public True
 NETID=$(neutron net-list |awk '/shared-net/ { print $2 }'
 . ~/.bash_aliases
-nova boot testvm --flavor m1.tiny --image cirros --nic net-id=$NETID
+nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/teskey
+nova secgroup-create ssh "open tcp 22"
+nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
+
+nova boot testvm --flavor m1.tiny --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
