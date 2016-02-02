@@ -24,8 +24,7 @@
 
 . config_vars
 
-# MY_IP=`ip a| awk "/inet $NOVA_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
-MY_IP=${VM_ACCESS_IP:-$(curl -s /dev/null http://ifconfig.me/ip)}
+MY_IP=`ip a| awk "/inet $MANAGEMENT_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
 
 ## create the database
 ./create_mysqldb $NOVA_DB $NOVA_DBPASSWORD
@@ -42,7 +41,7 @@ file=/etc/nova/nova.conf
 ./openstack-config --set $file DEFAULT rabbit_password $RABBIT_PASS
 ./openstack-config --set $file DEFAULT auth_strategy keystone
 ./openstack-config --set $file DEFAULT my_ip $MY_IP
-./openstack-config --set $file DEFAULT vncserver_listen $MY_IP
+./openstack-config --set $file DEFAULT vncserver_listen 0.0.0.0
 ./openstack-config --set $file DEFAULT vncserver_proxyclient_address $MY_IP
 ./openstack-config --set $file DEFAULT verbose True
 ./openstack-config --set $file keystone_authtoken auth_uri $AUTH_URI

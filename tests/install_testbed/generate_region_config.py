@@ -36,8 +36,8 @@ default_values = {
     'CONTROLLER': '127.0.0.1',
     'PUBLIC_CONTROLLER': '127.0.0.1',
     'EXTERNAL_INTERFACE': 'eth2',
-    'NOVA_IPS': '127.0.0',
-    'NEUTRON_IPS': '192.168.57',
+    'MANAGEMENT_IPS': '127.0.0',
+    'TUNNEL_IPS': '192.168.57',
 }
 
 template = """
@@ -67,9 +67,9 @@ export NEUTRON_DBUSER="$NEUTRON_DB"
 # Other defaults
 export EXTERNAL_INTERFACE='{EXTERNAL_INTERFACE}'
 # Used to get management interface
-export NOVA_IPS='{NOVA_IPS}'
+export MANAGEMENT_IPS='{MANAGEMENT_IPS}'
 # Used to get tunnel interface
-export NEUTRON_IPS='{NEUTRON_IPS}'
+export TUNNEL_IPS='{TUNNEL_IPS}'
 
 # Passwords are generated automatically.
 # Most of them can be changed by any other value. However, the following

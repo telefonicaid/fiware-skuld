@@ -24,7 +24,7 @@
 
 . ./config_vars
 
-MY_IP=`ip a| awk "/inet $NOVA_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
+MY_IP=`ip a| awk "/inet $MANAGEMENT_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
 
 
 apt-get install -y nova-compute sysfsutils

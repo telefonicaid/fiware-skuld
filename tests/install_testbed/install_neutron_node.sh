@@ -23,7 +23,7 @@
 
 . ./config_vars
 
-INSTANCE_TUNNELS_INTERFACE_IP_ADDRESS=`ip a| awk "/inet $NEUTRON_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
+INSTANCE_TUNNELS_INTERFACE_IP_ADDRESS=`ip a| awk "/inet $TUNNEL_IPS/  {print gensub(/\/../,\"\",\"g\",\\$2)}"`
 
 
 ### configure rp_filter and ipforwarding.
