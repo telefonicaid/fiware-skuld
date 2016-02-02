@@ -25,7 +25,7 @@
 . config_vars
 
 neutron net-create ext-net --router:external True --provider:physical_network external --provider:network_type flat
-neutron subnet-create ext-net --name ext-subnet --allocation-pool start=192.168.58.200,end=192.168.58.219  --disable-dhcp --gateway 192.168.58.1 192.168.58.0.0/24
+neutron subnet-create ext-net --name ext-subnet --allocation-pool start=192.168.58.200,end=192.168.58.219  --disable-dhcp --gateway 192.168.58.1 192.168.58.0/24
 neutron net-create shared-net
 neutron subnet-create shared-net --name shared-subnet --gateway 192.168.59.1 192.168.59.0/24
 neutron router-create shared-router
@@ -34,5 +34,6 @@ neutron router-gateway-set shared-router ext-net
 
 wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --is-public True
-NETID=$(neutron net-list |awk '/shared-net/ { print $2 }')
-env OS_AUTH_URL=http://$KEYSTONE_HOST:5000/v2.0/ nova boot testvm --flavor m1.tiny --image cirros --nic net-id=$NETID
+NETID=$(neutron net-list |awk '/shared-net/ { print $2 }'
+. ~/.bash_aliases
+nova boot testvm --flavor m1.tiny --image cirros --nic net-id=$NETID
