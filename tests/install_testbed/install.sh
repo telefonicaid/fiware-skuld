@@ -31,7 +31,7 @@ sudo ifup $1
 }
 
 # add alias to use nova with keystone URL v2
-echo "alias nova='env OS_AUTH_URL=$OS_AUTH_URL_V2 nova'" > ~/.bash_aliases
+echo alias nova='env OS_AUTH_URL=$OS_AUTH_URL_V2 nova' > ~/.bash_aliases
 
 # add hostname to /etc/hosts to avoid warning with sudo. This could
 # affect the parsing of some commands.
