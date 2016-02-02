@@ -35,8 +35,8 @@ neutron router-gateway-set shared-router ext-net
 wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --is-public True
 NETID=$(neutron net-list |awk '/shared-net/ { print $2 }'
-. ~/.bash_aliases
-nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/teskey
+export OS_AUTH_URL=$OS_AUTH_URL_V2
+nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/testkey
 nova secgroup-create ssh "open tcp 22"
 nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
 
