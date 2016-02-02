@@ -31,3 +31,12 @@ then
 
   apt-get update && apt-get -y dist-upgrade
 fi
+
+# nova boot finish with error when nova compute has /etc/machine-id and it is
+# empty.
+if [ -f /etc/machine-id ] ; then
+   size=$(stat -c "%s" /etc/machine-id)
+   if [ $size -eq 0 ] ; then
+      rm /etc/machine-id
+   fi
+fi
