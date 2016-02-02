@@ -22,19 +22,12 @@
 #
 # Author: Chema
 
-# if interface does not have IP, assign it. It only works with
-# netmask 255.255.255.0 addresses, using the .1 IP.
 
-if [ ! "$(ip a show dev $EXTERNAL_INTERFACE |grep 'inet ')" ]
+if [ ! -f /etc/apt/sources.list.d/cloudarchive-juno.list ]
 then
-cat <<EOF > /etc/network/interfaces.d/eth1.cfg
-auto $EXTERNAL_INTERFACE
-iface eth1 inet static
-   address ${NEUTRON_IPS}.1
-   netmask 255.255.255.0
-EOF
-sudo ifup eth1
-fi
+  apt-get install ubuntu-cloud-keyring
+  echo "deb http://ubuntu-cloud.archive.canonical.com/ubuntu" \
+    "trusty-updates/juno main" > /etc/apt/sources.list.d/cloudarchive-juno.list
 
-#ip tuntap add mode tap extdev0
-#ip address add dev extdev0 $IP_EXTDEV0
+  apt-get update && apt-get -y dist-upgrade
+fi
