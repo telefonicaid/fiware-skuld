@@ -75,11 +75,11 @@ class RegisterRegion(object):
         self.password_changer = PasswordChanger(self.osclients)
 
     def service_exists(self, service_name, service_type):
-        """
+        """Ensure that the service exists: create if it does not.
 
-        :param service_name:
-        :param service_type:
-        :return:
+        :param service_name: the service name (e.g. nova)
+        :param service_type: the service type (e.g. compute)
+        :return: the service id
         """
         try:
             service = self.keystone.services.find(name=service_name)
@@ -89,10 +89,10 @@ class RegisterRegion(object):
 
 
     def region_exists(self, region_id):
-        """
+        """ Ensure that the region exists: create if it does not.
 
-        :param region_id:
-        :return:
+        :param region_id: the region id (the region name)
+        :return: Nothing
         """
         try:
             self.keystone.regions.find(id=region_id)
@@ -100,11 +100,11 @@ class RegisterRegion(object):
             self.keystone.regions.create(region_id)
 
     def project_exists(self, tenant_name, domain_id='default'):
-        """
+        """Ensure that the project exists: create if it does not.
 
-        :param tenant_name:
-        :param domain_id:
-        :return:
+        :param tenant_name: the tenant (aka project)
+        :param domain_id: the domain-id (or default)
+        :return: the project (a.k.a. tenant) id
         """
         try:
             project = self.keystone.projects.find(name=tenant_name)
@@ -130,13 +130,14 @@ class RegisterRegion(object):
         return user
 
     def endpoint_exists(self, service_id, interface, url, region):
-        """
+        """check that enpoint exists. Otherwise, create it. Also check that the
+        URLs are the same; if they are different, update.
 
-        :param service_id:
-        :param interface:
-        :param url:
-        :param region:
-        :return:
+        :param service_id: the service id
+        :param interface: interface may be public, internal, admin.
+        :param url: the URL of the endpoint
+        :param region: the region id.
+        :return: the endpoint id.
         """
         result = self.keystone.endpoints.list(service=service_id, interface=interface, region=region)
         if not result:
@@ -149,6 +150,25 @@ class RegisterRegion(object):
         return result.id
 
     def register_region(self, region, set_passwords=False):
+        """Register the region data. It is intended to create all the users
+        and services required to add a region to a federation.
+
+        This method is idempotent, that is, the effect of invoking it multiple
+        times is the same that invoking only once.
+
+        It ensure that the region region['region'] is registered.
+        It ensure that the users region['users'] exist and have
+         the role admin in the service project
+        It ensure that the services region['services'] and its endpoints
+        exist and the URLs are correct.
+
+        :param region: a dictionary extracted from a JSON with the structure of
+        default_region_json
+
+        :param set_passwords: if true, override the passwords when the user
+         exists. If false, passwords are only used when the users are created.
+        :return: nothing
+        """
         region_name = region['region']
         self.region_exists(region_name)
 
@@ -187,11 +207,17 @@ class RegisterRegion(object):
         return data.format(**env)
 
     def register_regions(self, regions_json=default_region_json, env=os.environ):
-        """
+        """This is a front-end of the method register region, that receives
+        as parameter the JSON and the environment to override the ${VAR} and
+        $VAR expressions.
 
-        :param regions_json:
-        :param env:
-        :return:
+        It admits a JSON with an only region (with the structure of
+        default_region_json) or a JSON with multiple regions. This last has
+        a 'regions' fields that is an array of regions.
+
+        :param regions_json: a JSON
+        :param env: an environment (array of variables)
+        :return: nothing
         """
         regions_json = self.transform_json(regions_json, env)
         region = json.loads(regions_json)
@@ -206,6 +232,10 @@ class RegisterRegion(object):
         else:
             # This is an only region
             self.register_region(region, set_passwords)
+
+# If the program receives a parameter, it is interpreted as a file with the
+# JSON to register. Otherwise, it uses default_region_json, replacing the
+# variables with the environment.
 
 if __name__ == '__main__':
     register = RegisterRegion()
