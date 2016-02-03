@@ -35,8 +35,6 @@ sudo apt-get update
 sudo apt-get install -y pwgen
 
 pip install -r ~/fiware-skuld/requirements.txt --allow-all-external
-pip install python-openstackclient
-
 
 export PYTHONPATH=~/fiware-skuld
 
