@@ -30,6 +30,7 @@ from keystoneclient.v2_0 import client as keystonev2
 from keystoneclient.v3 import client as keystonev3
 
 from importlib import import_module
+import sys
 
 __author__ = 'chema'
 
@@ -799,6 +800,16 @@ class OpenStackClients(object):
             self._session_v2 = self._saved_session_v2
             self._session_v3 = self._saved_session_v3
 
+    # make access from scripts more easy using properties
+    nova = property(get_novaclient)
+    keystone = property(get_keystoneclient)
+    glance = property(get_keystoneclient)
+    swift = property(get_swiftclient)
+    cinder = property(get_cinderclient)
+    neutron = property(get_neutronclient)
+    session = property(get_session)
+    project_id = property(get_tenant_id)
+    tenant_id = property(get_tenant_id)
 
 # create an object. This allows using this methods easily with
 # from osclients import osclients
@@ -807,3 +818,9 @@ osclients = OpenStackClients()
 if 'KEYSTONE_ADMIN_ENDPOINT' in env:
     osclients.override_endpoint(
         'identity', osclients.region, 'admin', env['KEYSTONE_ADMIN_ENDPOINT'])
+
+# allow calling this module from a shell script (e.g. osclients 'o.project_id' )
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        o = osclients
+        print eval(sys.argv[1])
