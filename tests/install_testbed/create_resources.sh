@@ -42,6 +42,7 @@ nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
 
 nova boot testvm --poll --flavor m1.tiny --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
 
+. ~/skuldenv/bin/activate
 TEST_VM="o.nova.servers.find(name='testvm')"
-FLOATING_IP="o.nova.floating_ip.create('ext-net').ip"
+FLOATING_IP="o.nova.floating_ips.create('ext-net').ip"
 ~/fiware-skuld/utils/osclients.py "${TEST_VM}.add_floating_ip(${FLOATING_IP})"
