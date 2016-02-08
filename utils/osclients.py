@@ -803,7 +803,7 @@ class OpenStackClients(object):
     # make access from scripts more easy using properties
     nova = property(get_novaclient)
     keystone = property(get_keystoneclient)
-    glance = property(get_keystoneclient)
+    glance = property(get_glanceclient)
     swift = property(get_swiftclient)
     cinder = property(get_cinderclient)
     neutron = property(get_neutronclient)
