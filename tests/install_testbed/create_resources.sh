@@ -37,8 +37,10 @@ glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-di
 NETID=$(neutron net-list |awk '/shared-net/ { print $2 }')
 export OS_AUTH_URL=$OS_AUTH_URL_V2
 nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/testkey
-nova secgroup-create ssh "open tcp 22"
+nova secgroup-create ssh "open tcp 22 and icmp"
 nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
+nova secgroup-add-rule ssh icmp -1 -1 0.0.0.0/0
+
 
 nova boot testvm --poll --flavor m1.tiny --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
 
@@ -46,3 +48,4 @@ nova boot testvm --poll --flavor m1.tiny --image cirros --nic net-id=$NETID --ke
 TEST_VM="o.nova.servers.find(name='testvm')"
 FLOATING_IP="o.nova.floating_ips.create('ext-net').ip"
 ~/fiware-skuld/utils/osclients.py "${TEST_VM}.add_floating_ip(${FLOATING_IP})"
+cp config_vars ~
