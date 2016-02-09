@@ -22,6 +22,8 @@
 #
 # Author: Chema
 
+cd $(dirname $0)
+
 add_iface() {
 ip a show dev $1 |grep "inet " || cat <<EOF | sudo tee /etc/network/interfaces.d/$1.cfg >/dev/null
 auto $1
@@ -33,31 +35,11 @@ sudo ifup $1
 # add alias to use nova with keystone URL v2
 echo alias nova=\'env OS_AUTH_URL=\$OS_AUTH_URL_V2 nova\' > ~/.bash_aliases
 
-# add hostname to /etc/hosts to avoid warning with sudo. This could
-# affect the parsing of some commands.
-echo "127.0.0.1 localhost $(hostname)" > /tmp/host.new
-tail -n +2 /etc/hosts >> /tmp/host.new
-
 # Add network configuration for eth1 and eth2. These is needed because
 # we are using an installation with an only node.
 # eth1: tunnel
 add_iface eth1
-# eth2: external network
-add_iface eth2
-
-# Copy, instead of moving to use security context of the directory.
-cat /tmp/host.new | sudo tee /etc/hosts >/dev/null
-rm /tmp/host.new
-
-# download fiware-skuld project
-cd
-git clone https://github.com/telefonicaid/fiware-skuld.git
-# Remove these two lines before merge
-cd ~/fiware-skuld
-git checkout feature_CLAUDIA-5785
-
-
-cd ~/fiware-skuld/tests/install_testbed
+# eth2: external network, connected to OVS. No configuration
 
 # create properties file, register region
 ./keystone_work.sh
