@@ -1,0 +1,7 @@
+#cloud-config
+
+manage_etc_hosts: localhost
+
+runcmd:
+  - su - ubuntu -c "git clone https://github.com/telefonicaid/fiware-skuld.git ; cd ~/fiware-skuld ; git checkout feature_CLAUDIA-5785"
+  - su - ubuntu -c "~/fiware-skuld/tests/install_testbed/install.sh"
