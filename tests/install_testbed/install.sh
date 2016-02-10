@@ -27,12 +27,6 @@ cd $(dirname $0)
 # add alias to use nova with keystone URL v2
 echo alias nova=\'env OS_AUTH_URL=\$OS_AUTH_URL_V2 nova\' > ~/.bash_aliases
 
-# Add network configuration for eth1 and eth2. These is needed because
-# we are using an installation with an only node.
-# eth1: tunnel
-add_iface eth1
-# eth2: external network, connected to OVS. No configuration
-
 # create properties file, register region
 ./keystone_work.sh
 
