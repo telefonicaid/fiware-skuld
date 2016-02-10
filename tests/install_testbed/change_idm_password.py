@@ -26,11 +26,15 @@ __author__ = 'chema'
 
 """script to change idm user default password with a random one"""
 
+import os.path
+from subprocess import check_call
+
 from skuld.change_password import PasswordChanger
 from utils.osclients import OpenStackClients
-import os.path
 
 file_path = '/home/ubuntu/idm/conf/settings.py'
+etckeystone_path = '/home/ubuntu/idm/keystone/etc/keystone.conf'
+
 credential ="""export OS_AUTH_URL=http://127.0.0.1:5000/v3/
 export OS_AUTH_URL_V2=http://127.0.0.1:5000/v2.0/
 export OS_USERNAME=idm
@@ -53,9 +57,21 @@ with open(os.path.expanduser('~/credential'), 'w') as f:
     f.write(credential)
     f.write('export OS_PASSWORD=' + new_password + '\n')
 
-# Change the password in the configuration file
+# Change the password in the settings file
 content = open(file_path).read()
-content = content.replace("'password': 'idm'", "'password': '" + new_password + "'")
+content = content.replace("'password': 'idm'", "'password': '" +
+                          new_password + "'")
+content = content.replace("KEYSTONE_ADMIN_TOKEN = 'ADMIN'",
+                          "KEYSTONE_ADMIN_TOKEN = '" + new_password + "'")
 
 with open(file_path, 'w') as f:
     f.write(content)
+
+# Change the admin token in the keystone config file
+content = open(etckeystone_path).read()
+content = content.replace("admin_token=ADMIN", "admin_token=" + new_password)
+with open(etckeystone_path, 'w') as f:
+    f.write(content)
+
+# Restart keystone to apply admin_token change
+check_call(['sudo', 'service', 'keystone_idm', 'restart'])
