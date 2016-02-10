@@ -28,6 +28,7 @@ __author__ = 'chema'
 
 import os.path
 from subprocess import check_call
+import time
 
 from skuld.change_password import PasswordChanger
 from utils.osclients import OpenStackClients
@@ -77,3 +78,6 @@ check_call(['sudo', 'chmod', '600', etckeystone_path])
 
 # Restart keystone to apply admin_token change
 check_call(['sudo', 'service', 'keystone_idm', 'restart'])
+
+# Pause needed before running other commands that connects to keystone
+time.sleep(5)
