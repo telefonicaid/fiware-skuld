@@ -22,6 +22,46 @@
 #
 # Author: Chema
 
+add_tap_ifaces() {
+cat <<EOF |sudo tee /etc/network/interfaces.d/eth1.cfg >/dev/null
+auto eth1
+iface eth1 inet static
+address 192.168.57.1
+netmask 255.255.255.0
+pre-up ip tuntap add mode tap eth1
+post-down ip tuntap del mode tap eth1
+EOF
+sudo ifup eth1
+cat <<EOF |sudo tee /etc/network/interfaces.d/eth2.cfg >/dev/null
+auto eth2
+iface eth2 inet manual
+pre-up ip tuntap add mode tap eth2
+post-down ip tuntap del mode tap eth2
+up ip link set dev eth2 up
+down ip link set dev eth2 down
+EOF
+sudo ifup eth2
+}
+
+add_iface() {
+cat <<EOF > /etc/network/interfaces.d/$1.cfg
+auto $1
+iface $1 inet dhcp
+EOF
+sudo ifup $1
+}
+
+# check network interfaces
+if [ "$(ip link show eth1 2>/dev/null)" ] ; then
+   # configure eth1 to use dhcp if it is not already configured,
+   # let eth2 unconfigured (it is used in a bridge)
+   ip a show dev eth1 |grep "inet " || add_iface eth1
+else
+   # there are not eth1/eth2. Create them using TAP devices
+   add_tap_ifaces
+fi
+
+export DEBIAN_FRONTEND=noninteractive
 
 if [ ! -f /etc/apt/sources.list.d/cloudarchive-juno.list ]
 then

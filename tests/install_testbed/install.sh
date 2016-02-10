@@ -24,14 +24,6 @@
 
 cd $(dirname $0)
 
-add_iface() {
-ip a show dev $1 |grep "inet " || cat <<EOF | sudo tee /etc/network/interfaces.d/$1.cfg >/dev/null
-auto $1
-iface $1 inet dhcp
-EOF
-sudo ifup $1
-}
-
 # add alias to use nova with keystone URL v2
 echo alias nova=\'env OS_AUTH_URL=\$OS_AUTH_URL_V2 nova\' > ~/.bash_aliases
 
@@ -43,7 +35,6 @@ add_iface eth1
 
 # create properties file, register region
 ./keystone_work.sh
-
 
 # install controller (this might be run in another node)
 sudo ./prepare_controller.sh
