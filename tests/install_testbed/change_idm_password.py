@@ -80,4 +80,4 @@ check_call(['sudo', 'chmod', '600', etckeystone_path])
 check_call(['sudo', 'service', 'keystone_idm', 'restart'])
 
 # Pause needed before running other commands that connects to keystone
-time.sleep(5)
+time.sleep(10)

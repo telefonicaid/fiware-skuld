@@ -38,11 +38,11 @@ pip install -r ~/fiware-skuld/requirements.txt --allow-all-external
 
 export PYTHONPATH=~/fiware-skuld
 
-# create properties
-./generate_region_config.py
-
 # change idm default password & generate new credential
 ./change_idm_password.py
+
+# create properties
+./generate_region_config.py
 
 # register region data and create service project if it does not exist
 . config_vars
