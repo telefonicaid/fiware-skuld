@@ -70,8 +70,10 @@ with open(file_path, 'w') as f:
 # Change the admin token in the keystone config file
 content = open(etckeystone_path).read()
 content = content.replace("admin_token=ADMIN", "admin_token=" + new_password)
+check_call(['sudo', 'chmod', '777', etckeystone_path])
 with open(etckeystone_path, 'w') as f:
     f.write(content)
+check_call(['sudo', 'chmod', '600', etckeystone_path])
 
 # Restart keystone to apply admin_token change
 check_call(['sudo', 'service', 'keystone_idm', 'restart'])
