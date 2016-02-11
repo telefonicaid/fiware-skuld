@@ -473,7 +473,9 @@ to any port from a VM using the same security group.
 
 The names of the keypair, the security group and other parameters as the preferable
 floating IP are configurable in the *settings.py* file, but most of the users may
-ignore this file securely.
+ignore this file securely. However, to use the script in a different platform
+than FIWARE Lab, probably is necessary to change the parameter about the
+public shared network name.
 
 Using the testbed
 *****************
@@ -485,7 +487,7 @@ inside the VM and needs a few minutes to complete. Usually the installation
 process last between 10 and 20 minutes. The job is finish after the file
 config_vars is copied into the */home/ubuntu* folder inside the virtual machine.
 
-When the installation is finished, the credential may be loaded with . ~/config_vars.
+When the installation is finished, the credential may be loaded with *. ~/config_vars*.
 The command *nova list* shows a testing VM that has been created during the installation
 inside the testbed (that is, it is a virtual machine running inside the testbed
 virtual machine). The floating IP 192.168.58.201 is associated to this
@@ -501,6 +503,19 @@ VM. It is possible to connect to the server following this steps:
 Of course, if a new server is instantiated using the same network, there will
 be network visibility between both servers, according the rules of the
 security groups.
+
+.. code::
+
+    . ~/config_vars
+    NETID =
+    nova boot testvm2 --poll --flavor micro2 --image cirros --nic net-id=$NETID\
+     --key-name testkey --security-groups ssh
+    ssh -A cirros@192.168.58.201
+    $ ssh cirros@192.168.58.3
+
+The micro flavor provides 64MB of RAM, 1 VCPU and 1GB of disk. The micro2 flavor is the
+same, but with 0GB of disk (i.e. a minimal disk to boot the image is created
+but with barely free space)
 
 Tools
 -----
