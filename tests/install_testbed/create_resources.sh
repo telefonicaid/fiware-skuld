@@ -41,8 +41,14 @@ nova secgroup-create ssh "open tcp 22 and icmp"
 nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
 nova secgroup-add-rule ssh icmp -1 -1 0.0.0.0/0
 
+# 64MB RAM 1 GB disk, 1 VCPU
+nova flavor-create micro auto 64 1 1
+# 64MB RAM 0 GB disk, 1 VCPU
+nova flavor-create micro2 auto 64 0 1
 
-nova boot testvm --poll --flavor m1.tiny --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
+
+
+nova boot testvm --poll --flavor micro2 --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
 
 . ~/skuldenv/bin/activate
 TEST_VM="o.nova.servers.find(name='testvm')"
