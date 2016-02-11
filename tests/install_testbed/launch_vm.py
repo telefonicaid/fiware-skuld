@@ -26,38 +26,12 @@ __author__ = 'chema'
 
 import time
 import sys
+import os
+import os.path
 
 from utils.osclients import osclients
+import settings
 
-network_names = {
-   'management': 'node-int-net-01',
-   'tunnel': 'tunnel-net',
-   'external': 'external-net'
-}
-
-subnet = {
-   'management': '192.168.192.0/18',
-   'tunnel': '192.168.57.0/24',
-   'external': '192.168.58.0/24'
-}
-
-key_name = 'createimage'
-security_group = 'sshopen'
-# Use this IP if it is available.
-preferred_ip = None
-
-
-# Testbed image
-flavor_name = 'm1.large'
-image_name = 'keyrock-R4.4'
-vm_name = 'testbedskuld'
-# filename of init_script
-init_script = 'cloudconfig'
-
-# Test image
-flavor_name_test = 'm1.tiny'
-image_name_test = 'base_debian_7'
-vm_name_test = 'testvm'
 
 def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None):
     """ Launch a VM and wait until it is ready.
@@ -79,12 +53,12 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None):
     extra_params = dict()
     
     # load script to launch with nova.servers.create()
-    if init_script:
-        data = open(init_script).read()
+    if user_data:
+        data = open(user_data).read()
         extra_params['userdata'] = data
 
-    server =  nova_c.servers.create(
-        vm_n, flavor=flavor.id, image=image_id, key_name=key_name,
+    server = nova_c.servers.create(
+        vm_n, flavor=flavor.id, image=image_id, key_name=settings.key_name,
         security_groups=[securityg_n], nics=ifaces, **extra_params)
 
     print('Created VM with UUID ' + server.id)
@@ -103,7 +77,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None):
 
     return server
 
-def create_port_multi_ip():
+def create_port_multi_ip(security_group_id=None):
     """Create port in external network, with 5 IPs (this is the maximum allowed
     with the default neutron configuration).
 
@@ -112,6 +86,7 @@ def create_port_multi_ip():
     Another point is that security group may be different than the security
     group of the VM.
 
+    :param security_group_id: The security group
     :return: a pre-allocated port
     """
 
@@ -127,52 +102,91 @@ def create_port_multi_ip():
         fixed_ip['ip_address'] = '192.168.58.%d' % i
         fixed_ips.append(fixed_ip)
 
-    return neutron.create_port(
-        {'port': {'network_id': network['external'], 'fixed_ips': fixed_ips}})
-
+    p = {'port': {'network_id': network['external'], 'fixed_ips': fixed_ips}}
+    if security_group_id:
+        p['port']['security_groups'] = [security_group_id]
+    return neutron.create_port(p)
 
 # Get networks
 
 network = dict()
 neutron = osclients.get_neutronclient()
+nova = osclients.get_novaclient()
+
 for net in neutron.list_networks()['networks']:
-    for n in network_names:
-        if net['name'] == network_names[n]:
+    for n in settings.network_names:
+        if net['name'] == settings.network_names[n]:
             network[n] = net['id']
 
-for n in network_names:
+for n in settings.network_names:
     if not n in network:
-        network[n] = neutron.create_network({'network': {'name':
-            network_names[n], 'admin_state_up': True}})['network']['id']
+        if n == 'management':
+            sys.stderr.write('Fatal error: network ' + settings.network_names[n] +
+                             'not found.\n')
+            sys.exit(-1)
+
+        network[n] = neutron.create_network(
+            {'network': {'name': settings.network_names[n], 'admin_state_up': True}})['network']['id']
         # create subnetwork. It is not possible to assign a network
         # to a VM without a subnetwork.
         neutron.create_subnet({'subnet': {'network_id': network[n],
-            'ip_version': 4, 'cidr': subnet[n]}})
+            'ip_version': 4, 'cidr': settings.subnet[n], 'gateway_ip': None}})
 
 # Get a floating IP
 floating_ip = None
 for ip in neutron.list_floatingips()['floatingips']:
     floating_ip = ip['floating_ip_address']
-    if not preferred_ip or preferred_ip == floating_ip:
+    if not settings.preferred_ip or settings.preferred_ip == floating_ip:
         break
 
+if not floating_ip:
+    # allocate floating ip if it does not exist
+    floating_ip = nova.floating_ips.create('ext-net').ip
+
+keys = nova.keypairs.findall(name=settings.key_name)
+if not keys:
+    new_key = nova.keypairs.create(settings.key_name)
+    filename = os.path.expanduser('~/.ssh/' + settings.key_name)
+    with open(filename, 'w') as f:
+        f.write(new_key.private_key)
+    os.chmod(filename, 0600)
+
+# Create security group if it does not exist
+sg_name = settings.security_group
+sec_groups = nova.security_groups.findall(name=sg_name)
+if not sec_groups:
+    g = nova.security_groups.create(name=sg_name, description=sg_name)
+    nova.security_group_rules.create(
+        g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr='0.0.0.0/0')
+    nova.security_group_rules.create(
+        g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+    # This type of rule requires the neutron API
+    neutron.create_security_group_rule(
+        {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
+                                 'remote_group_id': g.id}})
+
 # Launch testbed VM
-nics = [{'net-id': network['management']},
-        {'net-id': network['tunnel']},
-        {'net-id': network['external']}]
-# change with this to use pre-allocated port
-#        {'port-id': port['port']['id']}]
-server = launch_vm(vm_name, flavor_name, security_group, image_name, nics,
-                   init_script)
+if settings.multinetwork:
+    security_group_id = nova.security_groups.find(name=sg_name).id
+    port = create_port_multi_ip(security_group_id)
+    nics = [{'net-id': network['management']},
+            {'net-id': network['tunnel']},
+            {'port-id': port['port']['id']}]
+else:
+    nics = [{'net-id': network['management']}]
+
+server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
+                   settings.image_name, nics, settings.init_script)
 
 # assign the floating ip
 if floating_ip:
     print('Assigning floating IP ' + floating_ip)
     server.add_floating_ip(floating_ip)
 
-# Launch test VM
-nics = [{'net-id': network['management']},
-        {'net-id': network['external']}]
+if settings.multinetwork:
+    # Launch test VM
+    nics = [{'net-id': network['management']},
+            {'net-id': network['external']}]
 
-server = launch_vm(vm_name_test, flavor_name_test, security_group,
-                   image_name_test, nics)
+    launch_vm(settings.vm_name_test, settings.flavor_name_test, sg_name,
+              settings.image_name_test, nics, settings.init_script)
