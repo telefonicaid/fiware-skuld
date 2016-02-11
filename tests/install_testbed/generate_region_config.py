@@ -32,7 +32,7 @@ import os
 
 default_values = {
     'KEYSTONE_HOST': '127.0.0.1',
-    'REGION': 'Spain2',
+    'REGION': 'RegionOne',
     'CONTROLLER': '127.0.0.1',
     'PUBLIC_CONTROLLER': '127.0.0.1',
     'EXTERNAL_INTERFACE': 'eth2',
