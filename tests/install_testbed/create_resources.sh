@@ -36,6 +36,9 @@ wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
 glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --is-public True
 NETID=$(neutron net-list |awk '/shared-net/ { print $2 }')
 export OS_AUTH_URL=$OS_AUTH_URL_V2
+
+# create a keypair and copy the private key in ~/.ssh with the right
+# permission.
 nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/testkey
 # create security group that opens port 22 (SSH) and ICMP (e.g. ping) to
 # INGRESS traffic from any IP (0.0.0.0/0)
@@ -48,10 +51,10 @@ nova flavor-create micro auto 64 1 1
 # 64MB RAM 0 GB disk, 1 VCPU
 nova flavor-create micro2 auto 64 0 1
 
-
-
+# boot the VM
 nova boot testvm --poll --flavor micro2 --image cirros --nic net-id=$NETID --key-name testkey --security-groups ssh
 
+# add a floating IP
 . ~/skuldenv/bin/activate
 TEST_VM="o.nova.servers.find(name='testvm')"
 FLOATING_IP="o.nova.floating_ips.create('ext-net').ip"
