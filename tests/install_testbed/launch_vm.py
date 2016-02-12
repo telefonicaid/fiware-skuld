@@ -149,6 +149,7 @@ if not keys:
     filename = os.path.expanduser('~/.ssh/' + settings.key_name)
     with open(filename, 'w') as f:
         f.write(new_key.private_key)
+    # make the file only readable by the owner
     os.chmod(filename, 0600)
 
 # Create security group if it does not exist
