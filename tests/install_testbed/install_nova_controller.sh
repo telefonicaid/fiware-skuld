@@ -53,7 +53,6 @@ file=/etc/nova/nova.conf
 
 ## populate the database
 su -s /bin/sh -c "nova-manage db sync" nova
-su -s /bin/sh -c "nova-manage db sync" nova
 
 # restart services
 service nova-api restart
