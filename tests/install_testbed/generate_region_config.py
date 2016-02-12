@@ -26,6 +26,8 @@ __author__ = 'chema'
 
 from subprocess import Popen, PIPE
 import os
+import os.path
+import sys
 
 # default content of the properties file. The passwords are
 # also append to this file.
@@ -41,41 +43,6 @@ default_values = {
 }
 
 template = """
-# Provided parameters. Do not change this.
-
-export KEYSTONE_HOST="{KEYSTONE_HOST}"
-export AUTH_URI="http://$KEYSTONE_HOST:5000/v2.0"
-export IDENTITY_URI="http://$KEYSTONE_HOST:35357"
-
-# Required parameters. If changed, they
-# must be provided to register the new
-# values.
-export REGION="{REGION}"
-export CONTROLLER="{CONTROLLER}"
-export PUBLIC_CONTROLLER="{PUBLIC_CONTROLLER}"
-
-# Set the IP used to connect to remotely control the VM. If undefined, it is
-# Database. These are only default values,
-# they may be changed at your convenience.
-export GLANCE_DB="glance"
-export NOVA_DB="nova"
-export NEUTRON_DB="neutron"
-export GLANCE_DBUSER="$GLANCE_DB"
-export NOVA_DBUSER="$NOVA_DB"
-export NEUTRON_DBUSER="$NEUTRON_DB"
-
-# Other defaults
-export EXTERNAL_INTERFACE='{EXTERNAL_INTERFACE}'
-# Used to get management interface
-export MANAGEMENT_IPS='{MANAGEMENT_IPS}'
-# Used to get tunnel interface
-export TUNNEL_IPS='{TUNNEL_IPS}'
-
-# Passwords are generated automatically.
-# Most of them can be changed by any other value. However, the following
-# passwords are associated with keystone accounts and cannot be modified without
-# changing them also in keystone:
-# NOVA_PASS, GLANCE_PASS, CINDER_PASS, SWIFT_PASS, NEUTRON_PASS, ADMIN_REGION_PASS
 """
 
 class GenerateTemplateRegion(object):
@@ -99,6 +66,8 @@ class GenerateTemplateRegion(object):
         :param env: environment to override default values
         :return: nothing
         """
+
+        template = open(os.path.join(os.path.split(sys.argv[1]), 'default_region_template')).read()
 
         values = default_values.copy()
         # override default values with env
