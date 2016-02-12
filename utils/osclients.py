@@ -206,7 +206,7 @@ class OpenStackClients(object):
 
         This method must be called before invoking some of the get_ methods
         unless the OS_USERNAME, OS_PASSWORD is provided (in that case, also
-        OS_TENANT_NAME, OS_TENANT_ID, OS_TRUST_ID etc. are considered)
+        OS_TENANT_NAME, OS_TENANT_ID, OS_TRUST_ID, etc. are considered)
 
         The tenant may be a name or a tenant_id. However, when trust_id is
         provided neither tenant_name nor tenant_id must be
@@ -235,13 +235,13 @@ class OpenStackClients(object):
         fill tenant_name nor tenant_id because the tenant of the trustor is
         used.
         :param user_domain_id: when using API v3, the domain is the namespace
-        where the user name is unique.
+        where the user name is unique. This is the id of the domain.
         :param user_domain_name: when using API v3, the domain is the namespace
-        where the user name is unique.
+        where the user name is unique. This is the name of the domain.
         :param project_domain_id: when using API v3, the domain is the namespace
-        where the project (tenant) name is unique.
+        where the project (tenant) name is unique. This is the id of the domain.
         :param project_domain_name: when using API v3, the domain is the namespace
-        where the project (tenant) name is unique.
+        where the project (tenant) name is unique. This is the name of the domain.
 
         :return: Nothing.
         """
