@@ -35,6 +35,11 @@ vm_name = 'testbedskuld'
 # filename of init_script
 init_script = 'cloudconfig'
 
+# Accept ICMP and SSH (TCP 22) traffic from these ranges of IPs
+# 0.0.0.0/0 means any IP
+ingress_icmp_ip_range = '0.0.0.0/0'
+ingress_ssh_ip_range = '0.0.0.0/0'
+
 # multinetwork uses two extra networks: tunnel and external. However this
 # configuration is not working at the moment and the supported option is
 # multinetwork = False, that uses TAP interfaces that only work inside the
@@ -43,6 +48,7 @@ multinetwork = False
 
 network_names = {'management': 'node-int-net-01'}
 subnet = {}
+
 
 if multinetwork:
     network_names['tunnel'] = 'tunnel-net'

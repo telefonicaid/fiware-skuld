@@ -156,10 +156,12 @@ sg_name = settings.security_group
 sec_groups = nova.security_groups.findall(name=sg_name)
 if not sec_groups:
     g = nova.security_groups.create(name=sg_name, description=sg_name)
+    # Open
     nova.security_group_rules.create(
-        g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr='0.0.0.0/0')
+        g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr=settings.ingress_icmp_ip_range)
+    # Open SSH (port TCP 22)
     nova.security_group_rules.create(
-        g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr='0.0.0.0/0')
+        g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
     # This type of rule requires the neutron API
     neutron.create_security_group_rule(
         {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
