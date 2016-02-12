@@ -177,7 +177,7 @@ if settings.multinetwork:
 else:
     nics = [{'net-id': network['management']}]
 
-init_script = os.path.join(os.path.split(sys.argv[0]), settings.init_script)
+init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
 server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                    settings.image_name, nics, init_script)
 
