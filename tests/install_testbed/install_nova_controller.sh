@@ -1,5 +1,5 @@
 #!/bin/bash -ex 
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #

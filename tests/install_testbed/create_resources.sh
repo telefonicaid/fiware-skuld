@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -37,6 +37,8 @@ glance image-create --name cirros --container bare --file cirros-0.3.4-x86_64-di
 NETID=$(neutron net-list |awk '/shared-net/ { print $2 }')
 export OS_AUTH_URL=$OS_AUTH_URL_V2
 nova keypair-add testkey > ~/.ssh/testkey ; chmod 700 ~/.ssh/testkey
+# create security group that opens port 22 (SSH) and ICMP (e.g. ping) to
+# INGRESS traffic from any IP (0.0.0.0/0)
 nova secgroup-create ssh "open tcp 22 and icmp"
 nova secgroup-add-rule ssh tcp 22 22 0.0.0.0/0
 nova secgroup-add-rule ssh icmp -1 -1 0.0.0.0/0

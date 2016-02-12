@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# -- encoding: utf-8 --
+# -*- encoding: utf-8 -*-
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-Core project.
+# This file is part of FIWARE project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

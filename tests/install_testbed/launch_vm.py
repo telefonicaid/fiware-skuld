@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -- encoding: utf-8 --
+# -*- encoding: utf-8 -*-
 #
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FI-Core project.
 #

@@ -1,5 +1,4 @@
-#!/bin/bash -x
-# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
 # This file is part of FIWARE project.
 #
@@ -27,6 +26,6 @@ source ./config_vars
 sudo mysql -u root -p$MYSQL_PASS <<EOF
 CREATE DATABASE $1;
 GRANT ALL PRIVILEGES ON $1.* TO '$1'@'localhost' IDENTIFIED BY '$2';
-GRANT ALL PRIVILEGES ON $1.* TO '$1'@'%' IDENTIFIED BY '$22';
+GRANT ALL PRIVILEGES ON $1.* TO '$1'@'%' IDENTIFIED BY '$2';
 FLUSH PRIVILEGES;
 EOF
