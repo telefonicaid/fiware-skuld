@@ -177,8 +177,9 @@ if settings.multinetwork:
 else:
     nics = [{'net-id': network['management']}]
 
+init_script = os.path.join(os.path.split(sys.argv[0]), settings.init_script)
 server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
-                   settings.image_name, nics, settings.init_script)
+                   settings.image_name, nics, init_script)
 
 # assign the floating ip
 if floating_ip:
@@ -191,4 +192,4 @@ if settings.multinetwork:
             {'net-id': network['external']}]
 
     launch_vm(settings.vm_name_test, settings.flavor_name_test, sg_name,
-              settings.image_name_test, nics, settings.init_script)
+              settings.image_name_test, nics, init_script)

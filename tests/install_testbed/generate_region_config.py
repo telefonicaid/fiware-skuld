@@ -67,7 +67,7 @@ class GenerateTemplateRegion(object):
         :return: nothing
         """
 
-        template = open(os.path.join(os.path.split(sys.argv[1]), 'default_region_template')).read()
+        template = open(os.path.join(os.path.split(sys.argv[0]), 'default_region_template')).read()
 
         values = default_values.copy()
         # override default values with env
