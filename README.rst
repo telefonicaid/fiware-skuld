@@ -463,8 +463,8 @@ This is work in progress; the current version only installs Glance, Nova and Neu
 but skuld also purges Swift, Cinder and Blueprint resources.
 
 To install, it is only necessary to configure the same virtualenv than for
-running skuld, setting PYTHONPATH with the path of the project and invoking the
-script *tests/install_testbed/launch_vm.py*.
+running skuld, set PYTHONPATH with the path of the project, and invoke
+the script *./tests/install_testbed/launch_vm.py*.
 
 The script uses a floating IP and creates both a keypair (it saves the SSH private key as
 ~/.ssh/testbedskuld_key) and a security group. The security group opens
@@ -482,16 +482,17 @@ Using the testbed
 
 The *launch_vm.py* ends in a few seconds, showing the floating IP. Although it is
 already possible to connect to the ubuntu account of the server (using the
- SSH key at *~/.ssh/testbedskuld_key*), the installation is still running
+SSH key at *~/.ssh/testbedskuld_key*), the installation is still running
 inside the VM and needs a few minutes to complete. Usually the installation
-process last between 10 and 20 minutes. The job is finish after the file
-config_vars is copied into the */home/ubuntu* folder inside the virtual machine.
+process lasts between 10 and 20 minutes. The job is finished after the file
+*config_vars* is copied into the */home/ubuntu* folder inside the virtual machine.
 
 When the installation is finished, the credential may be loaded with *. ~/config_vars*.
 The command *nova list* shows a testing VM that has been created during the installation
 inside the testbed (that is, it is a virtual machine running inside the testbed
 virtual machine). The floating IP 192.168.58.201 is associated to this
-VM. It is possible to connect to the server following this steps:
+VM (that is the second IP of the pool, the first was assigned to the router). It is
+possible to connect to the server following this steps:
 
 .. code::
 
