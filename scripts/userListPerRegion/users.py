@@ -59,6 +59,7 @@ PROJECT_DETAILS = '%s/projects'
 ROLE_ASSIGNMENT = 'role_assignments?scope.project.id=%s'
 USER_DETAILS = 'users/%s'
 
+
 def gettoken(username, password):
     """
     Get the admin token of a corresponding region administrator.
@@ -91,6 +92,7 @@ def gettoken(username, password):
 
     return token
 
+
 def getregionid(token, region):
     """
     Get the corresponding id of the region to check.
@@ -122,6 +124,7 @@ def getregionid(token, region):
 
     return listregions[region]
 
+
 def getprojectlist(token, regionid):
     """
     Get the list of projects in a specific region.
@@ -147,6 +150,7 @@ def getprojectlist(token, regionid):
         listprojects.append(info['projects'][i]['id'])
 
     return listprojects
+
 
 def getuserlist(token, projectlist):
     """
@@ -178,6 +182,7 @@ def getuserlist(token, projectlist):
 
     return userset
 
+
 def getemail(token, userset):
     """
     Get the list of users with their email.
@@ -206,11 +211,10 @@ def getemail(token, userset):
 
 def processingrequest(params):
     """
-    Method to process the arguments received from the CLI and obtain the list of GE(r)i nids.
+    Method to process the arguments received from the CLI and obtain the users list with email.
+
     :param params: Arguments received from the CLI.
-    :return: A string format with the different GE(r)i and nids classified by chapter. If the --wikitext argument is
-             specified, the method returns the data in tikiwiki format, nevertheless it returns in a dictionary
-             representation.
+    :return: A dictionary with the user name, user email for all the user that would use the region.
     """
     username = params['--user']
     password = params['--pass']
