@@ -56,6 +56,7 @@ Just execute the following command:
 To see the help information about the use of this script, like the following:
 
 .. code::
+
      Get the users list of a specific FIWARE Lab region.
 
      Usage:
@@ -74,6 +75,7 @@ To see the help information about the use of this script, like the following:
 A typical execution of this script could be:
 
 .. code::
+
      ./users.py --user <Admin user from Trento> --pass <Password> --region Trento --out a.out
 
 Keep in mind that the user should be the corresponding administrator of the region from
