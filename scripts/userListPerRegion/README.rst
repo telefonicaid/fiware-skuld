@@ -56,25 +56,25 @@ Just execute the following command:
 To see the help information about the use of this script, like the following:
 
 .. code::
-    Get the users list of a specific FIWARE Lab region.
+     Get the users list of a specific FIWARE Lab region.
 
-    Usage:
-      users --user=<username> --pass=<password> --region=<region> [--out=<filename>]
-      users -h | --help
-      users -v | --version
+     Usage:
+       users --user=<username> --pass=<password> --region=<region> [--out=<filename>]
+       users -h | --help
+       users -v | --version
 
-    Options:
-      -h --help           Show this screen.
-      -v --version        Show version.
-      -o --out=<filename> Store the information if the file <filename>.
-      --user=<username>   Admin user that request the data.
-      --pass=<password>   Admin password of the user.
-      --region=<region>   Region name that we want to recover the information.
+     Options:
+       -h --help           Show this screen.
+       -v --version        Show version.
+       -o --out=<filename> Store the information if the file <filename>.
+       --user=<username>   Admin user that request the data.
+       --pass=<password>   Admin password of the user.
+       --region=<region>   Region name that we want to recover the information.
 
 A typical execution of this script could be:
 
 .. code::
-    ./users.py --user <Admin user from Trento> --pass <Password> --region Trento --out a.out
+     ./users.py --user <Admin user from Trento> --pass <Password> --region Trento --out a.out
 
 Keep in mind that the user should be the corresponding administrator of the region from
 which you want to know the list of users that can use their resources. This value is
