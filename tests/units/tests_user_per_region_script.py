@@ -20,12 +20,13 @@
 #
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
-__author__ = 'fla'
-
 from unittest import TestCase
 import requests_mock
 from scripts.userListPerRegion import users
 import os
+
+__author__ = 'fla'
+
 
 @requests_mock.Mocker()
 class TestChangePassword(TestCase):
@@ -43,7 +44,7 @@ class TestChangePassword(TestCase):
         m.post(requests_mock.ANY, json=response)
 
         # When
-        resultToken = users.gettoken(username='fake user', password='a fake password')
+        resultToken = users.get_token(username='fake user', password='a fake password')
 
         # Then
         self.assertEqual(expectedToken, resultToken)
@@ -79,7 +80,6 @@ class TestChangePassword(TestCase):
             ],
         }
 
-
         expectedResult = '000bd9fe677544829dd6659d1af7713b'
 
         url = os.path.join(users.KEYSTONE_URL, users.API_V3, users.ENDPOINT_GROUPS)
@@ -87,7 +87,7 @@ class TestChangePassword(TestCase):
         m.get(url, json=response)
 
         # When
-        resultRegionId = users.getregionid(token='a fake token', region='Trento')
+        resultRegionId = users.get_endpoint_groups_id(token='a fake token', region='Trento')
 
         # Then
         self.assertEqual(expectedResult, resultRegionId)
@@ -127,7 +127,7 @@ class TestChangePassword(TestCase):
         m.get(url, json=response)
 
         # When
-        resultProjects = users.getprojectlist(token='a fake token', regionid='000bd9fe677544829dd6659d1af7713b')
+        resultProjects = users.get_project_list(token='a fake token', regionid='000bd9fe677544829dd6659d1af7713b')
 
         # Then
         self.assertEqual(expectedResult, resultProjects)
@@ -192,7 +192,7 @@ class TestChangePassword(TestCase):
             m.get(url, json=response[i])
 
         # When
-        resultUsersList = users.getuserlist(token='a fake token', projectlist=projectlist)
+        resultUsersList = users.get_user_list(token='a fake token', projectlist=projectlist)
 
         # Then
         self.assertEqual(expectedResult, resultUsersList)
@@ -206,32 +206,6 @@ class TestChangePassword(TestCase):
         """
         # Given
         userset = {'alvaro-alonso', 'alvaro-test', 'federico-facca'}
-        response1 = {
-            "user": {
-                "name": "foo@foo.es",
-                "id": "alvaro-alonso",
-            }
-        }
-
-        response2 = {
-            "user": {
-                "name": "spain@fiware.org",
-                "id": "alvaro-test",
-            }
-        }
-
-        response3 = {
-            "user": {
-                "name": "fake@fake.com",
-                "id": "federico-facca",
-            }
-        }
-
-        response = {
-            'alvaro-alonso': response1,
-            'alvaro-test': response2,
-            'federico-facca': response3
-        }
 
         expectedResult = {
             'alvaro-alonso': 'foo@foo.es',
@@ -239,14 +213,29 @@ class TestChangePassword(TestCase):
             'federico-facca': 'fake@fake.com'
         }
 
-        for i in userset:
-            user_details = users.USER_DETAILS % i
-            url = os.path.join(users.KEYSTONE_URL, users.API_V3, user_details)
+        response = {
+            "users": [
+                {
+                    "name": "foo@foo.es",
+                    "id": "alvaro-alonso",
+                },
+                {
+                    "name": "spain@fiware.org",
+                    "id": "alvaro-test",
+                },
+                {
+                    "name": "fake@fake.com",
+                    "id": "federico-facca",
+                }
+            ]
+        }
 
-            m.get(url, json=response[i])
+        url = os.path.join(users.KEYSTONE_URL, users.API_V3, users.USER_DETAILS)
+
+        m.get(url, json=response)
 
         # When
-        resultEmails = users.getemail(token='a fake token', userset=userset)
+        resultEmails = users.get_email(token='a fake token', userset=userset)
 
         # Then
         self.assertEqual(expectedResult, resultEmails)

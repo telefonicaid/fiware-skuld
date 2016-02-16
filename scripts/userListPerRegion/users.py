@@ -57,10 +57,10 @@ ACCEPT = CONTENT_TYPE
 ENDPOINT_GROUPS = 'OS-EP-FILTER/endpoint_groups'
 PROJECT_DETAILS = '%s/projects'
 ROLE_ASSIGNMENT = 'role_assignments?scope.project.id=%s'
-USER_DETAILS = 'users/%s'
+USER_DETAILS = 'users'
 
 
-def gettoken(username, password):
+def get_token(username, password):
     """
     Get the admin token of a corresponding region administrator.
 
@@ -93,7 +93,7 @@ def gettoken(username, password):
     return token
 
 
-def getregionid(token, region):
+def get_endpoint_groups_id(token, region):
     """
     Get the corresponding id of the region to check.
 
@@ -125,7 +125,7 @@ def getregionid(token, region):
     return listregions[region]
 
 
-def getprojectlist(token, regionid):
+def get_project_list(token, regionid):
     """
     Get the list of projects in a specific region.
 
@@ -152,7 +152,7 @@ def getprojectlist(token, regionid):
     return listprojects
 
 
-def getuserlist(token, projectlist):
+def get_user_list(token, projectlist):
     """
     Get the user list with some role in the list of projects.
 
@@ -183,7 +183,7 @@ def getuserlist(token, projectlist):
     return userset
 
 
-def getemail(token, userset):
+def get_email(token, userset):
     """
     Get the list of users with their email.
 
@@ -194,22 +194,25 @@ def getemail(token, userset):
     print('Getting the email of the identified users...')
 
     useremail = dict()
-    for i in userset:
-        user_details = USER_DETAILS % i
-        url = os.path.join(KEYSTONE_URL, API_V3, user_details)
 
-        headers = {'X-Auth-Token': token}
+    url = os.path.join(KEYSTONE_URL, API_V3, USER_DETAILS)
+    headers = {'X-Auth-Token': token}
 
-        response = requests.get(url=url, headers=headers)
+    response = requests.get(url=url, headers=headers)
 
-        info = json.loads(response.text)
+    info = json.loads(response.text)
 
-        useremail[i] = info['user']['name']
+    # Delete unnecessary keys
+    for i in range(0, len(info['users'])):
+        user = info['users'][i]
+        useremail[user['id']] = user['name']
 
-    return useremail
+    result = {k: useremail[k] for k in (useremail.viewkeys() & userset)}
+
+    return result
 
 
-def processingrequest(params):
+def processing_request(params):
     """
     Method to process the arguments received from the CLI and obtain the users list with email.
 
@@ -220,11 +223,11 @@ def processingrequest(params):
     password = params['--pass']
     region = params['--region']
 
-    token = gettoken(username, password)
-    regionid = getregionid(token, region)
-    projectlist = getprojectlist(token, regionid)
-    userset = getuserlist(token, projectlist)
-    useremail = getemail(token, userset)
+    token = get_token(username, password)
+    regionid = get_endpoint_groups_id(token, region)
+    projectlist = get_project_list(token, regionid)
+    userset = get_user_list(token, projectlist)
+    useremail = get_email(token, userset)
 
     return useremail
 
@@ -235,7 +238,7 @@ if __name__ == '__main__':
 
     output_file = arguments['--out']
 
-    getusers = processingrequest(arguments)
+    getusers = processing_request(arguments)
 
     pretty_getusers = json.dumps(getusers, indent=4, separators=(',', ': '))
 
@@ -243,6 +246,6 @@ if __name__ == '__main__':
         print('\n\n')
         print(pretty_getusers)
     else:
-        f = open(output_file,"a")
+        f = open(output_file, "a")
         f.write(pretty_getusers)
         f.close()
