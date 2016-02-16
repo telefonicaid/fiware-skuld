@@ -1,4 +1,4 @@
-# Requirements_dev.txt
+# test-requirements.txt
 #
 # The different package that should be used in order to
 # develop and tests this component.
