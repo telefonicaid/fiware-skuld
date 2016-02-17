@@ -42,6 +42,7 @@ default_values = {
     'TUNNEL_IPS': '192.168.57',
 }
 
+
 class GenerateTemplateRegion(object):
     """Class to generate the configuration to install openstack and register
     endpoint and users. The class uses a template as input and also generated

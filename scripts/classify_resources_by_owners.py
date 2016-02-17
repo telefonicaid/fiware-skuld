@@ -98,7 +98,6 @@ class ClassifyResources(object):
         else:
             self.regions = [self.map.osclients.region]
 
-
     def _process_users(self):
         """get information about all the users. This information is used
         by the other methods, as print_users_summary"""
@@ -341,6 +340,7 @@ class ClassifyResources(object):
                         projects_in_region.add(project_id)
                         break
         return projects_in_region
+
 
 class hidden_set(set):
     """Helper class that extends a set to allow a new method add_hidden.

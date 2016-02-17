@@ -40,6 +40,7 @@ from skuld.openstackmap import OpenStackMap
 
 OS_TENANT_ID = '00000000000000000000000000000001'
 
+
 class MySessionMock(MagicMock):
     # Mock of a keystone Session
 
@@ -216,6 +217,7 @@ class TestOpenstackMap(TestCase):
         openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
         openstackmap.load_keystone()
         self.assertIsNotNone(openstackmap)
+
 
 class TestOpenstackMapCacheOnly(TestCase):
     keystone_objects = ['users', 'users_by_name', 'tenants', 'tenants_by_name', 'roles_a',

@@ -231,18 +231,16 @@ def get_email_osclient(username, password, region):
     os.environ['OS_AUTH_URL'] = 'http://130.206.112.3:5000/v2.0'
 
     # load data from servers
-    map=OpenStackMap('tmp_cache', auto_load=False)
+    map = OpenStackMap('tmp_cache', auto_load=False)
     map.load_keystone()
 
-
     # Get region filters and empty filter
-
     regions_filters = dict()
     empty_filter = None
 
     for filter in map.filters.values():
         if 'region_id' in filter['filters']:
-            regions_filters[filter['filters']['region_id']]=filter['id']
+            regions_filters[filter['filters']['region_id']] = filter['id']
         elif not filter['filters']:
             empty_filter = filter['id']
 
@@ -251,7 +249,7 @@ def get_email_osclient(username, password, region):
     # there are users without this field (administrators and also other users)
     for user in map.users.values():
         if 'cloud_project_id' not in user:
-           continue
+            continue
 
         project_id = user['cloud_project_id']
         found = False
@@ -259,10 +257,10 @@ def get_email_osclient(username, password, region):
         if project_id not in map.filters_by_project:
             found = False
         else:
-           for filter in map.filters_by_project[project_id]:
-               if filter == regions_filters[region] or filter == empty_filter:
-                   found = True
-                   break
+            for filter in map.filters_by_project[project_id]:
+                if filter == regions_filters[region] or filter == empty_filter:
+                    found = True
+                    break
 
         if found:
             useremail[user.id] = user.name

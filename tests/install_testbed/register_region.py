@@ -36,34 +36,83 @@ from utils.osclients import OpenStackClients
 
 
 # default JSON template. Variables are expanded with environment
-default_region_json = """{
-"region": "$REGION",
-"update_passwords": false,
-"users": [
-    {"username": "glance", "password": "$GLANCE_PASS"},
-    {"username": "nova", "password": "$NOVA_PASS"},
-    {"username": "cinder", "password": "$CINDER_PASS"},
-    {"username": "neutron", "password": "$NEUTRON_PASS"},
-    {"username": "swift", "password": "$SWIFT_PASS"},
-    {"username": "admin-$REGION", "password": "$ADMIN_REGION_PASS"}
-  ],
-"services": [
-    { "name": "glance", "type": "image", "public": "http://$PUBLIC_CONTROLLER:9292",
-      "admin": "http://$CONTROLLER:9292", "internal": "http://$CONTROLLER:9292" },
-    { "name": "nova", "type": "compute", "public": "http://$PUBLIC_CONTROLLER:8774/v2/%(tenant_id)s",
-      "admin": "http://$CONTROLLER:8774/v2/%(tenant_id)s", "internal": "http://$CONTROLLER:8774/v2/%(tenant_id)s" },
-    { "name": "cinder", "type": "volume", "public": "http://$PUBLIC_CONTROLLER:8776/v1/%(tenant_id)s",
-      "admin": "http://$CONTROLLER:8776/v1/%(tenant_id)s", "internal": "http://$CONTROLLER:8776/v1/%(tenant_id)s" },
-    { "name": "cinderv2", "type": "volumev2", "public": "http://$PUBLIC_CONTROLLER:8776/v2/%(tenant_id)s",
-      "admin": "http://$CONTROLLER:8776/v2/%(tenant_id)s", "internal": "http://$CONTROLLER:8776/v2/%(tenant_id)s" },
-    { "name": "neutron", "type": "network", "public": "http://$PUBLIC_CONTROLLER:9696",
-      "admin": "http://$CONTROLLER:9696", "internal": "http://$CONTROLLER:9696" },
-    { "name": "neutron", "type": "network", "public": "http://$PUBLIC_CONTROLLER:9696",
-      "admin": "http://$CONTROLLER:9696", "internal": "http://$CONTROLLER:9696" },
-    { "name": "swift", "type": "object-store", "public": "http://$PUBLIC_CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
-      "admin": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s", "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"}
-  ]
-}"""
+default_region_json = """
+{
+    "region": "$REGION",
+    "update_passwords": false,
+    "users": [
+        {
+            "username": "glance",
+            "password": "$GLANCE_PASS"
+        },
+        {
+            "username": "nova",
+            "password": "$NOVA_PASS"
+        },
+        {
+            "username": "cinder",
+            "password": "$CINDER_PASS"
+        },
+        {
+            "username": "neutron",
+            "password": "$NEUTRON_PASS"
+        },
+        {"username": "swift", "password": "$SWIFT_PASS"},
+        {"username": "admin-$REGION", "password": "$ADMIN_REGION_PASS"}
+    ],
+    "services": [
+        {
+            "name": "glance",
+            "type": "image",
+            "public": "http://$PUBLIC_CONTROLLER:9292",
+            "admin": "http://$CONTROLLER:9292",
+            "internal": "http://$CONTROLLER:9292"
+        },
+        {
+            "name": "nova",
+            "type": "compute",
+            "public": "http://$PUBLIC_CONTROLLER:8774/v2/%(tenant_id)s",
+            "admin": "http://$CONTROLLER:8774/v2/%(tenant_id)s",
+            "internal": "http://$CONTROLLER:8774/v2/%(tenant_id)s"
+        },
+        {
+            "name": "cinder",
+            "type": "volume",
+            "public": "http://$PUBLIC_CONTROLLER:8776/v1/%(tenant_id)s",
+            "admin": "http://$CONTROLLER:8776/v1/%(tenant_id)s",
+            "internal": "http://$CONTROLLER:8776/v1/%(tenant_id)s"
+        },
+        {
+            "name": "cinderv2",
+            "type": "volumev2",
+            "public": "http://$PUBLIC_CONTROLLER:8776/v2/%(tenant_id)s",
+            "admin": "http://$CONTROLLER:8776/v2/%(tenant_id)s",
+            "internal": "http://$CONTROLLER:8776/v2/%(tenant_id)s"
+        },
+        {
+            "name": "neutron",
+            "type": "network",
+            "public": "http://$PUBLIC_CONTROLLER:9696",
+            "admin": "http://$CONTROLLER:9696",
+            "internal": "http://$CONTROLLER:9696"
+        },
+        {
+            "name": "neutron",
+            "type": "network",
+            "public": "http://$PUBLIC_CONTROLLER:9696",
+            "admin": "http://$CONTROLLER:9696",
+            "internal": "http://$CONTROLLER:9696"
+        },
+        {
+            "name": "swift",
+            "type": "object-store",
+            "public": "http://$PUBLIC_CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
+            "admin": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
+            "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"
+        }
+    ]
+}
+"""
 
 
 class RegisterRegion(object):
@@ -86,7 +135,6 @@ class RegisterRegion(object):
         except NotFound:
             service = self.keystone.services.create(name=service_name, type=service_type)
         return service.id
-
 
     def region_exists(self, region_id):
         """ Ensure that the region exists: create if it does not.

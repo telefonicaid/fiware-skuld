@@ -30,6 +30,7 @@ import base64
 from utils import osclients
 import os
 
+
 class PasswordChanger(object):
     """Class to change/reset the password of any user"""
     def __init__(self, osclients_o=None):

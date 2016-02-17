@@ -49,6 +49,7 @@ service = {
                    u'id': u'00000000000000000000000000000001'}],
     u'type': u'object-store', u'id': u'00000000000000000000000000000044'}
 
+
 class MySessionMock(MagicMock):
     # Mock of a keystone Session
 
@@ -66,6 +67,7 @@ class MySessionMock(MagicMock):
         d = defaultdict(list)
         d['catalog'].append(service)
         return d
+
 
 class TestOSClients(TestCase):
 
@@ -458,7 +460,6 @@ class TestOSClientsOverrideEndpoint(TestCase):
         self.override_endpoint()
         self.assertOverrideEndpoint()
 
-
     @patch('utils.osclients.session')
     def test_override_endpoint_multiple(self, mock):
         """test that override works with an already created session and then
@@ -477,6 +478,3 @@ class TestOSClientsOverrideEndpoint(TestCase):
 
         # check again
         self.assertOverrideEndpoint()
-
-
-

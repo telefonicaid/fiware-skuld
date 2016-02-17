@@ -29,7 +29,7 @@ __author__ = 'fla'
 
 
 @requests_mock.Mocker()
-class TestChangePassword(TestCase):
+class TestUserPerRegionScript(TestCase):
     def test_gettoken(self, m):
         """
         Test the response of a valid token.
@@ -253,4 +253,3 @@ class TestChangePassword(TestCase):
 
         # Then
         self.assertEqual(expectedResult, result)
-

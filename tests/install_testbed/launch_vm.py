@@ -51,7 +51,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None):
     flavor = nova_c.flavors.find(name=flavor_n)
 
     extra_params = dict()
-    
+
     # load script to launch with nova.servers.create()
     if user_data:
         data = open(user_data).read()
@@ -76,6 +76,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None):
         sys.exit(-1)
 
     return server
+
 
 def create_port_multi_ip(security_group_id=None):
     """Create port in external network, with 5 IPs (this is the maximum allowed
