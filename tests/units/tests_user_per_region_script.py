@@ -239,3 +239,18 @@ class TestChangePassword(TestCase):
 
         # Then
         self.assertEqual(expectedResult, resultEmails)
+
+    def test_merge_two_dicts(self, m):
+        # Given
+        A = {'uno': 'dos-uno', 'dos': 'dos-uno'}
+
+        B = {'tres': 'tres-dos', 'uno': 'dos-uno'}
+
+        expectedResult = {'dos': 'dos-uno', 'tres': 'tres-dos', 'uno': 'dos-uno'}
+
+        # When
+        result = users.merge_two_dicts(A, B)
+
+        # Then
+        self.assertEqual(expectedResult, result)
+
