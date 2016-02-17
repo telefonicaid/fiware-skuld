@@ -222,13 +222,15 @@ def get_email_osclient(username, password, region):
     :param region: The region in which we want to obtain the data.
     :return: The emaillist.
     """
+    print("Making analysis bottom-up...")
+
     # Set environment variables
     os.environ['OS_USERNAME'] = username
     os.environ['OS_PASSWORD'] = password
     os.environ['OS_TENANT_NAME'] = 'admin'
     os.environ['OS_REGION_NAME'] = region
     os.environ['KEYSTONE_ADMIN_ENDPOINT'] = 'http://cloud.lab.fiware.org:4730'
-    os.environ['OS_AUTH_URL'] = 'http://130.206.112.3:5000/v2.0'
+    os.environ['OS_AUTH_URL'] = 'http://cloud.lab.fiware.org:4730/'
 
     # load data from servers
     map = OpenStackMap('tmp_cache', auto_load=False)
