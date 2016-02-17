@@ -45,6 +45,7 @@ from docopt import docopt
 import requests
 import os
 import json
+from skuld.openstackmap import OpenStackMap
 
 __version__ = '1.0.0'
 
@@ -212,6 +213,77 @@ def get_email(token, userset):
     return result
 
 
+def get_email_osclient(username, password, region):
+    """
+    Get the list of user of one region taking into account a bottom-up analysis.
+
+    :param username: The name of the admin user that launch the request.
+    :param password: The password of the admin user.
+    :param region: The region in which we want to obtain the data.
+    :return: The emaillist.
+    """
+    print("Making analysis bottom-up...")
+
+    # Set environment variables
+    os.environ['OS_USERNAME'] = username
+    os.environ['OS_PASSWORD'] = password
+    os.environ['OS_TENANT_NAME'] = 'admin'
+    os.environ['OS_REGION_NAME'] = region
+    os.environ['KEYSTONE_ADMIN_ENDPOINT'] = 'http://cloud.lab.fiware.org:4730'
+    os.environ['OS_AUTH_URL'] = 'http://cloud.lab.fiware.org:4730/'
+
+    # load data from servers
+    map = OpenStackMap('tmp_cache', auto_load=False)
+    map.load_keystone()
+
+    # Get region filters and empty filter
+    regions_filters = dict()
+    empty_filter = None
+
+    for filter in map.filters.values():
+        if 'region_id' in filter['filters']:
+            regions_filters[filter['filters']['region_id']] = filter['id']
+        elif not filter['filters']:
+            empty_filter = filter['id']
+
+    useremail = dict()
+    # Get users. Genuine FIWARE Users should have cloud_project_id. Be aware that
+    # there are users without this field (administrators and also other users)
+    for user in map.users.values():
+        if 'cloud_project_id' not in user:
+            continue
+
+        project_id = user['cloud_project_id']
+        found = False
+
+        if project_id not in map.filters_by_project:
+            found = False
+        else:
+            for filter in map.filters_by_project[project_id]:
+                if filter == regions_filters[region] or filter == empty_filter:
+                    found = True
+                    break
+
+        if found:
+            useremail[user.id] = user.name
+
+    return useremail
+
+
+def merge_two_dicts(A, B):
+    """
+    Merge two dictionaries.
+
+    :param A: Dictionary A
+    :param B: Dictionary B
+    :return: The merged dictionary
+    """
+    result = A.copy()
+    result.update(B)
+
+    return result
+
+
 def processing_request(params):
     """
     Method to process the arguments received from the CLI and obtain the users list with email.
@@ -223,13 +295,20 @@ def processing_request(params):
     password = params['--pass']
     region = params['--region']
 
+    # Get top-down approx to obtain the user list
     token = get_token(username, password)
     regionid = get_endpoint_groups_id(token, region)
     projectlist = get_project_list(token, regionid)
     userset = get_user_list(token, projectlist)
     useremail = get_email(token, userset)
 
-    return useremail
+    # Get botton-up approx to obtain the user list
+    useremail_osclient = get_email_osclient(username=username, password=password, region=region)
+
+    # Join the two lists
+    finaluserlist = merge_two_dicts(useremail, useremail_osclient)
+
+    return finaluserlist
 
 
 if __name__ == '__main__':

@@ -33,6 +33,7 @@ from skuld.impersonate import TrustFactory, TRUSTID_VALIDITY
 
 __author__ = 'chema'
 
+
 class TestTrustFactoryConstructor(unittest.TestCase):
     """class to test constructor of TrustFactory"""
     def setUp(self):
@@ -88,6 +89,7 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         trustfactory = TrustFactory(mock)
         self.assertTrue(mock.get_keystoneclientv3.called)
         self.assertEquals(trustfactory.keystone, mock.get_keystoneclientv3())
+
 
 class TestTrustFactory(unittest.TestCase):
     """class to test methods of TrustFactory"""

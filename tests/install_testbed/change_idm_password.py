@@ -36,7 +36,7 @@ from utils.osclients import OpenStackClients
 file_path = '/home/ubuntu/idm/conf/settings.py'
 etckeystone_path = '/home/ubuntu/idm/keystone/etc/keystone.conf'
 
-credential ="""export OS_AUTH_URL=http://127.0.0.1:5000/v3/
+credential = """export OS_AUTH_URL=http://127.0.0.1:5000/v3/
 export OS_AUTH_URL_V2=http://127.0.0.1:5000/v2.0/
 export OS_USERNAME=idm
 export OS_TENANT_NAME=idm

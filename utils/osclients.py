@@ -255,7 +255,6 @@ class OpenStackClients(object):
         elif user_domain_name:
             self.__user_domain_name = user_domain_name
 
-
         if trust_id:
             self.__trust_id = trust_id
             self.__tenant_id = None
@@ -277,7 +276,6 @@ class OpenStackClients(object):
             self.__project_domain_id = project_domain_id
         elif user_domain_name:
             self.__project_domain_name = project_domain_name
-
 
         self._clear_sessions()
 
