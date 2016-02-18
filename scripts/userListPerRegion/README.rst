@@ -46,8 +46,16 @@ Top_
 Running
 =======
 
-To run the process just follow the indications provided by the client component.
-Just execute the following command:
+Before launching the execution of the scripts from the command line interface in the folder
+'scripts/userListPerRegion' be sure that you define the PYTHONPATH environment variable with
+the following value:
+
+.. code::
+
+     $ export PYTHONPATH=../..
+
+In order to find the Skuld modules used in this script. To run the process just follow the
+indications provided by the client component. Just execute the following command:
 
 .. code::
 
