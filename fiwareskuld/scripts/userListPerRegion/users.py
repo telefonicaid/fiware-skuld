@@ -39,13 +39,11 @@ Options:
 
 """
 
-author = 'fla'
-
 from docopt import docopt
 import requests
 import os
 import json
-from skuld.openstackmap import OpenStackMap
+from fiwareskuld.openstackmap import OpenStackMap
 
 __version__ = '1.0.0'
 

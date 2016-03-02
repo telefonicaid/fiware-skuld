@@ -25,10 +25,9 @@
 from datetime import datetime
 import os.path
 
-from utils import osclients
+from fiwareskuld.utils import osclients
 from conf import settings
-import utils.log
-import utils.rotated_files
+from fiwareskuld import utils
 
 __author__ = 'chema'
 

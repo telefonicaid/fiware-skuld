@@ -23,7 +23,7 @@
 
 __author__ = 'gjp'
 
-UNIT_TEST_RESOURCES_FOLDER = 'tests/units/resources/'
+UNIT_TEST_RESOURCES_FOLDER = 'resources/'
 LIST_SERVERS_RESPONSE_FILE = 'list_servers_response.json'
 LIST_VOLUMES_RESPONSE_FILE = 'list_volumes_response.json'
 LIST_SNAPSHOTS_RESPONSE_FILE = 'list_snapshots_response.json'

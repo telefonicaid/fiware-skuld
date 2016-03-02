@@ -36,7 +36,7 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FI
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
 LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
 
-from skuld.openstackmap import OpenStackMap
+from fiwareskuld.openstackmap import OpenStackMap
 
 OS_TENANT_ID = '00000000000000000000000000000001'
 
@@ -161,7 +161,7 @@ class TestOpenstackMap(TestCase):
         with self.assertRaises(Exception):
             OpenStackMap(auth_url=self.OS_AUTH_URL, auto_load=False)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
     def test_implement_openstackmap_with_keystone_admin_endpoint(self, mock_exists, mock_os):
@@ -176,7 +176,7 @@ class TestOpenstackMap(TestCase):
         self.assertTrue(mock_os.called)
         self.assertIsNotNone(openstackmap)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
     def test_load_nova(self, mock_exists, mock_os):
@@ -192,7 +192,7 @@ class TestOpenstackMap(TestCase):
         self.assertTrue(mock_os.called)
         self.assertIsNotNone(openstackmap)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_nova2(self):
         """test_load_nova check that we could build a map from nova resources using Direct_objects directive."""
 
@@ -200,7 +200,7 @@ class TestOpenstackMap(TestCase):
         openstackmap.load_nova()
         self.assertIsNotNone(openstackmap)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_cinder(self):
         """test_load_cinder check that we could build a map from cinder resources using Direct_objects directive."""
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
@@ -209,7 +209,7 @@ class TestOpenstackMap(TestCase):
         openstackmap.load_cinder()
         self.assertIsNotNone(openstackmap)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_keystone(self):
         """test_load_keystone check that we could build a map from keystone resources using Direct_objects directive."""
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)

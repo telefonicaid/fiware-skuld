@@ -23,9 +23,9 @@
 # contact with opensource@tid.es
 #
 import unittest
-from mock import MagicMock, patch, call, ANY
+from mock import MagicMock
 
-from skuld.nova_resources import NovaResources
+from fiwareskuld.nova_resources import NovaResources
 
 __author__ = 'chema'
 

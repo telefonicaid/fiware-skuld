@@ -25,8 +25,8 @@
 import sys
 import logging
 
-from skuld.openstackmap import OpenStackMap
-import utils.log
+from fiwareskuld.openstackmap import OpenStackMap
+from fiwareskuld.utils import log
 
 __author__ = 'chema'
 

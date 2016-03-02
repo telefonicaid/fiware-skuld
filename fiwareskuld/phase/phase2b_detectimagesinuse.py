@@ -24,8 +24,8 @@
 #
 import cPickle as pickle
 
-from skuld.queries import Queries
-import utils.log
+from fiwareskuld.queries import Queries
+from fiwareskuld.utils import log
 
 __author__ = 'chema'
 
@@ -36,7 +36,7 @@ Invoke this script before deleting the users if you don't want to remove
 the images of the tenant in use by other tenants.
 """
 q = Queries()
-logger = utils.log.init_logs('phase2b')
+logger = log.init_logs('phase2b')
 
 image_set = q.get_imageset_othertenants()
 print(image_set)

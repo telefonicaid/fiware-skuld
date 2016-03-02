@@ -27,14 +27,14 @@ import os.path
 import cPickle as pickle
 import datetime
 
-from skuld.user_resources import UserResources
+from fiwareskuld.user_resources import UserResources
+from fiwareskuld.utils import log
 
 import conf.settings
-import utils.log
 
 __author__ = 'chema'
 
-logger = utils.log.init_logs('phase3')
+logger = log.init_logs('phase3')
 
 images_in_use = None
 free_trust_id = False

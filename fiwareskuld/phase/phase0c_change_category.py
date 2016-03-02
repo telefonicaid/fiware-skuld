@@ -29,12 +29,12 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
-from skuld import queries
-import utils.log
+from fiwareskuld.utils import queries
+from fiwareskuld.utils import log
 from conf.settings import TRIAL_ROLE_ID, BASIC_ROLE_ID, HORIZON_ENDPOINT
 __author__ = 'chema'
 
-logger = utils.log.init_logs('phase0c')
+logger = log.init_logs('phase0c')
 
 trial = TRIAL_ROLE_ID
 basic = BASIC_ROLE_ID

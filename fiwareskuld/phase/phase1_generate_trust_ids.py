@@ -26,12 +26,12 @@ import logging
 import sys
 from os import environ as env
 
-from skuld.impersonate import TrustFactory
+from fiwareskuld.impersonate import TrustFactory
 from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
-from utils.osclients import OpenStackClients
-from skuld.check_users import CheckUsers
+from fiwareskuld.utils.osclients import OpenStackClients
+from fiwareskuld.check_users import CheckUsers
 
-import utils.log
+from fiwareskuld.utils import log
 
 __author__ = 'chema'
 
@@ -85,7 +85,7 @@ def generate_trust_ids(users_to_delete):
 
 
 if __name__ == '__main__':
-    logger = utils.log.init_logs('phase1')
+    logger = log.init_logs('phase1')
     if len(sys.argv) == 2:
         name = sys.argv[1]
     else:

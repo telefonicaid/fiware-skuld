@@ -29,7 +29,7 @@ import re
 
 import requests_mock
 
-from skuld.expired_users import ExpiredUsers
+from fiwareskuld.expired_users import ExpiredUsers
 
 
 @requests_mock.Mocker()

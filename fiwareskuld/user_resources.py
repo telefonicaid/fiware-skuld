@@ -22,7 +22,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 import time
 import logging
@@ -30,11 +29,11 @@ import logging
 import impersonate
 from conf import settings
 from utils.osclients import OpenStackClients
-from skuld.nova_resources import NovaResources
-from skuld.glance_resources import GlanceResources
-from skuld.cinder_resources import CinderResources
-from skuld.neutron_resources import NeutronResources
-from skuld.blueprint_resources import BluePrintResources
+from nova_resources import NovaResources
+from glance_resources import GlanceResources
+from cinder_resources import CinderResources
+from neutron_resources import NeutronResources
+from blueprint_resources import BluePrintResources
 from swift_resources import SwiftResources
 
 

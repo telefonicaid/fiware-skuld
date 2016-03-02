@@ -22,12 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-import utils.log
-from skuld.change_password import PasswordChanger
+from fiwareskuld.utils import log
+from fiwareskuld.change_password import PasswordChanger
 
 __author__ = 'chema'
 
-logger = utils.log.init_logs('phase1')
+logger = log.init_logs('phase1')
 
 try:
     users_to_delete = open('users_to_delete.txt')

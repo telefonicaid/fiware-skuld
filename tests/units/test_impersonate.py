@@ -23,13 +23,13 @@
 # contact with opensource@tid.es
 #
 import unittest
-from mock import MagicMock, patch, call, ANY
+from mock import MagicMock, patch
 import os
 import time
 from oslo_utils import timeutils
 
 
-from skuld.impersonate import TrustFactory, TRUSTID_VALIDITY
+from fiwareskuld.impersonate import TrustFactory, TRUSTID_VALIDITY
 
 __author__ = 'chema'
 
@@ -58,7 +58,7 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertTrue(mock.return_value.get_keystoneclientv3.called)
         self.assertEquals(object.keystone, mock().get_keystoneclientv3())
 
-    @patch('skuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
     def test_constructor_no_params(self, mock):
         """test call to constructor without params nor environment"""
         trustfactory = TrustFactory()
@@ -66,7 +66,7 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertEquals(trustfactory.trustid_validity, TRUSTID_VALIDITY)
         self.assertCommonCalls(mock, trustfactory)
 
-    @patch('skuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
     def test_constructor_no_params_with_environ(self, mock):
         """test constructo without params but with KEYSTONE_ADMIN_ENDPOINT"""
         os.environ['KEYSTONE_ADMIN_ENDPOINT'] = 'foo'
@@ -74,7 +74,7 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertTrue(mock.return_value.override_endpoint.called)
         self.assertCommonCalls(mock, trustfactory)
 
-    @patch('skuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
     def test_constructor_params_validity(self, mock):
         """test constructor passing trustid_validity"""
         trustfactory = TrustFactory(trustid_validity=0)
@@ -129,7 +129,7 @@ class TestTrustFactory(unittest.TestCase):
         self.trustfactory.keystone.configure_mock(**config)
 
         now = time.time()
-        with patch('skuld.impersonate.time.time') as time_mock:
+        with patch('fiwareskuld.impersonate.time.time') as time_mock:
             time_mock.configure_mock(return_value=now)
             result = self.trustfactory.create_trust_admin(
                 'trustor_id', 'trustee_name')

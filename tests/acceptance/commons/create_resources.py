@@ -26,7 +26,7 @@ import time
 import urllib
 import os
 
-from utils.osclients import OpenStackClients
+from fiwareskuld.utils.osclients import OpenStackClients
 
 __author__ = 'chema'
 

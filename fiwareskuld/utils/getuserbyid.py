@@ -24,9 +24,8 @@
 #
 
 import sys
-
-from utils.osclients import osclients
-from skuld import queries
+import osclients
+import queries
 
 user = osclients.get_keystoneclientv3().users.get(sys.argv[1])
 print(user.to_dict())

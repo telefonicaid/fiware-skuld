@@ -21,12 +21,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
 
 from os import environ
 from unittest import TestCase
 from mock import patch, MagicMock
-from utils.osclients import OpenStackClients
+from fiwareskuld.utils.osclients import OpenStackClients
 import cinderclient.v2.client
 import cinderclient.v1.client
 import neutronclient.v2_0.client
@@ -173,7 +172,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(novaClient, novaclient.v2.client.Client)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_glanceclient(self):
         """test_get_glanceclient check that we could retrieve a Session client to work with glance"""
 
@@ -183,7 +182,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(glanceClient, glanceclient.v1.client.Client)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_swiftclient(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v3"""
 
@@ -192,7 +191,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(swiftClient, Connection)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_swiftclient_with_keystone_v2(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v2"""
 
@@ -460,7 +459,7 @@ class TestOSClientsOverrideEndpoint(TestCase):
         self.override_endpoint()
         self.assertOverrideEndpoint()
 
-    @patch('utils.osclients.session')
+    @patch('fiwareskuld.utils.osclients.session')
     def test_override_endpoint_multiple(self, mock):
         """test that override works with an already created session and then
         with a new one without invoking the method again"""

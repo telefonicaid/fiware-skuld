@@ -24,10 +24,11 @@
 #
 from os import environ as env
 
-from skuld.expired_users import ExpiredUsers
+from fiwareskuld.expired_users import ExpiredUsers
 from conf import settings
-from utils.osclients import OpenStackClients
-import utils.log
+from fiwareskuld.utils.osclients import OpenStackClients
+from fiwareskuld import utils
+
 
 logger = utils.log.init_logs('phase0')
 

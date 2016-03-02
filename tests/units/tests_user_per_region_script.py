@@ -22,7 +22,7 @@
 # contact with opensource@tid.es
 from unittest import TestCase
 import requests_mock
-from scripts.userListPerRegion import users
+from fiwareskuld.scripts.userListPerRegion import users
 import os
 
 __author__ = 'fla'

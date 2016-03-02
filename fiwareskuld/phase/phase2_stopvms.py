@@ -27,13 +27,13 @@ import os
 import cPickle as pickle
 import datetime
 
-from skuld.user_resources import UserResources
+from fiwareskuld.user_resources import UserResources
 import conf.settings
-import utils.log
+from fiwareskuld.utils import log
 
 __author__ = 'chema'
 
-logger = utils.log.init_logs('phase2')
+logger = log.init_logs('phase2')
 
 free_trust_id = False
 stopped_vms = 0
