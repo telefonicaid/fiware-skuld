@@ -56,7 +56,7 @@ class TestExpiredUsers(TestCase):
             "error":
                 {
                     "message": "The request you have made requires"
-                               "authentication.",
+                               " authentication.",
                     "code": 401,
                     "title": "Unauthorized"
                 }
@@ -70,8 +70,8 @@ class TestExpiredUsers(TestCase):
         try:
             expiredUsers.get_admin_token()
         except Exception as e:
-            assert e.message == 'The request you have made requires' \
-                                ' authentication.'
+            assert e.message ==\
+                   'The request you have made requires authentication.'
 
     def testadmintokenWithoutCredentials(self, m):
         """Test the obtention of admin token without credentials"""
@@ -133,7 +133,7 @@ class TestExpiredUsers(TestCase):
         # There was no users in the list
         expiredusers.token = ""
         expectedmessage = "Error, you need to have an admin token." \
-                          " Execute the get_admin_token() method previously."
+                          " Execute the get_admin_token method previously."
 
         try:
             expiredusers.get_list_trial_users()
@@ -276,7 +276,7 @@ class TestExpiredUsers(TestCase):
         # There was no users in the list
         expiredusers.token = ""
         expectedmessage = "Error, you need to have an admin token. Execute" \
-                          " the get_admin_token() method previously."
+                          " the get_admin_token method previously."
 
         try:
             expiredusers.get_list_expired_users()

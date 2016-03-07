@@ -14,7 +14,7 @@ before_script:
 
 # command to run tests
 script:
-  nosetests --with-coverage --cover-package=./ --exe
+  cd tests/units;nosetests --with-coverage --cover-package=./ --exe
 
 after_success:
   coveralls

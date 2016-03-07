@@ -223,7 +223,7 @@ class ExpiredUsers:
         if self.token == "":
             # We need to have a admin token in order to proceed.
             raise ValueError("Error, you need to have an admin token."
-                             "Execute the get_admin_token method previously.")
+                             " Execute the get_admin_token method previously.")
 
     def __check_credentials(self):
         """Check if we have the credentials of the admin user"""
@@ -231,8 +231,8 @@ class ExpiredUsers:
                 or self.__password is None:
             # We need to have a admin token in order to proceed.
             raise ValueError("Error, you need to define the credentials of the"
-                             "admin user. Please, execute the setCredentials()"
-                             "method previously.")
+                             " admin user. Please, execute the"
+                             " setCredentials() method previously.")
 
     def getadmintoken(self):
         """
