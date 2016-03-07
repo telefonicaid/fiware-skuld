@@ -57,3 +57,6 @@ target/
 # Acceptance test result folder
 tests/acceptance_tests/testreport/
 
+# OpenStackMap resource folder
+scripts/userListPerRegion/tmp_cache/
+

@@ -524,7 +524,7 @@ class OpenStackMap(object):
             self.floatingips = self._load('floatingips')
             # legacy
             if os.path.exists(self.pers_region + '/securitygroups.pickle'):
-               self.security_groups = self._load('securitygroups')
+                self.security_groups = self._load('securitygroups')
             else:
                 self.security_groups = self._load('security_groups')
 
