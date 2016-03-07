@@ -54,7 +54,8 @@ class ClassifyResources(object):
             strategy = OpenStackMap.USE_CACHE_OBJECTS
 
         if regions:
-            self.map = OpenStackMap(cache_dir, objects_strategy=strategy, auto_load=False)
+            self.map = OpenStackMap(cache_dir, objects_strategy=strategy,
+                                    auto_load=False)
             self.map.preload_regions(regions)
         else:
             self.map = OpenStackMap(cache_dir, objects_strategy=strategy)
@@ -394,7 +395,8 @@ if __name__ == '__main__':
 
     help = 'data is cached in this directory (default is %(default)s)'
     parser.add_argument('--cache-dir', help=help, default='~/openstackmap')
-    parser.add_argument('--offline-mode', help='only use cached data', action='store_true')
+    parser.add_argument('--offline-mode', help='only use cached data',
+                        action='store_true')
 
     meta = parser.parse_args()
     if meta.offline_mode:

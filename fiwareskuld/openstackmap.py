@@ -42,8 +42,8 @@ class OpenStackMap(object):
     """
 
     # objects strategy see the __init__ method documentation
-    DIRECT_OBJECTS, NO_CACHE_OBJECTS, REFRESH_OBJECTS, USE_CACHE_OBJECTS, USE_CACHE_OBJECTS_ONLY = \
-        range(5)
+    DIRECT_OBJECTS, NO_CACHE_OBJECTS, REFRESH_OBJECTS, USE_CACHE_OBJECTS,\
+        USE_CACHE_OBJECTS_ONLY = range(5)
 
     # If use_wrapper is True, dictionaries are wrapped to allow access to
     # resource['field'] also as resource.field. This is not used when
@@ -53,8 +53,8 @@ class OpenStackMap(object):
     load_filters = True
 
     resources_region = ['vms', 'images', 'routers', 'networks', 'subnets',
-                 'ports', 'floatingips', 'security_groups',
-                 'volumes', 'volume_backups', 'volume_snapshots']
+                        'ports', 'floatingips', 'security_groups',
+                        'volumes', 'volume_backups', 'volume_snapshots']
 
     def __init__(
             self, persistence_dir='~/openstackmap', region=None, auth_url=None,
@@ -77,9 +77,10 @@ class OpenStackMap(object):
            objects are cached: the new version replace the old one.
          * USE_CACHE_OBJECTS is using the objects converted to dictionaries. If
            a cached copy of the objects are available, it is used.
-         * USE_CACHE_OBJECTS_ONLY is using the objects converted to dictionaries.
-           This strategy used cached objects only. It never contacts with the
-           servers, even when the object is not available in the local cache.
+         * USE_CACHE_OBJECTS_ONLY is using the objects converted to
+           dictionaries. This strategy used cached objects only. It never
+           contacts with the servers, even when the object is not available in
+           the local cache.
 
         :param auto_load: if True, invoke self.load_all()
          Note that neutron objects returned by the API are already dictionaries
@@ -323,14 +324,14 @@ class OpenStackMap(object):
             with open(self.pers_keystone + '/roles_by_user.pickle', 'wb') as f:
                 pickle.dump(roles_by_user, f, protocol=-1)
 
-            with open(self.pers_keystone + '/roles_by_project.pickle', 'wb') as\
-                    f:
+            with open(self.pers_keystone + '/roles_by_project.pickle', 'wb')\
+                    as f:
                 pickle.dump(roles_by_project, f, protocol=-1)
 
             with open(self.pers_keystone + '/filters.pickle', 'wb') as f:
                 pickle.dump(filters, f, protocol=-1)
 
-            with open(self.pers_keystone + '/filters_by_project.pickle', 'wb') \
+            with open(self.pers_keystone + '/filters_by_project.pickle', 'wb')\
                     as f:
                 pickle.dump(filters_by_project, f, protocol=-1)
 
@@ -492,7 +493,8 @@ class OpenStackMap(object):
             self.vms = self._load('vms')
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
-                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about nova')
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there'
+                                'are not cached data about nova')
 
             self._get_nova_data()
 
@@ -504,7 +506,8 @@ class OpenStackMap(object):
             self.images = self._load('images')
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
-                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about glance')
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there'
+                                'are not cached data about glance')
             self._get_glance_data()
 
     def load_neutron(self):
@@ -531,7 +534,8 @@ class OpenStackMap(object):
             self.ports = self._load('ports')
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
-                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about neutron')
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there'
+                                'are not cached data about neutron')
             self._get_neutron_data()
 
         # make indexes
@@ -560,14 +564,18 @@ class OpenStackMap(object):
             self.roles_by_user = self._load_fkeystone('roles_by_user')
             self.filters = self._load_fkeystone('filters')
             # legacy code
-            if os.path.exists(self.pers_keystone + '/filters_byproject.pickle'):
-                self.filters_by_project = self._load_fkeystone('filters_byproject')
+            path = self.pers_keystone + '/filters_byproject.pickle'
+            if os.path.exists(path):
+                self.filters_by_project =\
+                    self._load_fkeystone('filters_byproject')
             else:
-                self.filters_by_project = self._load_fkeystone('filters_by_project')
+                self.filters_by_project =\
+                    self._load_fkeystone('filters_by_project')
 
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
-                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about keystone')
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there'
+                                'are not cached data about keystone')
 
             self._get_keystone_data()
 
@@ -582,7 +590,8 @@ class OpenStackMap(object):
             self.volume_snapshots = self._load('volume_snapshots')
         else:
             if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
-                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there are not cached data about cinder')
+                raise Exception('Strategy is USE_CACHE_OBJECTS_ONLY but there'
+                                'are not cached data about cinder')
 
             self._get_cinder_data()
 
@@ -636,12 +645,14 @@ class OpenStackMap(object):
         regions is None, use all the available regions in the federation, but
         the specified in all_regions_excluded.
 
-        The data for each region will be available at the region_map dictionary.
+        The data for each region will be available at the region_map
+        dictionary.
 
         It must be noted that this method could affect the current region
-        and the values of the direct maps (vms, networks...). This is because it
-        calls change_region/load_<service_name> methods. If regions is provided, then
-        the last region in the list will be the new current region"""
+        and the values of the direct maps (vms, networks...). This is because
+        it calls change_region/load_<service_name> methods. If regions is
+        provided, then the last region in the list will be the new current
+        region"""
 
         if self.objects_strategy == OpenStackMap.USE_CACHE_OBJECTS_ONLY:
             regions_in_disk = set(os.listdir(self.persistence_dir))
@@ -676,7 +687,8 @@ class OpenStackMap(object):
         if not regions:
             """ not regions specified, so all existing regions with some
                 resource (compute, network, image or volume) are considered.
-                If all_regions_excluded is defined, then these regions are excluded
+                If all_regions_excluded is defined, then these regions are
+                excluded
             """
             all_regions = regions_compute.union(regions_network).union(
                 regions_image).union(regions_volume)

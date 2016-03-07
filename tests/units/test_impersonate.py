@@ -58,7 +58,8 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertTrue(mock.return_value.get_keystoneclientv3.called)
         self.assertEquals(object.keystone, mock().get_keystoneclientv3())
 
-    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients',
+           auto_spec=True)
     def test_constructor_no_params(self, mock):
         """test call to constructor without params nor environment"""
         trustfactory = TrustFactory()
@@ -66,7 +67,8 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertEquals(trustfactory.trustid_validity, TRUSTID_VALIDITY)
         self.assertCommonCalls(mock, trustfactory)
 
-    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients',
+           auto_spec=True)
     def test_constructor_no_params_with_environ(self, mock):
         """test constructo without params but with KEYSTONE_ADMIN_ENDPOINT"""
         os.environ['KEYSTONE_ADMIN_ENDPOINT'] = 'foo'
@@ -74,7 +76,8 @@ class TestTrustFactoryConstructor(unittest.TestCase):
         self.assertTrue(mock.return_value.override_endpoint.called)
         self.assertCommonCalls(mock, trustfactory)
 
-    @patch('fiwareskuld.impersonate.osclients.OpenStackClients', auto_spec=True)
+    @patch('fiwareskuld.impersonate.osclients.OpenStackClients',
+           auto_spec=True)
     def test_constructor_params_validity(self, mock):
         """test constructor passing trustid_validity"""
         trustfactory = TrustFactory(trustid_validity=0)

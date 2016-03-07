@@ -21,13 +21,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'fla'
-__copyright__ = "Copyright 2015"
-__license__ = " Apache License, Version 2.0"
-
 
 from fiwareskuld.expired_users import ExpiredUsers
-from tests.acceptance.commons.configuration import TENANT_NAME, USERNAME, PASSWORD
+from tests.acceptance.commons.configuration import TENANT_NAME, USERNAME,\
+    PASSWORD
 from tests.acceptance.commons.logger_utils import get_logger
 
 __logger__ = get_logger("qautils")

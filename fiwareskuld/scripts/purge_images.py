@@ -22,11 +22,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 import logging
 
-from skuld.queries import Queries
+from fiwareskuld.utils.queries import Queries
 from utils import osclients
 
 """This scripts delete images with the metadata 'orphan_image' when there are

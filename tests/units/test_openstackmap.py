@@ -21,7 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
 
 import os
 from os import environ
@@ -32,9 +31,12 @@ from requests import Response
 from httplib import OK
 import tempfile
 import cPickle as pickle
-from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
-    LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
-LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
+from tests_constants import UNIT_TEST_RESOURCES_FOLDER,\
+    LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
+    LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE,\
+    LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
+    LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE,\
+    GET_USER_RESPONSE_FILE
 
 from fiwareskuld.openstackmap import OpenStackMap
 
@@ -52,11 +54,16 @@ class MySessionMock(MagicMock):
     def get_access(self, session):
 
         service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
-                                    u'interface': u'public', u'region': u'Spain2',
-                                    u'id': u'00000000000000000000000000000002'},
-                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
-                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'}],
-                                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
+                                    u'interface': u'public',
+                                    u'region': u'Spain2',
+                                    u'id': u'000000000000000000000000000002'},
+                                   {u'url': u'http://172.0.0.1:4731/v3/',
+                                    u'interface': u'administator',
+                                    u'region': u'Spain2',
+                                    u'id': u'00000000000000000000000000000001'}
+                                   ],
+                    u'type': u'identity',
+                    u'id': u'00000000000000000000000000000045'}
 
         d = defaultdict(list)
         d['catalog'].append(service2)
@@ -68,47 +75,56 @@ class MySessionMock(MagicMock):
         resp = Response()
 
         if url == '/servers/detail?all_tenants=1':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_SERVERS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_SERVERS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/volumes/detail?all_tenants=1':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_VOLUMES_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_VOLUMES_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/snapshots/detail?all_tenants=1':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_SNAPSHOTS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_SNAPSHOTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/backups/detail':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_BACKUPS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_BACKUPS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/roles':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_ROLES_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/users' or url == '/users?name=user':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_USERS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/users/' + OS_TENANT_ID:
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/projects':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_PROJECTS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_PROJECTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/role_assignments':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER +
+                             LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
@@ -144,16 +160,19 @@ class TestOpenstackMap(TestCase):
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
     def test_implement_openstackmap(self, mock_exists, mock_os):
-        """test_implement_openstackmap check that we could build an empty map from the resources (VMs, networks, images,
+        """test_implement_openstackmap check that we could build an empty map
+        from the resources (VMs, networks, images,
         volumes, users, tenants, roles...) in an OpenStack infrastructure."""
         mock_exists.return_value = False
         mock_os.return_value = True
-        openstackmap = OpenStackMap(region=self.OS_REGION_NAME, auto_load=False)
+        openstackmap = OpenStackMap(region=self.OS_REGION_NAME,
+                                    auto_load=False)
         self.assertTrue(mock_os.called)
         self.assertIsNotNone(openstackmap)
 
     def test_implement_openstackmap_without_region_name(self):
-        """test_implement_openstackmap_without_region_name check that we could not build an empty map without providing
+        """test_implement_openstackmap_without_region_name check that we could
+         not build an empty map without providing
         a region Name."""
 
         del os.environ['OS_REGION_NAME']
@@ -164,8 +183,11 @@ class TestOpenstackMap(TestCase):
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
-    def test_implement_openstackmap_with_keystone_admin_endpoint(self, mock_exists, mock_os):
-        """test_implement_openstackmap_with_keystone_admin_endpoint check that we could build an empty map from the
+    def test_implement_openstackmap_with_keystone_admin_endpoint(self,
+                                                                 mock_exists,
+                                                                 mock_os):
+        """test_implement_openstackmap_with_keystone_admin_endpoint check that
+         we could build an empty map from the
          resources providing a keystone admin endpoint environment variable."""
 
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
@@ -180,13 +202,16 @@ class TestOpenstackMap(TestCase):
     @patch.object(os, 'mkdir')
     @patch.object(os.path, 'exists')
     def test_load_nova(self, mock_exists, mock_os):
-        """test_load_nova check that we could build an empty map from nova resources."""
+        """test_load_nova check that we could build an empty map from nova
+        resources."""
 
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
 
         mock_exists.return_value = False
         mock_os.return_value = True
-        openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.NO_CACHE_OBJECTS)
+        openstackmap = OpenStackMap(auto_load=False,
+                                    objects_strategy=OpenStackMap.
+                                    NO_CACHE_OBJECTS)
 
         openstackmap.load_nova()
         self.assertTrue(mock_os.called)
@@ -194,34 +219,45 @@ class TestOpenstackMap(TestCase):
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_nova2(self):
-        """test_load_nova check that we could build a map from nova resources using Direct_objects directive."""
+        """test_load_nova check that we could build a map from nova resources
+         using Direct_objects directive."""
 
-        openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
+        openstackmap = OpenStackMap(auto_load=False,
+                                    objects_strategy=OpenStackMap.
+                                    DIRECT_OBJECTS)
         openstackmap.load_nova()
         self.assertIsNotNone(openstackmap)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_cinder(self):
-        """test_load_cinder check that we could build a map from cinder resources using Direct_objects directive."""
+        """test_load_cinder check that we could build a map from cinder
+        resources using Direct_objects directive."""
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
 
-        openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
+        openstackmap = OpenStackMap(auto_load=False,
+                                    objects_strategy=OpenStackMap.
+                                    DIRECT_OBJECTS)
         openstackmap.load_cinder()
         self.assertIsNotNone(openstackmap)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_load_keystone(self):
-        """test_load_keystone check that we could build a map from keystone resources using Direct_objects directive."""
+        """test_load_keystone check that we could build a map from keystone
+         resources using Direct_objects directive."""
         environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
 
-        openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
+        openstackmap = OpenStackMap(auto_load=False,
+                                    objects_strategy=OpenStackMap.
+                                    DIRECT_OBJECTS)
         openstackmap.load_keystone()
         self.assertIsNotNone(openstackmap)
 
 
 class TestOpenstackMapCacheOnly(TestCase):
-    keystone_objects = ['users', 'users_by_name', 'tenants', 'tenants_by_name', 'roles_a',
-                        'filters', 'filters_by_project', 'roles', 'roles_by_user', 'roles_by_project']
+    keystone_objects = ['users', 'users_by_name', 'tenants',
+                        'tenants_by_name', 'roles_a',
+                        'filters', 'filters_by_project', 'roles',
+                        'roles_by_user', 'roles_by_project']
 
     def setUp(self):
         """Create fake pickle objects to be used as cache"""
@@ -231,18 +267,21 @@ class TestOpenstackMapCacheOnly(TestCase):
         os.mkdir(self.tmpdir + os.path.sep + 'region2')
         sample_dict = {id: 'value1'}
         for resource in self.keystone_objects:
-            with open(self.tmpdir + '/keystone/' + resource + '.pickle', 'wb') as f:
+            with open(self.tmpdir + '/keystone/' + resource +
+                      '.pickle', 'wb') as f:
                 pickle.dump(sample_dict, f, protocol=-1)
 
         for resource in OpenStackMap.resources_region:
-            with open(self.tmpdir + '/region1/' + resource + '.pickle', 'wb') as f:
+            with open(self.tmpdir + '/region1/' + resource +
+                      '.pickle', 'wb') as f:
                 pickle.dump(sample_dict, f, protocol=-1)
 
         with open(self.tmpdir + '/region2/vms.pickle', 'wb') as f:
             pickle.dump(sample_dict, f, protocol=-1)
 
         self.map = OpenStackMap(
-            self.tmpdir, region='region1', auto_load=False, objects_strategy=OpenStackMap.USE_CACHE_OBJECTS_ONLY)
+            self.tmpdir, region='region1', auto_load=False,
+            objects_strategy=OpenStackMap.USE_CACHE_OBJECTS_ONLY)
 
     def tearDown(self):
         for dir in os.listdir(self.tmpdir):

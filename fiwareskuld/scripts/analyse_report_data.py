@@ -35,7 +35,8 @@ def get_users_to_delete():
     Get the content of users_to_delete.txt as a list
     :return: the users to delete list.
     """
-    return set(user.rstrip().split([0]) for user in open('users_to_delete.txt'))
+    return set(user.rstrip().split([0])
+               for user in open('users_to_delete.txt'))
 
 
 def get_unified_report(users_to_delete):

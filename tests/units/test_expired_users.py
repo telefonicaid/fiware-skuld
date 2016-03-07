@@ -21,7 +21,6 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'fla'
 
 from unittest import TestCase
 from datetime import datetime, timedelta
@@ -36,11 +35,13 @@ from fiwareskuld.expired_users import ExpiredUsers
 class TestExpiredUsers(TestCase):
     def testadmintoken(self, m):
         """testadmintoken check that we have an admin token"""
-        response = {'access': {'token': {'id': '49ede5a9ce224631bc778cceedc0cca1'}}}
+        response = {'access': {
+            'token': {'id': '49ede5a9ce224631bc778cceedc0cca1'}}}
 
         m.post(requests_mock.ANY, json=response)
 
-        expiredUsers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredUsers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         expiredUsers.get_admin_token()
 
@@ -54,7 +55,8 @@ class TestExpiredUsers(TestCase):
         response = {
             "error":
                 {
-                    "message": "The request you have made requires authentication.",
+                    "message": "The request you have made requires"
+                               "authentication.",
                     "code": 401,
                     "title": "Unauthorized"
                 }
@@ -62,19 +64,22 @@ class TestExpiredUsers(TestCase):
 
         m.post(requests_mock.ANY, json=response, status_code=401)
 
-        expiredUsers = ExpiredUsers('wrong tenant', 'any username', 'any password')
+        expiredUsers = ExpiredUsers('wrong tenant', 'any username',
+                                    'any password')
 
         try:
             expiredUsers.get_admin_token()
         except Exception as e:
-            assert e.message == 'The request you have made requires authentication.'
+            assert e.message == 'The request you have made requires' \
+                                ' authentication.'
 
     def testadmintokenWithoutCredentials(self, m):
         """Test the obtention of admin token without credentials"""
         expiredUsers = ExpiredUsers()
 
-        expectedmessage = 'Error, you need to define the credentials of the admin user. ' \
-                          'Please, execute the setCredentials() method previously.'
+        expectedmessage = 'Error, you need to define the credentials of the' \
+                          ' admin user. Please, execute the setCredentials()' \
+                          ' method previously.'
 
         try:
             expiredUsers.get_admin_token()
@@ -100,30 +105,35 @@ class TestExpiredUsers(TestCase):
                       "user": {"id": "zippitelli"},
                       "links": {"assignment": "http://c.com"}
                      }],
-                     "links": {"self": "http://d.com"}
-        }
+                    "links": {"self": "http://d.com"}
+                    }
 
         m.get(requests_mock.ANY, json=response)
 
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         expiredusers.token = 'a token'
         expiredusers.get_list_trial_users()
 
         result = expiredusers.gerlisttrialusers()
 
-        expectedresult = ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a',
+        expectedresult = ['0f4de1ea94d342e696f3f61320c15253',
+                          '24396976a1b84eafa5347c3f9818a66a',
                           '24cebaa9b665426cbeab579f1a3ac733', 'zippitelli']
 
         self.assertEqual(expectedresult, result)
 
     def testlistTrialUsersWithNoAdminToken(self, m):
-        """testlistTrialUsersWithNoAdminToken check that we have an admin token"""
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        """testlistTrialUsersWithNoAdminToken check that we have an admin
+         token"""
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         # There was no users in the list
         expiredusers.token = ""
-        expectedmessage = "Error, you need to have an admin token. Execute the get_admin_token() method previously."
+        expectedmessage = "Error, you need to have an admin token." \
+                          " Execute the get_admin_token() method previously."
 
         try:
             expiredusers.get_list_trial_users()
@@ -134,7 +144,8 @@ class TestExpiredUsers(TestCase):
         """testadmintoken check that we have an admin token"""
         m.get(requests_mock.ANY, json=self.text_callback)
 
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
         expiredusers.token = 'a token'
         expiredusers.listUsers = ['0f4de1ea94d342e696f3f61320c15253',
                                   '24396976a1b84eafa5347c3f9818a66a',
@@ -142,16 +153,19 @@ class TestExpiredUsers(TestCase):
 
         result = expiredusers.get_list_expired_users()
 
-        expectedresult = ['24396976a1b84eafa5347c3f9818a66a', 'e3294fcf05984b3f934e189fa92c6990']
+        expectedresult = ['24396976a1b84eafa5347c3f9818a66a',
+                          'e3294fcf05984b3f934e189fa92c6990']
 
         self.assertEqual(expectedresult, result)
 
     def testCheckTimeExpiredWithNoUsers(self, m):
-        """testCheckTimeExpiredWithNoUsers check that we receive an error if we do not execute the
+        """testCheckTimeExpiredWithNoUsers check that we receive an error if
+         we do not execute the
         get_list_trial_users() previously"""
         m.get(requests_mock.ANY, json=self.text_callback)
 
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
         expiredusers.token = 'a token'
 
         result = expiredusers.get_list_expired_users()
@@ -162,13 +176,15 @@ class TestExpiredUsers(TestCase):
 
     def text_callback(self, request, context):
         """
-        Create the returns message of the request based on the information that we request.
+        Create the returns message of the request based on the information
+         that we request.
         :param request: The request send to the server
         :param context: The context send to the server
         :return: The message to be returned in the requests.
         """
-        datetime_value1 = (datetime.now() + timedelta(days=-10)).date()  # Here, I am adding a negative timedelta
-        datetime_value2 = (datetime.now() + timedelta(days=-20)).date()  # Here, I am adding a negative timedelta
+        # Here, I am adding a negative timedelta
+        datetime_value1 = (datetime.now() + timedelta(days=-10)).date()
+        datetime_value2 = (datetime.now() + timedelta(days=-20)).date()
 
         # Create the dictionary with the possible values.
         result1 = {
@@ -176,11 +192,15 @@ class TestExpiredUsers(TestCase):
                        "username": "Rodo",
                        "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
                        "name": "rododendrotiralapiedra@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/0f4de1ea94d342e696f3f61320c15253"},
+                       "links": {"self": "http://cloud.lab.fiware.org:4730/"
+                                         "v3/"
+                                         "users/"
+                                         "0f4de1ea94d342e696f3f61320c15253"},
                        "enabled": True,
                        "trial_started_at": str(datetime_value1),
                        "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                       "default_project_id":
+                           "e29eff7c153b448caf684aa9031d01c6",
                        "id": "0f4de1ea94d342e696f3f61320c15253"
                    }
         }
@@ -190,11 +210,15 @@ class TestExpiredUsers(TestCase):
                        "username": "Rodo",
                        "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
                        "name": "rododendrotiralapiedra@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/24396976a1b84eafa5347c3f9818a66a"},
+                       "links": {"self": "http://cloud.lab.fiware.org:4730/"
+                                         "v3/"
+                                         "users/"
+                                         "24396976a1b84eafa5347c3f9818a66a"},
                        "enabled": True,
                        "trial_started_at": str(datetime_value2),
                        "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                       "default_project_id":
+                           "e29eff7c153b448caf684aa9031d01c6",
                        "id": "24396976a1b84eafa5347c3f9818a66a"
                    }
         }
@@ -204,11 +228,15 @@ class TestExpiredUsers(TestCase):
                        "username": "Frodo",
                        "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
                        "name": "frodobolsom@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/e3294fcf05984b3f934e189fa92c6990"},
+                       "links": {"self": "http://cloud.lab.fiware.org:4730/"
+                                         "v3/"
+                                         "users/"
+                                         "e3294fcf05984b3f934e189fa92c6990"},
                        "enabled": True,
                        "trial_started_at": str(datetime_value2),
                        "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                       "default_project_id":
+                           "e29eff7c153b448caf684aa9031d01c6",
                        "id": "e3294fcf05984b3f934e189fa92c6990"
                    }
         }
@@ -227,7 +255,8 @@ class TestExpiredUsers(TestCase):
     def testCheckTimeExpiredwithNoListUsers(self, m):
         """testadmintoken check that we have an admin token"""
 
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         # There was no users in the list
         expiredusers.listUsers = []
@@ -241,11 +270,13 @@ class TestExpiredUsers(TestCase):
 
     def testCheckTimeExpiredwithNoAdminToken(self, m):
         """testadmintoken check that we have an admin token"""
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         # There was no users in the list
         expiredusers.token = ""
-        expectedmessage = "Error, you need to have an admin token. Execute the get_admin_token() method previously."
+        expectedmessage = "Error, you need to have an admin token. Execute" \
+                          " the get_admin_token() method previously."
 
         try:
             expiredusers.get_list_expired_users()
@@ -253,8 +284,10 @@ class TestExpiredUsers(TestCase):
             self.assertEqual(e.message, expectedmessage)
 
     def testcheckTime1(self, m):
-        """ test the difference between two dates in string are bigger than 14 days."""
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        """ test the difference between two dates in string are bigger than
+         14 days."""
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         olddate = "2015-05-01"
 
@@ -265,8 +298,10 @@ class TestExpiredUsers(TestCase):
         self.assertEqual(expectedresult, result)
 
     def testcheckTime2(self, m):
-        """ test the difference between two dates in string are bigger than 14 days."""
-        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        """ test the difference between two dates in string are bigger
+         than 14 days."""
+        expiredusers = ExpiredUsers('any tenant id', 'any username',
+                                    'any password')
 
         aux = datetime.today()
         olddate = aux.strftime("%Y-%m-%d")
@@ -278,7 +313,8 @@ class TestExpiredUsers(TestCase):
         self.assertEqual(expectedresult, result)
 
     def testkeystonegetter(self, m):
-        """ Test the obtention of appropriate value of the Keystone service endpoint.
+        """ Test the obtention of appropriate value of the Keystone
+         service endpoint.
         """
         expiredusers = ExpiredUsers()
 

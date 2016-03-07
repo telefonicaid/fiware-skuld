@@ -65,7 +65,7 @@ class ExpiredUsers:
         """
         user_ids = self.get_trial_user_ids()
         return list(user for user in self.keystoneclient.users.list()
-                     if user.id in user_ids)
+                    if user.id in user_ids)
 
     def get_yellow_red_users(self):
         """Get a pair of lists
@@ -116,7 +116,8 @@ class ExpiredUsers:
                 name = 'users_to_delete_phase3.txt'
                 with open(name, 'w') as users_to_delete_p3:
                     for user in delete_list:
-                        users_to_delete_p3.write(user.id + ',' + user.name + '\n')
+                        users_to_delete_p3.write(user.id + ',' + user.name +
+                                                 '\n')
             else:
                 name = 'users_to_delete.txt'
                 phase3_name = 'users_to_delete_phase3.txt'
@@ -167,8 +168,8 @@ class ExpiredUsers:
 
     def _is_user_protected(self, user):
         """
-        Return true if the user must not be deleted, because their address has a
-        domain in setting.DONT_DELETE_DOMAINS, and print a warning.
+        Return true if the user must not be deleted, because their address has
+        a domain in setting.DONT_DELETE_DOMAINS, and print a warning.
         :param user: user to check
         :return: true if the user must not be deleted
         """

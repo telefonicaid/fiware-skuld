@@ -83,7 +83,8 @@ elif os.path.exists('users_credentials.txt'):
     use_trust_ids = False
     lines = open('users_credentials.txt').readlines()
 else:
-    raise Exception("user_trusted_ids.txt or users_credentials.txt must exists")
+    raise Exception("user_trusted_ids.txt or users_credentials.txt must"
+                    "exists")
 
 
 count = 0

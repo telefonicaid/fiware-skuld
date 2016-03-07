@@ -135,7 +135,8 @@ class TrustFactory:
         """Delete and invalidate a TRUST_ID
 
         WARNING: This method currently does not work.  It requires changes in
-        the keystone server. Use delete_trust with the trustee identity instead.
+        the keystone server. Use delete_trust with the trustee identity
+        instead.
         :param trust_id:
         :return: True if success
         """

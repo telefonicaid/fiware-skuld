@@ -55,22 +55,23 @@ class TestChangePassword(TestCase):
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):
         """test_get_user_by_name check that we could get a user by name."""
-        passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byname(self.mock_user_name)
+        password_changer = change_password.PasswordChanger()
+        user = password_changer.get_user_byname(self.mock_user_name)
         self.assertEqual(self.mock_user_name, user.name)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
-        passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byid(OS_TENANT_ID)
+        password_changer = change_password.PasswordChanger()
+        user = password_changer.get_user_byid(OS_TENANT_ID)
         self.assertEqual(OS_TENANT_ID, user.id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_list_users_with_cred(self):
-        """test_get_list_users_with_cred check that we could patch the Password to a list of users"""
-        passwordChanger = change_password.PasswordChanger()
+        """test_get_list_users_with_cred check that we could patch the
+        Password to a list of users"""
+        password_changer = change_password.PasswordChanger()
         mylist = []
         mylist.append(OS_TENANT_ID)
-        result = passwordChanger.get_list_users_with_cred(mylist)
+        result = password_changer.get_list_users_with_cred(mylist)
         self.assertIsNotNone(result)
