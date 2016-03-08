@@ -26,7 +26,7 @@ import json
 import requests
 from datetime import datetime
 from conf import settings
-from utils.log import logger
+from fiwareskuld.utils.log import logger
 
 
 class ExpiredUsers:
@@ -57,8 +57,7 @@ class ExpiredUsers:
         self.__check_credentials()
 
         payload = "{\"auth\":{\"tenantName\":\"%s\"," \
-                  "\"passwordCredentials\":" \
-                  "{\"username\":\"%s\",\"password\":\"%s\"}}}" \
+                  "\"passwordCredentials\":{\"username\":\"%s\",\"password\":\"%s\"}}}" \
                   % (self.__tenant, self.__username, self.__password)
         headers = {'content-type': 'application/json'}
         url = self.KEYSTONE_ENDPOINT + self.v20 + "tokens"
@@ -78,14 +77,13 @@ class ExpiredUsers:
 
     def get_list_trial_users(self):
         """
-        Return the list of users which have the Trial Role defined. This value
-        is maintained in the internal attribute "listUsers" of the class.
+        Return the list of users which have the Trial Role defined. This value is
+        maintained in the internal attribute "listUsers" of the class.
         :return: Lists of users id who have Trial role
         """
         self.__check_token()
 
-        url = self.KEYSTONE_ENDPOINT + self.v30 + \
-            "role_assignments?role.id=" + self.TRIAL_ROLE_ID
+        url = self.KEYSTONE_ENDPOINT + self.v30 + "role_assignments?role.id=" + self.TRIAL_ROLE_ID
         headers = {'X-Auth-Token': self.token}
         r = requests.get(url=url, headers=headers)
 
@@ -130,8 +128,8 @@ class ExpiredUsers:
 
         logger.info("Number of expired Trial Users found: %d",
                     len(self.finalList))
-        logger.info("Number of Trial Users to expire in the following days:"
-                    "%d", len(self.yellowList))
+        logger.info("Number of Trial Users to expire in the following days: %d",
+                    len(self.yellowList))
 
         return self.yellowList, self.finalList
 
@@ -222,17 +220,14 @@ class ExpiredUsers:
         """Check if the token is not blank"""
         if self.token == "":
             # We need to have a admin token in order to proceed.
-            raise ValueError("Error, you need to have an admin token."
-                             " Execute the get_admin_token method previously.")
+            raise ValueError("Error, you need to have an admin token. Execute the get_admin_token() method previously.")
 
     def __check_credentials(self):
         """Check if we have the credentials of the admin user"""
-        if self.__tenant is None or self.__username is None\
-                or self.__password is None:
+        if self.__tenant is None or self.__username is None or self.__password is None:
             # We need to have a admin token in order to proceed.
-            raise ValueError("Error, you need to define the credentials of the"
-                             " admin user. Please, execute the"
-                             " setCredentials() method previously.")
+            raise ValueError("Error, you need to define the credentials of the admin user. "
+                             "Please, execute the setCredentials() method previously.")
 
     def getadmintoken(self):
         """
@@ -250,11 +245,10 @@ class ExpiredUsers:
 
     def getlistusers(self):
         """
-        Global method that call the rest of internal one in order to recover
-        the information of the expired users.
-        :return: List of Expired Users id who have Trial role and expired,
-            example: ['0f4de1ea94d342e696f3f61320c15253',
-                        '24396976a1b84eafa5347c3f9818a66a']
+        Global method that call the rest of internal one in order to recover the information of
+        the expired users.
+        :return: List of Expired Users id who have Trial role and expired, example:
+                    ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a']
         """
         # Get the security token
         self.get_admin_token()

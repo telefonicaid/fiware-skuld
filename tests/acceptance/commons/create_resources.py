@@ -113,8 +113,7 @@ class ResourcePopulator(object):
         nova.keypairs.create(name='testpublickey')
 
         print('Allocating a new security group')
-        nova.security_groups.create('testsecgroup a security group for'
-                                    'testing')
+        nova.security_groups.create('testsecgroup a security group for testing')
 
         print('Reserving a flotaing ip')
         floatingip = nova.floating_ips.create(pool=external_net)
@@ -140,8 +139,7 @@ class ResourcePopulator(object):
             Only admin users can create shared networks.
 
             network2 = neutron.create_network(
-                {'network': {'name': 'testnetwork_shared',
-                             'admin_state_up': True,
+                {'network': {'name': 'testnetwork_shared', 'admin_state_up': True,
                              'shared': True}})['network']
 
             subnet2 = neutron.create_subnet(
@@ -153,10 +151,8 @@ class ResourcePopulator(object):
             """
 
             print('Adding interface and gateway to router')
-            neutron.add_interface_router(router['id'],
-                                         {'subnet_id': subnet['id']})
-            neutron.add_gateway_router(router['id'],
-                                       {'network_id': external_net})
+            neutron.add_interface_router(router['id'], {'subnet_id': subnet['id']})
+            neutron.add_gateway_router(router['id'], {'network_id': external_net})
         else:
             # use any internal network
             network = None
@@ -189,8 +185,7 @@ class ResourcePopulator(object):
             osclients2 = OpenStackClients()
             second_user = os.environ['USER2']
             second_user_tenant = os.environ['USER2_TENANT']
-            osclients2.set_credential(second_user,
-                                      os.environ['PASSWORD_USER2'],
+            osclients2.set_credential(second_user, os.environ['PASSWORD_USER2'],
                                       tenant_name=second_user_tenant)
             nova = osclients2.get_novaclient()
             neutron = osclients2.get_neutronclient()
@@ -203,8 +198,8 @@ class ResourcePopulator(object):
 
             nics = [{'net-id': net2}]
             print('Creating a second VM, with a different user')
-            nova.servers.create('vm_testdelete2', flavor=tiny,
-                                image=image_shared2.id, nics=nics)
+            nova.servers.create(
+                'vm_testdelete2', flavor=tiny, image=image_shared2.id, nics=nics)
 
 
 def download_images():

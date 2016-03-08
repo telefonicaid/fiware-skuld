@@ -81,9 +81,7 @@ class BluePrintResources(object):
             self.logger.error(err_msg.format(self.tenant_id, str(e)))
             return None
         if response.status_code != 200:
-            self.logger.error(err_msg.format(self.tenant_id),
-                              str(response.status_code) +
-                              ' ' + response.reason)
+            self.logger.error(err_msg.format(self.tenant_id), str(response.status_code) + ' ' + response.reason)
             return None
         tree = et.fromstring(response.content)
         return list(name.text for name in tree.findall(
@@ -143,9 +141,7 @@ class BluePrintResources(object):
             self.logger.error(err_msg.format(self.tenant_id, str(e)))
             return None
         if response.status_code != 200:
-            self.logger.error(err_msg.format(self.tenant_id),
-                              str(response.status_code) +
-                              ' ' + response.reason)
+            self.logger.error(err_msg.format(self.tenant_id), str(response.status_code) + ' ' + response.reason)
             return None
         tree = et.fromstring(response.content)
         return list(nam.text for nam in tree.findall('./environmentDto/name'))

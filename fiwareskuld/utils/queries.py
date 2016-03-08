@@ -129,9 +129,8 @@ class Queries(object):
         image = self.glance.images.get(image_id)
         vms = self.get_all_vms().values()
         if discard_owned_vm:
-            vms_image = list(vm for vm in vms if vm.image['id'] == image_id and
-                             vm.tenant_id != image.owner and (not flag or
-                             flag in image.user_properties))
+            vms_image = list(vm for vm in vms if vm.image['id'] == image_id and vm.tenant_id != image.owner and
+                             (not flag or flag in image.user_properties))
         else:
             vms_image = list(vm for vm in vms if vm.image['id'] == image_id and
                              (not flag or flag in image.user_properties))

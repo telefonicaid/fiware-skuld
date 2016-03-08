@@ -25,8 +25,7 @@
 """Get the users list of a specific FIWARE Lab region.
 
 Usage:
-  users --user=<username> --pass=<password> --region=<region>
-                                                        [--out=<filename>]
+  users --user=<username> --pass=<password> --region=<region> [--out=<filename>]
   users -h | --help
   users -v | --version
 
@@ -214,8 +213,7 @@ def get_email(token, userset):
 
 def get_email_osclient(username, password, region):
     """
-    Get the list of user of one region taking into account a bottom-up
-    analysis.
+    Get the list of user of one region taking into account a bottom-up analysis.
 
     :param username: The name of the admin user that launch the request.
     :param password: The password of the admin user.
@@ -247,9 +245,8 @@ def get_email_osclient(username, password, region):
             empty_filter = filter['id']
 
     useremail = dict()
-    # Get users. Genuine FIWARE Users should have cloud_project_id. Be aware
-    # that there are users without this field (administrators and also other
-    # users)
+    # Get users. Genuine FIWARE Users should have cloud_project_id. Be aware that
+    # there are users without this field (administrators and also other users)
     for user in map.users.values():
         if 'cloud_project_id' not in user:
             continue
@@ -287,12 +284,10 @@ def merge_two_dicts(A, B):
 
 def processing_request(params):
     """
-    Method to process the arguments received from the CLI and obtain the users
-    list with email.
+    Method to process the arguments received from the CLI and obtain the users list with email.
 
     :param params: Arguments received from the CLI.
-    :return: A dictionary with the user name, user email for all the user that
-    would use the region.
+    :return: A dictionary with the user name, user email for all the user that would use the region.
     """
     username = params['--user']
     password = params['--pass']
@@ -306,8 +301,7 @@ def processing_request(params):
     useremail = get_email(token, userset)
 
     # Get botton-up approx to obtain the user list
-    useremail_osclient = get_email_osclient(username=username,
-                                            password=password, region=region)
+    useremail_osclient = get_email_osclient(username=username, password=password, region=region)
 
     # Join the two lists
     finaluserlist = merge_two_dicts(useremail, useremail_osclient)

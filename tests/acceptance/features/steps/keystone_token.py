@@ -25,7 +25,7 @@
 # -*- coding: utf-8 -*-
 import requests
 from behave import when, then, given
-from fiwareskuld.expired_users import ExpiredUsers
+from skuld.expired_users import ExpiredUsers
 from tests.acceptance.commons.configuration import KEYSTONE_URL, TOKEN_LENGTH
 
 __author__ = 'fla'
@@ -47,22 +47,19 @@ def step_valid_data(context):
 @given(u'a connectivity to the Keystone service')
 def step_check_connectivity_to_keystone(context):
     """
-    Check if we can contact with the Keystone service defined in the
-    KEYSTONE_URL.
+    Check if we can contact with the Keystone service defined in the KEYSTONE_URL.
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """
     context.expiredusers.set_keystone_endpoint(KEYSTONE_URL)
 
     try:
-        result = requests.get(context.expiredusers.get_keystone_endpoint(),
-                              timeout=5)
+        result = requests.get(context.expiredusers.get_keystone_endpoint(), timeout=5)
     except requests.ConnectionError:
         assert False, 'Expected True but \n Obtained Connection exception'
 
-    assert result.status_code == \
-        MULTIPLE_CHOICE, 'Expected 300 - Multiple Choice ' \
-        'but obtained {}'.format(result.status_code)
+    assert result.status_code == MULTIPLE_CHOICE, 'Expected 300 - Multiple Choice ' \
+                                                  'but obtained {}'.format(result.status_code)
 
 
 @when(u'I request a valid token from the Keystone')
@@ -92,8 +89,7 @@ def step_check_returned_token(context):
 
     assert result is not None, 'Expected a valid token but obtained no token'
     assert len(result) == TOKEN_LENGTH, 'Expected a token with length: 32 ' \
-                                        '\n Obtained a token with length: {}'\
-                                        .format(len(result))
+                                        '\n Obtained a token with length: {}'.format(len(result))
 
 
 @when(u'I request a list of trial users from the Keystone')
@@ -116,7 +112,7 @@ def step_get_list_trial_users(context):
     """
     try:
         result = context.expiredusers.gerlisttrialusers()
-        print('\n     Number of trial users found: {}\n\n'.format(len(result)))
+        print('\n      Number of trial users found: {}\n\n'.format(len(result)))
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
 
@@ -128,8 +124,7 @@ def step_request_list_expired_users(context):
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """
-    context.expiredusers.finalList = context.expiredusers.\
-        get_list_expired_users()
+    context.expiredusers.finalList = context.expiredusers.get_list_expired_users()
 
 
 @then(u'the component returns a list with all the expired trial users')
@@ -141,18 +136,15 @@ def step_get_list_expired_users(context):
     """
     try:
         result = context.expiredusers.finalList
-        print('\n      Number of expired trial users found: {}\n\n'.format(
-            len(result)))
+        print('\n      Number of expired trial users found: {}\n\n'.format(len(result)))
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
 
 
 @given(u'a wrong "{tenantname}", "{username}" or "{password}"')
-def given_a_wrong_tenant_username_and_password(context, tenantname, username,
-                                               password):
+def given_a_wrong_tenant_username_and_password(context, tenantname, username, password):
     """
-    Check that the operation to recover trial users with wrong data produce an
-    exception.
+    Check that the operation to recover trial users with wrong data produce an exception.
     :param context: Context of the acceptance test execution.
     :param tenantname: Wrong tenant name.
     :param username: Wrong user name.

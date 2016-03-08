@@ -25,7 +25,7 @@
 
 import logging
 
-from fiwareskuld.utils.queries import Queries
+from skuld.queries import Queries
 from utils import osclients
 
 """This scripts delete images with the metadata 'orphan_image' when there are

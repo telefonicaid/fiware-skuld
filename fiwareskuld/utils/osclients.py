@@ -197,10 +197,9 @@ class OpenStackClients(object):
             self._session_v3 = None
 
     def set_credential(
-            self, username=None, password=None, tenant_name=None,
-            tenant_id=None, trust_id=None, user_domain_name=None,
-            user_domain_id=None, project_domain_name=None,
-            project_domain_id=None):
+            self, username=None, password=None, tenant_name=None, tenant_id=None,
+            trust_id=None, user_domain_name=None, user_domain_id=None,
+            project_domain_name=None, project_domain_id=None):
         """Set the credential to use in the session. If a session already
         exists, it is invalidated. It is possible to save and then restore the
         session with the methods preserve_session/restore_session.
@@ -220,11 +219,10 @@ class OpenStackClients(object):
         project.
 
         The domain is the namespace where the user/tenant name is valid (when
-        using ids, this is not required, because ids are always globally
-        unique).
+        using ids, this is not required, because ids are always globally unique).
         The domain concept was introduced in the third version of keystone API.
-        Domain may be specified by name or by id. When it is not provided,
-        it is assumed id=default.
+        Domain may be specified by name or by id. When it is not provided, it is
+        assumed id=default.
 
         :param username: the username of the user
         :param password: the password of the user
@@ -240,12 +238,10 @@ class OpenStackClients(object):
         where the user name is unique. This is the id of the domain.
         :param user_domain_name: when using API v3, the domain is the namespace
         where the user name is unique. This is the name of the domain.
-        :param project_domain_id: when using API v3, the domain is the
-        namespace where the project (tenant) name is unique. This is the id
-        of the domain.
-        :param project_domain_name: when using API v3, the domain is the
-        namespace where the project (tenant) name is unique. This is the name
-        of the domain.
+        :param project_domain_id: when using API v3, the domain is the namespace
+        where the project (tenant) name is unique. This is the id of the domain.
+        :param project_domain_name: when using API v3, the domain is the namespace
+        where the project (tenant) name is unique. This is the name of the domain.
 
         :return: Nothing.
         """
@@ -403,8 +399,7 @@ class OpenStackClients(object):
             auth_url = self.auth_url
 
         if not self.__username and not self._token:
-            raise Exception('Username and password or a token must be'
-                            'provided')
+            raise Exception('Username and password or a token must be provided')
 
         other_params = dict()
         if self.__trust_id:
@@ -418,8 +413,7 @@ class OpenStackClients(object):
             if self.__project_domain_id:
                 other_params['project_domain_id'] = self.__project_domain_id
             elif self.__project_domain_name:
-                other_params['project_domain_name'] =\
-                    self.__project_domain_name
+                other_params['project_domain_name'] = self.__project_domain_name
             else:
                 other_params['project_domain_id'] = 'default'
 
@@ -683,8 +677,7 @@ class OpenStackClients(object):
         """This method apply the changes registered in override_endpoint.
         See the documentation of that method.
         """
-        endpoints = list(endp for endp in self.get_endpoints(service_type)
-                         if endp['interface'] == interface)
+        endpoints = list(endp for endp in self.get_endpoints(service_type) if endp['interface'] == interface)
 
         if len(endpoints) == 1:
             endpoints[0]['url'] = url
@@ -693,8 +686,7 @@ class OpenStackClients(object):
                 if endpoint['region'] == region:
                     endpoint['url'] = url
 
-    def _apply_override_endpoint_v2(self, service_type, region, interface,
-                                    url):
+    def _apply_override_endpoint_v2(self, service_type, region, interface, url):
         """This method apply the changes registered in override_endpoint.
         See the documentation of that method.
         """
@@ -824,7 +816,7 @@ if 'KEYSTONE_ADMIN_ENDPOINT' in env:
     osclients.override_endpoint(
         'identity', osclients.region, 'admin', env['KEYSTONE_ADMIN_ENDPOINT'])
 
-# allow calling this module from a shell script (e.g. osclients 'o.project_id')
+# allow calling this module from a shell script (e.g. osclients 'o.project_id' )
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         o = osclients

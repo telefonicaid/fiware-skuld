@@ -38,17 +38,16 @@ class TestUserPerRegionScript(TestCase):
         :return: Nothing
         """
         # Given
-        response = {'access': {'token': {'id': '49ede5a9ce224631bc778cceedc'}}}
-        expected_token = '49ede5a9ce224631bc778cceedc'
+        response = {'access': {'token': {'id': '49ede5a9ce224631bc778cceedc0cca1'}}}
+        expectedToken = '49ede5a9ce224631bc778cceedc0cca1'
 
         m.post(requests_mock.ANY, json=response)
 
         # When
-        resultToken = users.get_token(username='fake user',
-                                      password='a fake password')
+        resultToken = users.get_token(username='fake user', password='a fake password')
 
         # Then
-        self.assertEqual(expected_token, resultToken)
+        self.assertEqual(expectedToken, resultToken)
 
     def test_getregionid(self, m):
         """
@@ -83,14 +82,12 @@ class TestUserPerRegionScript(TestCase):
 
         expectedResult = '000bd9fe677544829dd6659d1af7713b'
 
-        url = os.path.join(users.KEYSTONE_URL, users.API_V3,
-                           users.ENDPOINT_GROUPS)
+        url = os.path.join(users.KEYSTONE_URL, users.API_V3, users.ENDPOINT_GROUPS)
 
         m.get(url, json=response)
 
         # When
-        resultRegionId = users.get_endpoint_groups_id(token='a fake token',
-                                                      region='Trento')
+        resultRegionId = users.get_endpoint_groups_id(token='a fake token', region='Trento')
 
         # Then
         self.assertEqual(expectedResult, resultRegionId)
@@ -125,18 +122,15 @@ class TestUserPerRegionScript(TestCase):
 
         regionid = '000bd9fe677544829dd6659d1af7713b'
         project_details = users.PROJECT_DETAILS % regionid
-        url = os.path.join(users.KEYSTONE_URL, users.API_V3,
-                           users.ENDPOINT_GROUPS, project_details)
+        url = os.path.join(users.KEYSTONE_URL, users.API_V3, users.ENDPOINT_GROUPS, project_details)
 
         m.get(url, json=response)
 
         # When
-        result_projects = users.get_project_list(
-            token='a fake token',
-            regionid='000bd9fe677544829dd6659d1af7713b')
+        resultProjects = users.get_project_list(token='a fake token', regionid='000bd9fe677544829dd6659d1af7713b')
 
         # Then
-        self.assertEqual(expectedResult, result_projects)
+        self.assertEqual(expectedResult, resultProjects)
 
     def test_getuserlist(self, m):
         """
@@ -193,14 +187,12 @@ class TestUserPerRegionScript(TestCase):
 
         for i in projectlist:
             role_assignment = users.ROLE_ASSIGNMENT % i
-            url = os.path.join(users.KEYSTONE_URL, users.API_V3,
-                               role_assignment)
+            url = os.path.join(users.KEYSTONE_URL, users.API_V3, role_assignment)
 
             m.get(url, json=response[i])
 
         # When
-        resultUsersList = users.get_user_list(token='a fake token',
-                                              projectlist=projectlist)
+        resultUsersList = users.get_user_list(token='a fake token', projectlist=projectlist)
 
         # Then
         self.assertEqual(expectedResult, resultUsersList)
@@ -238,8 +230,7 @@ class TestUserPerRegionScript(TestCase):
             ]
         }
 
-        url = os.path.join(users.KEYSTONE_URL, users.API_V3,
-                           users.USER_DETAILS)
+        url = os.path.join(users.KEYSTONE_URL, users.API_V3, users.USER_DETAILS)
 
         m.get(url, json=response)
 
@@ -255,12 +246,10 @@ class TestUserPerRegionScript(TestCase):
 
         B = {'tres': 'tres-dos', 'uno': 'dos-uno'}
 
-        expected_result = {'dos': 'dos-uno',
-                           'tres': 'tres-dos',
-                           'uno': 'dos-uno'}
+        expectedResult = {'dos': 'dos-uno', 'tres': 'tres-dos', 'uno': 'dos-uno'}
 
         # When
         result = users.merge_two_dicts(A, B)
 
         # Then
-        self.assertEqual(expected_result, result)
+        self.assertEqual(expectedResult, result)

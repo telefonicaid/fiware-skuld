@@ -38,6 +38,13 @@ from xml.dom.minidom import parseString
 import json
 import os
 
+__author__ = "Javier Fernández"
+__email__ = "jfernandez@tcpsi.es"
+__copyright__ = "Copyright 2015"
+__license__ = " Apache License, Version 2.0"
+__version__ = "1.0.0"
+
+
 HEADER_CONTENT_TYPE = u'content-type'
 HEADER_REPRESENTATION_JSON = u'application/json'
 HEADER_REPRESENTATION_XML = u'application/xml'
@@ -83,8 +90,7 @@ def __get_pretty_body__(headers, body):
         return body
 
 
-def log_print_request(logger, method, url, query_params=None, headers=None,
-                      body=None):
+def log_print_request(logger, method, url, query_params=None, headers=None, body=None):
     """
     Log an HTTP request data.
     :param logger: Logger to use
@@ -104,8 +110,7 @@ def log_print_request(logger, method, url, query_params=None, headers=None,
     if headers is not None:
         log_msg += '\t> Headers: {}\n'.format(str(headers))
     if body is not None:
-        log_msg += '\t> Payload sent:\n {}\n'.format(
-            __get_pretty_body__(headers, body))
+        log_msg += '\t> Payload sent:\n {}\n'.format(__get_pretty_body__(headers, body))
 
     logger.debug(log_msg)
 
@@ -123,11 +128,9 @@ def log_print_response(logger, response):
     log_msg += '\t< Headers: {}\n'.format(str(dict(response.headers)))
     try:
         log_msg += '\t< Payload received:\n {}'\
-            .format(__get_pretty_body__(dict(response.headers),
-                                        response.content))
+            .format(__get_pretty_body__(dict(response.headers), response.content))
     except ValueError:
         log_msg += '\t< Payload received:\n {}'\
-            .format(__get_pretty_body__(dict(response.headers),
-                                        response.content.text))
+            .format(__get_pretty_body__(dict(response.headers), response.content.text))
 
     logger.debug(log_msg)

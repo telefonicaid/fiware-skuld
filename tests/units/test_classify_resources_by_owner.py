@@ -25,8 +25,7 @@
 import unittest
 from mock import MagicMock, patch, call, ANY
 
-from fiwareskuld.scripts.classify_resources_by_owners import\
-    ClassifyResources, hidden_set
+from fiwareskuld.scripts.classify_resources_by_owners import ClassifyResources, hidden_set
 from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
     ADMIN_ROLE_ID
 
@@ -43,33 +42,28 @@ class _DictAttr(dict):
 
 class TestClassifyResources(unittest.TestCase):
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def testConstructorBasic(self, mock):
         """check constructor without parameters"""
         classify = ClassifyResources('/fakedir')
-        mock.assert_called_with('/fakedir',
-                                objects_strategy=mock.USE_CACHE_OBJECTS)
+        mock.assert_called_with('/fakedir', objects_strategy=mock.USE_CACHE_OBJECTS)
 
         self.assertFalse(mock.return_value.preload_regions.called)
         self.assertTrue(mock.return_value.filters.values.called)
         self.assertTrue(mock.return_value.users.values.called)
         self.assertTrue(mock.return_value.tenants.keys.called)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def testConstructorOfflineMode(self, mock):
         """check constructor with offline_mode=True"""
         classify = ClassifyResources('/fakedir', offline_mode=True)
-        mock.assert_called_with('/fakedir',
-                                objects_strategy=mock.USE_CACHE_OBJECTS_ONLY)
+        mock.assert_called_with('/fakedir', objects_strategy=mock.USE_CACHE_OBJECTS_ONLY)
         self.assertFalse(mock.return_value.preload_regions.called)
         self.assertTrue(mock.return_value.filters.values.called)
         self.assertTrue(mock.return_value.users.values.called)
         self.assertTrue(mock.return_value.tenants.keys.called)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def testConstructorRegions(self, mock):
         """check constructor with a list of regions as parameter"""
         classify = ClassifyResources('/fakedir', ['region0', 'region1'])
@@ -111,8 +105,7 @@ class TestClassifyResources(unittest.TestCase):
                   'return_value.filters_by_project': filters_by_project}
         mock.configure_mock(**config)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def testConstructorFilter(self, mock):
         """test constructor providing filters in the mock"""
         self.init_filters(mock)
@@ -150,7 +143,7 @@ class TestClassifyResources(unittest.TestCase):
         roles = {
             '1': [(BASIC_ROLE_ID, 0)], '2': [(BASIC_ROLE_ID, 0)],
             '3': [(COMMUNITY_ROLE_ID, 0)], '4': [(COMMUNITY_ROLE_ID, 0)],
-            '5': [(TRIAL_ROLE_ID, 0)], '6':  [(TRIAL_ROLE_ID, 0)],
+            '5': [(TRIAL_ROLE_ID, 0)], '6': [(TRIAL_ROLE_ID, 0)],
             admin_user: [(ADMIN_ROLE_ID, 0)], '8': [('OTHER', 0)]}
 
         config = {
@@ -160,8 +153,7 @@ class TestClassifyResources(unittest.TestCase):
         }
         mock.configure_mock(**config)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def test_constructor_process_users(self, mock):
         """Test that the process_users method that is invoked from the
         constructor, fills correctly all the data"""
@@ -203,8 +195,7 @@ class TestClassifyResources(unittest.TestCase):
         self.assertEquals(classify.broken_users_projects, {'cpi_10'})
         self.assertTrue(True)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def test_print_users_summary(self, mock):
         """This method only prints the results already calculated in
         process users, therefore this method only checks that execution ends
@@ -215,8 +206,7 @@ class TestClassifyResources(unittest.TestCase):
         classify = ClassifyResources('/fakedir', ['region0', 'region1'])
         classify.print_users_summary()
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def test_classify_filter_projects(self, mock):
         """Check the filter_projects methods. The tenant-id that has filters
         and don't include the region, must be discarded. Project without
@@ -257,8 +247,7 @@ class TestClassifyResources(unittest.TestCase):
         }
         mock.configure_mock(**config)
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def test_classify_resource_raw(self, mock):
         """test classify resource with a known set inserted in the mock"""
         self.init_users(mock)
@@ -291,8 +280,7 @@ class TestClassifyResources(unittest.TestCase):
         self.assertEquals(len(tuple[3]),
                           self.count_resources_by_tenant['fake'])
 
-    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap',
-           auto_spec=True)
+    @patch('fiwareskuld.scripts.classify_resources_by_owners.OpenStackMap', auto_spec=True)
     def test_classify_resource(self, mock):
         """check classify resource, that classify_resource_raw is invoked
         with the right parameters; this is tested comparing the result with
