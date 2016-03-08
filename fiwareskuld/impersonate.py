@@ -134,7 +134,7 @@ class TrustFactory:
     def delete_trust_admin(self, trust_id):
         """Delete and invalidate a TRUST_ID
 
-        WARNING: This method currently does not work.  It requires changes in
+        WARNING: This method currently does not work. It requires changes in
         the keystone server. Use delete_trust with the trustee identity
         instead.
         :param trust_id:
