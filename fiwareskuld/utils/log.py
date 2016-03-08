@@ -32,7 +32,7 @@ __author__ = 'fla'
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-#LOGFILE = settings.LOGGING_PATH + '/Skuld.log'
+# LOGFILE = settings.LOGGING_PATH + '/Skuld.log'
 LOGFILE = 'fiware-skuld.log'
 
 if not os.path.exists(settings.LOGGING_PATH):

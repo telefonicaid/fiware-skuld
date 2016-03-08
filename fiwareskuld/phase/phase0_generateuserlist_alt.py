@@ -25,10 +25,9 @@
 from datetime import datetime
 import os.path
 
-from utils import osclients
+from fiwareskuld.utils import osclients
 from conf import settings
-import utils.log
-import utils.rotated_files
+from fiwareskuld import utils
 
 __author__ = 'chema'
 
@@ -65,8 +64,7 @@ class ExpiredUsers:
         :return: a list of trial users
         """
         user_ids = self.get_trial_user_ids()
-        return list(user for user in self.keystoneclient.users.list()
-                     if user.id in user_ids)
+        return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
 
     def get_yellow_red_users(self):
         """Get a pair of lists

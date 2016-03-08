@@ -23,10 +23,10 @@
 # contact with opensource@tid.es
 #
 import logging
-from skuld.openstackmap import OpenStackMap
+from fiwareskuld.openstackmap import OpenStackMap
 from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
     ADMIN_ROLE_ID
-import utils.log
+from fiwareskuld.utils import log
 import sys
 import argparse
 
@@ -374,7 +374,7 @@ class hidden_set(set):
         return self.baselist
 
 if __name__ == '__main__':
-    logger = utils.log.init_logs('classify_resources_by_owner')
+    logger = log.init_logs('classify_resources_by_owner')
     # Parse cmdline
     description = 'A tool to classify users and the resources on any region'
     parser = argparse.ArgumentParser(description=description)

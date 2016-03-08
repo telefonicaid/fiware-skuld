@@ -22,22 +22,27 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+from fiwareskuld.utils import log
+from fiwareskuld.change_password import PasswordChanger
+
 __author__ = 'chema'
 
-import logging
+logger = log.init_logs('phase1')
 
-from skuld.queries import Queries
-from utils import osclients
+try:
+    users_to_delete = open('users_to_delete.txt')
 
-"""This scripts delete images with the metadata 'orphan_image' when there are
-no more VMs using it. It may be invoked by a cron script.
+    users_credentials = open('users_credentials.txt', 'w')
 
-An 'orphan image' is an image that was preserved when the other resources of
-the user was deleted, because it was in use by VMs of other tenants."""
-q = Queries()
-images = q.get_orphan_images_without_use()
-if images:
-    glance = osclients.OpenStackClients().get_glanceclient()
-    for image in images:
-        logging.info('Deleting image ' + image)
-        glance.images.delete(image)
+    user_manager = PasswordChanger()
+    user_ids = list()
+    for user in users_to_delete.readlines():
+        user_ids.append(user.strip())
+    cred_list = user_manager.get_list_users_with_cred(user_ids)
+
+    for cred in cred_list:
+        users_credentials.write(','.join(cred) + '\n')
+
+    users_credentials.close()
+except Exception:
+    logger.error('The users_to_delete.txt file must exists')

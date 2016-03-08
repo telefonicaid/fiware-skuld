@@ -22,14 +22,13 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
 
 import time
 import sys
 import os
 import os.path
 
-from utils.osclients import osclients
+from fiwareskuld.utils.osclients import osclients
 import settings
 
 
@@ -120,7 +119,7 @@ for net in neutron.list_networks()['networks']:
             network[n] = net['id']
 
 for n in settings.network_names:
-    if not n in network:
+    if n not in network:
         if n == 'management':
             sys.stderr.write('Fatal error: network ' + settings.network_names[n] +
                              'not found.\n')
@@ -130,8 +129,8 @@ for n in settings.network_names:
             {'network': {'name': settings.network_names[n], 'admin_state_up': True}})['network']['id']
         # create subnetwork. It is not possible to assign a network
         # to a VM without a subnetwork.
-        neutron.create_subnet({'subnet': {'network_id': network[n],
-            'ip_version': 4, 'cidr': settings.subnet[n], 'gateway_ip': None}})
+        neutron.create_subnet({'subnet': {'network_id': network[n], 'ip_version': 4, 'cidr': settings.subnet[n],
+                                          'gateway_ip': None}})
 
 # Get a floating IP
 floating_ip = None

@@ -26,7 +26,7 @@ __author__ = 'chema'
 
 """Neutron API doesn't return the resources of the tenant, but also the
 resources the tenant has access. For a no-admin user, this includes the shared
-reources of other tenants"""
+resources of other tenants"""
 
 
 class NeutronResources(object):

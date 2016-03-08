@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-# -*- encoding: utf-8 -*-
+# -- encoding: utf-8 --
 #
-# Copyright 2014 Telefónica Investigación y Desarrollo, S.A.U
+# Copyright 2015 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of FI-WARE project.
+# This file is part of FI-Core project.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 #
 # You may obtain a copy of the License at:
 #
-#        http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,12 +23,16 @@
 # contact with opensource@tid.es
 #
 
-import sys
+import setuptools
 
-from utils.osclients import osclients
-from skuld import queries
+# In python < 2.7.4, a lazy loading of package `pbr` will break
+# setuptools if some other modules registered functions in `atexit`.
+# solution from: http://bugs.python.org/issue15881#msg170215
+try:
+    import multiprocessing  # noqa
+except ImportError:
+    pass
 
-q = queries.Queries()
-user = osclients.get_keystoneclientv3().users.find(name=sys.argv[1])
-print(user.to_dict())
-print(q.get_type_fiware_user(user.id))
+setuptools.setup(
+    setup_requires=['pbr>=1.8'],
+    pbr=True)

@@ -21,15 +21,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'fla'
 
 from unittest import TestCase
 from datetime import datetime, timedelta
 import re
-
 import requests_mock
-
-from skuld.expired_users import ExpiredUsers
+from fiwareskuld.expired_users import ExpiredUsers
 
 
 @requests_mock.Mocker()
@@ -67,6 +64,7 @@ class TestExpiredUsers(TestCase):
         try:
             expiredUsers.get_admin_token()
         except Exception as e:
+
             assert e.message == 'The request you have made requires authentication.'
 
     def testadmintokenWithoutCredentials(self, m):
@@ -83,24 +81,18 @@ class TestExpiredUsers(TestCase):
 
     def testlistTrialUsers(self, m):
         """testadmintoken check that we have an admin token"""
-        response = {"role_assignments": [
-                     {
-                      "user": {"id": "0f4de1ea94d342e696f3f61320c15253"},
-                      "links": {"assignment": "http://aurl.com/abc"}
-                     },
-                     {
-                      "user": {"id": "24396976a1b84eafa5347c3f9818a66a"},
-                      "links": {"assignment": "http://a.com"}
-                     },
-                     {
-                      "user": {"id": "24cebaa9b665426cbeab579f1a3ac733"},
-                      "links": {"assignment": "http://b.com"}
-                     },
-                     {
-                      "user": {"id": "zippitelli"},
-                      "links": {"assignment": "http://c.com"}
-                     }],
-                     "links": {"self": "http://d.com"}
+        response = {
+            "role_assignments": [
+                {"user": {"id": "0f4de1ea94d342e696f3f61320c15253"}, "links": {"assignment": "http://aurl.com/abc"}
+                 },
+                {"user": {"id": "24396976a1b84eafa5347c3f9818a66a"}, "links": {"assignment": "http://a.com"}
+                 },
+                {"user": {"id": "24cebaa9b665426cbeab579f1a3ac733"}, "links": {"assignment": "http://b.com"}
+                 },
+                {"user": {"id": "zippitelli"}, "links": {"assignment": "http://c.com"}
+                 }
+            ],
+            "links": {"self": "http://d.com"}
         }
 
         m.get(requests_mock.ANY, json=response)
@@ -172,45 +164,45 @@ class TestExpiredUsers(TestCase):
 
         # Create the dictionary with the possible values.
         result1 = {
-                   "user": {
-                       "username": "Rodo",
-                       "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
-                       "name": "rododendrotiralapiedra@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/0f4de1ea94d342e696f3f61320c15253"},
-                       "enabled": True,
-                       "trial_started_at": str(datetime_value1),
-                       "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
-                       "id": "0f4de1ea94d342e696f3f61320c15253"
-                   }
+            "user": {
+                "username": "Rodo",
+                "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
+                "name": "rododendrotiralapiedra@hotmail.com",
+                "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/0f4de1ea94d342e696f3f61320c15253"},
+                "enabled": True,
+                "trial_started_at": str(datetime_value1),
+                "domain_id": "default",
+                "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                "id": "0f4de1ea94d342e696f3f61320c15253"
+            }
         }
 
         result2 = {
-                   "user": {
-                       "username": "Rodo",
-                       "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
-                       "name": "rododendrotiralapiedra@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/24396976a1b84eafa5347c3f9818a66a"},
-                       "enabled": True,
-                       "trial_started_at": str(datetime_value2),
-                       "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
-                       "id": "24396976a1b84eafa5347c3f9818a66a"
-                   }
+            "user": {
+                "username": "Rodo",
+                "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
+                "name": "rododendrotiralapiedra@hotmail.com",
+                "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/24396976a1b84eafa5347c3f9818a66a"},
+                "enabled": True,
+                "trial_started_at": str(datetime_value2),
+                "domain_id": "default",
+                "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                "id": "24396976a1b84eafa5347c3f9818a66a"
+            }
         }
 
         result3 = {
-                   "user": {
-                       "username": "Frodo",
-                       "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
-                       "name": "frodobolsom@hotmail.com",
-                       "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/e3294fcf05984b3f934e189fa92c6990"},
-                       "enabled": True,
-                       "trial_started_at": str(datetime_value2),
-                       "domain_id": "default",
-                       "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
-                       "id": "e3294fcf05984b3f934e189fa92c6990"
-                   }
+            "user": {
+                "username": "Frodo",
+                "cloud_project_id": "8f1d82b3a20f403a823954423fd8f451",
+                "name": "frodobolsom@hotmail.com",
+                "links": {"self": "http://cloud.lab.fiware.org:4730/v3/users/e3294fcf05984b3f934e189fa92c6990"},
+                "enabled": True,
+                "trial_started_at": str(datetime_value2),
+                "domain_id": "default",
+                "default_project_id": "e29eff7c153b448caf684aa9031d01c6",
+                "id": "e3294fcf05984b3f934e189fa92c6990"
+            }
         }
 
         result = {

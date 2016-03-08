@@ -52,9 +52,8 @@ class OpenStackMap(object):
 
     load_filters = True
 
-    resources_region = ['vms', 'images', 'routers', 'networks', 'subnets',
-                 'ports', 'floatingips', 'security_groups',
-                 'volumes', 'volume_backups', 'volume_snapshots']
+    resources_region = ['vms', 'images', 'routers', 'networks', 'subnets', 'ports', 'floatingips',
+                        'security_groups', 'volumes', 'volume_backups', 'volume_snapshots']
 
     def __init__(
             self, persistence_dir='~/openstackmap', region=None, auth_url=None,

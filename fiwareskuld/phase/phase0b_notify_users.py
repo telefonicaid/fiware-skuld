@@ -32,9 +32,9 @@ import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 
-from utils.osclients import osclients
+from fiwareskuld.utils.osclients import osclients
 from conf.settings import HORIZON_ENDPOINT
-import utils.log
+from fiwareskuld import utils
 
 __author__ = 'chema'
 

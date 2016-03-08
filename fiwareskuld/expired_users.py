@@ -21,13 +21,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'fla'
 
 import json
 import requests
 from datetime import datetime
 from conf import settings
-from utils.log import logger
+from fiwareskuld.utils.log import logger
 
 
 class ExpiredUsers:

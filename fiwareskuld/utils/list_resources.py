@@ -24,7 +24,7 @@
 #
 from os import environ as env
 
-from skuld.user_resources import UserResources
+from fiwareskuld.user_resources import UserResources
 
 __author__ = 'chema'
 

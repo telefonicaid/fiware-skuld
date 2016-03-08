@@ -25,8 +25,8 @@
 import sys
 import logging
 
-from skuld.openstackmap import OpenStackMap
-import utils.log
+from fiwareskuld.openstackmap import OpenStackMap
+from fiwareskuld.utils import log
 
 __author__ = 'chema'
 
@@ -114,8 +114,7 @@ class SpecialPortRemover(object):
                     router=port['device_id'], body=body)
                 deleted += 1
             except Exception, e:
-                self.logger.error('Error deleting port' + port.id + 'Reason: '
-                                  + str(e))
+                self.logger.error('Error deleting port' + port.id + 'Reason: ' + str(e))
         if len(ports):
             print('Deleted {0}/{1} ports'.format(deleted, len(ports)))
         else:

@@ -644,7 +644,7 @@ class OpenStackClients(object):
                         url = endpoint['url']
                         break
             else:
-                #v2
+                # v2
                 if not region:
                     if url:
                         raise Exception('A region must be specified')
@@ -677,8 +677,7 @@ class OpenStackClients(object):
         """This method apply the changes registered in override_endpoint.
         See the documentation of that method.
         """
-        endpoints = list(endp for endp in self.get_endpoints(service_type)
-                 if endp['interface'] == interface)
+        endpoints = list(endp for endp in self.get_endpoints(service_type) if endp['interface'] == interface)
 
         if len(endpoints) == 1:
             endpoints[0]['url'] = url
