@@ -26,7 +26,7 @@
 import requests
 from behave import when, then, given
 from fiwareskuld.expired_users import ExpiredUsers
-from tests.acceptance.commons.configuration import KEYSTONE_URL, TOKEN_LENGTH
+from commons.configuration import KEYSTONE_URL, TOKEN_LENGTH
 
 __author__ = 'fla'
 
