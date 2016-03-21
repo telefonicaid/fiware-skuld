@@ -31,7 +31,7 @@ from fiwareskuld.change_password import PasswordChanger
 
 from keystoneclient.exceptions import NotFound
 
-from utils.osclients import OpenStackClients
+from fiwareskuld.utils.osclients import OpenStackClients
 
 
 # default JSON template. Variables are expanded with environment
