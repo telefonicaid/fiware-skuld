@@ -29,7 +29,7 @@ import os.path
 from subprocess import check_call
 import time
 
-from skuld.change_password import PasswordChanger
+from fiwareskuld.change_password import PasswordChanger
 from utils.osclients import OpenStackClients
 
 file_path = '/home/ubuntu/idm/conf/settings.py'

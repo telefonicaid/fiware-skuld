@@ -27,7 +27,7 @@ import json
 import re
 import os
 import sys
-from skuld.change_password import PasswordChanger
+from fiwareskuld.change_password import PasswordChanger
 
 from keystoneclient.exceptions import NotFound
 
