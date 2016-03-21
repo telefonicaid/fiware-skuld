@@ -143,7 +143,7 @@ class OpenStackClients(object):
             self.__user_domain_name = env['OS_USER_DOMAIN_NAME']
         else:
             self.__user_domain_name = None
- 
+
        # dynamic imports
 
         self._modules_imported = dict()
@@ -408,8 +408,8 @@ class OpenStackClients(object):
             other_params['project_name'] = self.__tenant_name
         elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
-        
-        if self.__username:
+
+       if self.__username:
             if self.__project_domain_id:
                 other_params['project_domain_id'] = self.__project_domain_id
             elif self.__project_domain_name:
