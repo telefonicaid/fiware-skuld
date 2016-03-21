@@ -58,5 +58,5 @@ nova boot testvm --poll --flavor micro2 --image cirros --nic net-id=$NETID --key
 . ~/skuldenv/bin/activate
 TEST_VM="o.nova.servers.find(name='testvm')"
 FLOATING_IP="o.nova.floating_ips.create('ext-net').ip"
-~/fiware-skuld/utils/osclients.py "${TEST_VM}.add_floating_ip(${FLOATING_IP})"
+~/fiware-skuld/fiwareskuld/utils/osclients.py "${TEST_VM}.add_floating_ip(${FLOATING_IP})"
 cp config_vars ~
