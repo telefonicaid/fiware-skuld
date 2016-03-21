@@ -144,7 +144,7 @@ class OpenStackClients(object):
         else:
             self.__user_domain_name = None
 
-       # dynamic imports
+        # dynamic imports
 
         self._modules_imported = dict()
         self._autoloadmodules = False
@@ -409,7 +409,7 @@ class OpenStackClients(object):
         elif self.__tenant_id:
             other_params['project_id'] = self.__tenant_id
 
-       if self.__username:
+        if self.__username:
             if self.__project_domain_id:
                 other_params['project_domain_id'] = self.__project_domain_id
             elif self.__project_domain_name:
@@ -423,7 +423,6 @@ class OpenStackClients(object):
                 other_params['user_domain_name'] = self.__user_domain_name
             else:
                 other_params['user_domain_id'] = 'default'
-            
             auth = v3.Password(
                 auth_url=auth_url, username=self.__username,
                 password=self.__password, **other_params)
@@ -433,7 +432,6 @@ class OpenStackClients(object):
                 token=self._token)
 
         self._session_v3 = session.Session(auth=auth)
-        
         # apply override endpoints
         if self.use_v3:
             for override in self.endpoints_to_override:
