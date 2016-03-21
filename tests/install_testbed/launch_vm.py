@@ -164,7 +164,7 @@ if not sec_groups:
     nova.security_group_rules.create(
         g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
     nova.security_group_rules.create(
-        g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range) 
+        g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range)
     nova.security_group_rules.create(
         g.id, ip_protocol='tcp', from_port=8774, to_port=8776, cidr=settings.ingress_ssh_ip_range)
     nova.security_group_rules.create(
