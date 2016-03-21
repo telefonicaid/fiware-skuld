@@ -143,8 +143,8 @@ class OpenStackClients(object):
             self.__user_domain_name = env['OS_USER_DOMAIN_NAME']
         else:
             self.__user_domain_name = None
-        
-        # dynamic imports
+ 
+       # dynamic imports
 
         self._modules_imported = dict()
         self._autoloadmodules = False
