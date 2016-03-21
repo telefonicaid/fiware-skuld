@@ -41,7 +41,7 @@ export OS_USERNAME=idm
 export OS_TENANT_NAME=idm
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
-export OS_REGION_NAME=Spain2
+export OS_REGION_NAME=RegionOne
 export OS_IDENTITY_API_VERSION=3
 """
 
