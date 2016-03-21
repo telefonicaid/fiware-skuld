@@ -29,8 +29,8 @@ import os.path
 from subprocess import check_call
 import time
 
-from skuld.change_password import PasswordChanger
-from utils.osclients import OpenStackClients
+from fiwareskuld.change_password import PasswordChanger
+from fiwareskuld.utils.osclients import OpenStackClients
 
 file_path = '/home/ubuntu/idm/conf/settings.py'
 etckeystone_path = '/home/ubuntu/idm/keystone/etc/keystone.conf'
