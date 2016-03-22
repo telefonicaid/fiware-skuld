@@ -24,6 +24,7 @@
 #
 
 from subprocess import Popen, PIPE
+import json
 import os
 import os.path
 import sys
@@ -66,8 +67,16 @@ class GenerateTemplateRegion(object):
 
         template = open(os.path.join(os.path.split(sys.argv[0])[0], 'default_region_template')).read()
         p = Popen(["curl", "http://169.254.169.254/latest/meta-data/public-ipv4"], stdout=PIPE)
-        out, err = p.communicate()
-        default_values["PUBLIC_CONTROLLER"] = out
+        publicip, err = p.communicate()
+        default_values["PUBLIC_CONTROLLER"] = publicip
+        p = Popen(["curl", "http://169.254.169.254/latest/meta-data/Region"], stdout=PIPE)
+        publicip, err = p.communicate()
+        default_values["PUBLIC_CONTROLLER"] = publicip
+        p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], stdout=PIPE)
+        metadatajson, err = p2.communicate()
+        meta = json.loads(metadatajson)["meta"]
+        default_values["REGION"] = meta["Region"]
+        default_values["KEYSTONE_HOST"] = meta["keystone_ip"]
         values = default_values.copy()
         # override default values with env
         if env:
