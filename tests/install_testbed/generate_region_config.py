@@ -65,7 +65,7 @@ class GenerateTemplateRegion(object):
         """
 
         template = open(os.path.join(os.path.split(sys.argv[0])[0], 'default_region_template')).read()
-        p = Popen(["curl", "http://169.254.169.254/latest/meta-data/public-ipv4"], stdout=subprocess.PIPE)
+        p = Popen(["curl", "http://169.254.169.254/latest/meta-data/public-ipv4"], stdout=PIPE)
         out, err = p.communicate()
         default_values["PUBLIC_CONTROLLER"] = out
         values = default_values.copy()
