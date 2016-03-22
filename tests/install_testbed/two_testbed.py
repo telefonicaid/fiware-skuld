@@ -121,7 +121,7 @@ keystone_ip = floating_ip[0]
 region = 'RegionOne'
 init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
 server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
-                   settings.image_name, nics, init_script, keystone_ip, region)
+                             settings.image_name, nics, init_script, keystone_ip, region)
 
 # assign the floating ip
 if floating_ip:
@@ -133,13 +133,13 @@ if settings.multinetwork:
     nics = [{'net-id': network['management']},
             {'net-id': network['external']}]
     launch_vm.launch_vm(settings.vm_name_test, settings.flavor_name_test, sg_name,
-              settings.image_name_test, nics, init_script, keystone_ip, region)
+                        settings.image_name_test, nics, init_script, keystone_ip, region)
 
 print 'RegionTwo'
 region = 'RegionTwo'
 init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
 server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
-                   settings.image_name, nics, init_script, keystone_ip, region)
+                             settings.image_name, nics, init_script, keystone_ip, region)
 
 # assign the floating ip
 if floating_ip:
@@ -151,4 +151,4 @@ if settings.multinetwork:
     nics = [{'net-id': network['management']},
             {'net-id': network['external']}]
     launch_vm.launch_vm(settings.vm_name_test, settings.flavor_name_test, sg_name,
-              settings.image_name_test, nics, init1_script, keystone_ip, region)
+                        settings.image_name_test, nics, init1_script, keystone_ip, region)

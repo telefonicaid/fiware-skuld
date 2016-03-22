@@ -109,6 +109,7 @@ def create_port_multi_ip(security_group_id=None):
         p['port']['security_groups'] = [security_group_id]
     return neutron.create_port(p)
 
+
 # Get networks
 def deploy_testbed():
     network = dict()
