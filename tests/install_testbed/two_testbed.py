@@ -32,6 +32,7 @@ from fiwareskuld.utils.osclients import osclients
 import settings
 import launch_vm
 
+
 # Get networks
 def deploy_testbeds():
     network = dict()
