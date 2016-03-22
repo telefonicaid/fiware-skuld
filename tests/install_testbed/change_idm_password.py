@@ -50,7 +50,6 @@ osclients = OpenStackClients('http://127.0.0.1:5000/v3/')
 osclients.set_credential('idm', 'idm', 'idm')
 password_changer = PasswordChanger(osclients)
 idm = password_changer.get_user_byname('idm')
-# for tests deployment
 new_password = password_changer.reset_password(idm)
 
 # Generate the credential file
