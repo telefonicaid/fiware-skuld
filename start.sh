@@ -1,6 +1,6 @@
 tests/install_testbed/launch_vm.py >cmd.log 2>&1
 cat cmd.log
-export ip=`grep 130 cmd.log | awk '{print $4}'`
+export ip=`grep "Assigning floating IP" cmd.log | awk '{print $4}'`
 export uuid=`grep UUID cmd.log | awk '{print $5}'`
 echo $ip
 echo $uuid
@@ -10,7 +10,7 @@ if [ -z "${ip}" ]; then
     exit;
 fi
 echo "waiting"
-while ! nc -z $ip 5000; do sleep 8; done
+while ! nc -z $ip 9696; do sleep 8; done
 echo "console log"
 sleep 20
 nova console-log $uuid > logvm
