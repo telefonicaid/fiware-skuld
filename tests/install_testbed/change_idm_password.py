@@ -28,6 +28,8 @@
 import os.path
 from subprocess import check_call
 import time
+import json
+from subprocess import Popen, PIPE
 
 from fiwareskuld.change_password import PasswordChanger
 from fiwareskuld.utils.osclients import OpenStackClients
@@ -35,22 +37,26 @@ from fiwareskuld.utils.osclients import OpenStackClients
 file_path = '/home/ubuntu/idm/conf/settings.py'
 etckeystone_path = '/home/ubuntu/idm/keystone/etc/keystone.conf'
 
-credential = """export OS_AUTH_URL=http://127.0.0.1:5000/v3/
-export OS_AUTH_URL_V2=http://127.0.0.1:5000/v2.0/
+# reset the password
+p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], stdout=PIPE)
+metadatajson, err = p2.communicate()
+meta = json.loads(metadatajson)["meta"]
+keystone_ip = meta["keystone_ip"]
+osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
+osclients.set_credential('idm', 'idm', 'idm')
+password_changer = PasswordChanger(osclients)
+idm = password_changer.get_user_byname('idm')
+new_password = password_changer.reset_password(idm)
+
+credential = """export OS_AUTH_URL=http://{0}:5000/v3/
+export OS_AUTH_URL_V2=http://{0}:5000/v2.0/
 export OS_USERNAME=idm
 export OS_TENANT_NAME=idm
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_REGION_NAME=RegionOne
 export OS_IDENTITY_API_VERSION=3
-"""
-
-# reset the password
-osclients = OpenStackClients('http://127.0.0.1:5000/v3/')
-osclients.set_credential('idm', 'idm', 'idm')
-password_changer = PasswordChanger(osclients)
-idm = password_changer.get_user_byname('idm')
-new_password = password_changer.reset_password(idm)
+""".format(keystone_ip, keystone_ip)
 
 # Generate the credential file
 with open(os.path.expanduser('~/credential'), 'w') as f:
