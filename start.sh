@@ -27,7 +27,15 @@ export OS_IDENTITY_API_VERSION=3
 export OS_AUTH_URL=http://$ip:5000/v3" >> credentials
 
 cat credentials
-. credentials
+export OS_USERNAME=$username
+export OS_PASSWORD=$password
+export OS_TENANT_NAME=$username
+export OS_REGION_NAME=$region
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=Default
+export OS_IDENTITY_API_VERSION=3
+export OS_AUTH_URL=http://$ip:5000/v3
+
 nova list
 neutron net-list
 keystone user-list

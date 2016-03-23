@@ -73,7 +73,7 @@ class GenerateTemplateRegion(object):
         metadatajson, err = p2.communicate()
         meta = json.loads(metadatajson)["meta"]
         default_values["REGION"] = meta["Region"]
-        # default_values["KEYSTONE_HOST"] = meta["keystone_ip"]
+        default_values["KEYSTONE_HOST"] = meta["keystone_ip"]
         values = default_values.copy()
         # override default values with env
         if env:
