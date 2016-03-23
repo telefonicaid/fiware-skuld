@@ -5,7 +5,7 @@ export uuid=`grep UUID cmd.log | awk '{print $5}'`
 echo $ip
 echo $uuid
 if [ -z "${ip}" ]; then
-    echo "VAR is unset or set to the empty string"
+    echo "Error to deploy the VM or obtain the IP"
     nova delete $uuid
     exit;
 fi
