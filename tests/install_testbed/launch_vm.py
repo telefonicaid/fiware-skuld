@@ -69,7 +69,10 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
     while server.status != 'ACTIVE' and tries < 30:
         print('Waiting for ACTIVE status. (Try ' + str(tries) + '/30)')
         time.sleep(5)
-        server = nova_c.servers.get(server.id)
+        try:
+            server = nova_c.servers.get(server.id)
+        except:
+            pass
         tries += 1
 
     if server.status != 'ACTIVE':
