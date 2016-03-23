@@ -69,12 +69,11 @@ class GenerateTemplateRegion(object):
         p = Popen(["curl", "http://169.254.169.254/latest/meta-data/public-ipv4"], stdout=PIPE)
         publicip, err = p.communicate()
         default_values["PUBLIC_CONTROLLER"] = publicip
-        default_values["CONTROLLER"] = publicip
         p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], stdout=PIPE)
         metadatajson, err = p2.communicate()
         meta = json.loads(metadatajson)["meta"]
-        default_values["REGION"] = meta["Region"]
-        default_values["KEYSTONE_HOST"] = meta["keystone_ip"]
+        #default_values["REGION"] = meta["Region"]
+        #default_values["KEYSTONE_HOST"] = meta["keystone_ip"]
         values = default_values.copy()
         # override default values with env
         if env:
