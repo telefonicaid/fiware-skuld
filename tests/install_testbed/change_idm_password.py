@@ -47,11 +47,13 @@ osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
 osclients.set_credential('idm', 'idm', 'idm')
 
-## create idm region user
+# create idm region user
 
 password_changer = PasswordChanger(osclients)
 idm = password_changer.get_user_byname("idm")
-new_password = password_changer
+idm = password_changer.get_user_byname('idm')
+# new_password = password_changer.reset_password(idm)
+new_password = 'idm'
 
 
 credential = """export OS_AUTH_URL=http://{0}:5000/v3/
