@@ -43,6 +43,10 @@ metadatajson, err = p2.communicate()
 meta = json.loads(metadatajson)["meta"]
 keystone_ip = meta["keystone_ip"]
 region = meta["Region"]
+region2 = meta["region_keystone"]
+if region2:
+    check_call(["export", "REGION_NAME", region2])
+
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
 osclients.set_credential('idm', 'idm', 'idm')
@@ -82,6 +86,7 @@ with open(file_path, 'w') as f:
     f.write(content)
 
 # Change the admin token in the keystone config file
+check_call(["export", "REGION_NAME", region])
 content = open(etckeystone_path).read()
 content = content.replace("admin_token=ADMIN", "admin_token=" + new_password)
 check_call(['sudo', 'chmod', '777', etckeystone_path])
