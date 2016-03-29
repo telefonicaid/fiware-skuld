@@ -32,7 +32,7 @@ from fiwareskuld.utils.osclients import osclients
 import settings
 
 
-def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keystone_ip=None, region=None):
+def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keystone_ip=None, region=None, region_keystone=None):
     """ Launch a VM and wait until it is ready.
 
     :param vm_n: virtual machine name
@@ -56,7 +56,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
         data = open(user_data).read()
         extra_params['userdata'] = data
 
-    extra_params['meta'] = {"Region": region, "keystone_ip": keystone_ip}
+    extra_params['meta'] = {"Region": region, "keystone_ip": keystone_ip, "region_keystone": region_keystone}
 
     server = nova_c.servers.create(
         vm_n, flavor=flavor.id, image=image_id, key_name=settings.key_name,
@@ -199,9 +199,11 @@ def deploy_testbed():
 
     keystone_ip = floating_ip
     region = 'RegionOne'
+    region_keystone = 'RegionOne'
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
     server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
-                       settings.image_name, nics, init_script, keystone_ip, region)
+                       settings.image_name, nics, init_script, keystone_ip, region,
+                       region_keystone)
 
     # assign the floating ip
     if floating_ip:
@@ -213,7 +215,8 @@ def deploy_testbed():
         nics = [{'net-id': network['management']},
                 {'net-id': network['external']}]
         launch_vm(settings.vm_name_test, settings.flavor_name_test, sg_name,
-                  settings.image_name_test, nics, init_script, keystone_ip, region)
+                  settings.image_name_test, nics, init_script, keystone_ip, region,
+                  region_keystone)
 
 if __name__ == "__main__":
     deploy_testbed()
