@@ -110,7 +110,7 @@ default_region_json = """
             "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"
         },
         {
-            "name": "keystone2",
+            "name": "keystone",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
             "admin": "http://$KEYSTONE_HOST:5000/v3/",
@@ -184,10 +184,22 @@ class RegisterRegion(object):
         return user
 
     def delete_spain2_regions(self):
-        service_id = self.keystone.services.find(type="identity")
-        self.keystone.endpoints.delete(service=service_id, interface='public', region='Spain2')
-        self.keystone.endpoints.delete(service=service_id, interface='admin', region='Spain2')
-        self.keystone.endpoints.delete(service=service_id, interface='internal', region='Spain2')
+        service_id = self.keystone.services.find(type="keystone")
+        try:
+            end1 = self.keystone.endpoints.find(service=service_id, interface='public', region='Spain2')
+            self.keystone.endpoints.delete(end1)
+        except:
+            pass
+        try:
+            end2 = self.keystone.endpoints.find(service=service_id, interface='admin', region='Spain2')
+            self.keystone.endpoints.delete(end2)
+        except:
+            pass
+        try:
+            end3 = self.keystone.endpoints.find(service=service_id, interface='internal', region='Spain2')
+            self.keystone.endpoints.delete(end3)
+        except:
+            pass
 
     def endpoint_exists(self, service_id, interface, url, region):
         """check that enpoint exists. Otherwise, create it. Also check that the
