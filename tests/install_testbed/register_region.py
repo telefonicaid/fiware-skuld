@@ -183,6 +183,12 @@ class RegisterRegion(object):
             user = self.keystone.users.create(name=username, password=password)
         return user
 
+    def delete_spain2_regions(self):
+        service_id = self.keystone.services.find(type="identity")
+        self.keystone.endpoints.delete(service=service_id, interface='public', region='Spain2')
+        self.keystone.endpoints.delete(service=service_id, interface='admin', region='Spain2')
+        self.keystone.endpoints.delete(service=service_id, interface='internal', region='Spain2')
+
     def endpoint_exists(self, service_id, interface, url, region):
         """check that enpoint exists. Otherwise, create it. Also check that the
         URLs are the same; if they are different, update.
@@ -295,6 +301,7 @@ if __name__ == '__main__':
     register = RegisterRegion()
     if len(sys.argv) == 2:
         json_data = open(sys.argv[1]).read()
+        register.delete_spain2_regions()
         register.register_regions(json_data)
     else:
         register.register_regions()
