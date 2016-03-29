@@ -42,21 +42,24 @@ p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], s
 metadatajson, err = p2.communicate()
 meta = json.loads(metadatajson)["meta"]
 keystone_ip = meta["keystone_ip"]
+region = meta["Region"]
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
-osclients.set_credential('idm', 'idm', 'idm')
+idmuser = "idm-{0}".format(region)
+osclients.set_credential(idmuser, 'idm', 'idm')
 password_changer = PasswordChanger(osclients)
-idm = password_changer.get_user_byname('idm')
+idm = password_changer.get_user_byname(idmuser)
 new_password = password_changer.reset_password(idm)
+
 
 credential = """export OS_AUTH_URL=http://{0}:5000/v3/
 export OS_AUTH_URL_V2=http://{0}:5000/v2.0/
-export OS_USERNAME=idm
+export OS_USERNAME={2}
 export OS_TENANT_NAME=idm
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
-export OS_REGION_NAME=RegionOne
+export OS_REGION_NAME={3}
 export OS_IDENTITY_API_VERSION=3
-""".format(keystone_ip, keystone_ip)
+""".format(keystone_ip, keystone_ip, idmuser, region)
 
 # Generate the credential file
 with open(os.path.expanduser('~/credential'), 'w') as f:

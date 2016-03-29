@@ -179,6 +179,8 @@ def deploy_testbed():
             g.id, ip_protocol='tcp', from_port=8080, to_port=8080, cidr=settings.ingress_ssh_ip_range)
         nova.security_group_rules.create(
             g.id, ip_protocol='tcp', from_port=9292, to_port=9292, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=35357, to_port=35357, cidr=settings.ingress_ssh_ip_range)
         # This type of rule requires the neutron API
 
         neutron.create_security_group_rule(
