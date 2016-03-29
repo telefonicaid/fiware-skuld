@@ -110,7 +110,7 @@ default_region_json = """
             "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"
         },
         {
-            "name": "keystone",
+            "name": "keystone$REGION",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
             "admin": "http://$KEYSTONE_HOST:5000/v3/",
@@ -184,7 +184,7 @@ class RegisterRegion(object):
         return user
 
     def delete_spain2_regions(self):
-        service_id = self.keystone.services.find(type="keystone")
+        service_id = self.keystone.services.find(name="keystone")
         try:
             end1 = self.keystone.endpoints.find(service=service_id, interface='public', region='Spain2')
             self.keystone.endpoints.delete(end1)
@@ -311,9 +311,9 @@ class RegisterRegion(object):
 
 if __name__ == '__main__':
     register = RegisterRegion()
+    register.delete_spain2_regions()
     if len(sys.argv) == 2:
         json_data = open(sys.argv[1]).read()
-        register.delete_spain2_regions()
         register.register_regions(json_data)
     else:
         register.register_regions()
