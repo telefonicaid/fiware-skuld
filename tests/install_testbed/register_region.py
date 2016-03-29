@@ -108,6 +108,13 @@ default_region_json = """
             "public": "http://$PUBLIC_CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
             "admin": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s",
             "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"
+        },
+        {
+            "name": "keystone",
+            "type": "identity",
+            "public": "http://$KEYSTONE_HOST:35357/v3/",
+            "admin": "http://$KEYSTONE_HOST:5000/v3/",
+            "internal": "http://$KEYSTONE_HOST:35357/v3/"
         }
     ]
 }
