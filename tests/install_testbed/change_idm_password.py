@@ -30,6 +30,7 @@ from subprocess import check_call
 import time
 import json
 from subprocess import Popen, PIPE
+from os import environ as env
 
 from fiwareskuld.change_password import PasswordChanger
 from fiwareskuld.utils.osclients import OpenStackClients
@@ -45,7 +46,7 @@ keystone_ip = meta["keystone_ip"]
 region = meta["Region"]
 region2 = meta["region_keystone"]
 if region2:
-    check_call(["export", "REGION_NAME", region2])
+    os.environ['OS_REGION_NAME']=region2
 
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
@@ -86,7 +87,7 @@ with open(file_path, 'w') as f:
     f.write(content)
 
 # Change the admin token in the keystone config file
-check_call(["export", "REGION_NAME", region])
+os.environ['OS_REGION_NAME']=region
 content = open(etckeystone_path).read()
 content = content.replace("admin_token=ADMIN", "admin_token=" + new_password)
 check_call(['sudo', 'chmod', '777', etckeystone_path])
