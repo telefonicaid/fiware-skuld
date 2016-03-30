@@ -150,8 +150,13 @@ class RegisterRegion(object):
         """
         try:
             self.keystone.regions.find(id=region_id)
-        except:
+        except NotFound:
             self.keystone.regions.create(region_id)
+        except:
+            try:
+                self.keystone.regions.get(region_id)
+            except:
+                self.keystone.regions.create(region_id)
 
     def project_exists(self, tenant_name, domain_id='default'):
         """Ensure that the project exists: create if it does not.
@@ -211,10 +216,11 @@ class RegisterRegion(object):
         :param region: the region id.
         :return: the endpoint id.
         """
-        result = self.keystone.endpoints.list(service=service_id, interface=interface, region=region)
+        result = self.keystone.endpoints.list(service=service_id, interface=interface, region=region,
+                                              region_id=region)
         if not result:
             result = self.keystone.endpoints.create(service=service_id, interface=interface,
-                                                    url=url, region=region)
+                                                    url=url, region=region, region_id=region)
         else:
             result = result[0]
             if result.url != url:
