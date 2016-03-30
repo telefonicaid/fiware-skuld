@@ -38,7 +38,7 @@ file=/etc/nova/nova.conf
 ./openstack-config --set $file keystone_authtoken auth_uri $AUTH_URI
 ./openstack-config --set $file keystone_authtoken identity_uri $IDENTITY_URI
 ./openstack-config --set $file keystone_authtoken admin_tenant_name service
-./openstack-config --set $file keystone_authtoken admin_user nova
+./openstack-config --set $file keystone_authtoken admin_user nova$REGION
 ./openstack-config --set $file keystone_authtoken admin_password $NOVA_PASS
 ./openstack-config --set $file DEFAULT my_ip $MY_IP
 ./openstack-config --set $file DEFAULT verbose True
