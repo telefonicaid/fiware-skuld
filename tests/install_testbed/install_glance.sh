@@ -36,7 +36,7 @@ file=/etc/glance/glance-api.conf
 ./openstack-config --set $file keystone_authtoken auth_uri $AUTH_URI
 ./openstack-config --set $file keystone_authtoken identity_uri $IDENTITY_URI
 ./openstack-config --set $file keystone_authtoken admin_tenant_name service
-./openstack-config --set $file keystone_authtoken admin_user glance
+./openstack-config --set $file keystone_authtoken admin_user glance$REGION
 ./openstack-config --set $file keystone_authtoken admin_password $GLANCE_PASS
 ./openstack-config --set $file paste_deploy flavor keystone
 ./openstack-config --set $file glance_store default_store file
@@ -49,7 +49,7 @@ file=/etc/glance/glance-registry.conf
 ./openstack-config --set $file keystone_authtoken auth_uri $AUTH_URI
 ./openstack-config --set $file keystone_authtoken identity_uri $IDENTITY_URI
 ./openstack-config --set $file keystone_authtoken admin_tenant_name service
-./openstack-config --set $file keystone_authtoken admin_user glance
+./openstack-config --set $file keystone_authtoken admin_user glance$REGION
 ./openstack-config --set $file keystone_authtoken admin_password $GLANCE_PASS
 ./openstack-config --set $file paste_deploy flavor keystone
 ./openstack-config --set $file DEFAULT notification_driver noop

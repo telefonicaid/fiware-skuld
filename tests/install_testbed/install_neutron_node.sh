@@ -59,7 +59,7 @@ file=/etc/neutron/neutron.conf
 ./openstack-config --set $file keystone_authtoken auth_uri $AUTH_URI
 ./openstack-config --set $file keystone_authtoken identity_uri $IDENTITY_URI
 ./openstack-config --set $file keystone_authtoken admin_tenant_name service
-./openstack-config --set $file keystone_authtoken admin_user neutron
+./openstack-config --set $file keystone_authtoken admin_user neutron$REGION
 ./openstack-config --set $file keystone_authtoken admin_password $NEUTRON_PASS
 ./openstack-config --set $file DEFAULT core_plugin ml2
 ./openstack-config --set $file DEFAULT service_plugins router
@@ -101,7 +101,7 @@ file=/etc/neutron/metadata_agent.ini
 ./openstack-config --set $file DEFAULT auth_url $AUTH_URI
 ./openstack-config --set $file DEFAULT auth_region $REGION
 ./openstack-config --set $file DEFAULT admin_tenant_name service
-./openstack-config --set $file DEFAULT admin_user neutron
+./openstack-config --set $file DEFAULT admin_user neutron$REGION
 ./openstack-config --set $file DEFAULT admin_password $NEUTRON_PASS
 ./openstack-config --set $file DEFAULT nova_metadata_ip $CONTROLLER
 ./openstack-config --set $file DEFAULT metadata_proxy_shared_secret $METADATA_SECRET

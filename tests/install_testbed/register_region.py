@@ -41,22 +41,22 @@ default_region_json = """
     "update_passwords": false,
     "users": [
         {
-            "username": "glance",
+            "username": "glance$REGION",
             "password": "$GLANCE_PASS"
         },
         {
-            "username": "nova",
+            "username": "nova$REGION",
             "password": "$NOVA_PASS"
         },
         {
-            "username": "cinder",
+            "username": "cinder$REGION",
             "password": "$CINDER_PASS"
         },
         {
-            "username": "neutron",
+            "username": "neutron$REGION",
             "password": "$NEUTRON_PASS"
         },
-        {"username": "swift", "password": "$SWIFT_PASS"},
+        {"username": "swift$REGION", "password": "$SWIFT_PASS"},
         {"username": "admin-$REGION", "password": "$ADMIN_REGION_PASS"}
     ],
     "services": [
