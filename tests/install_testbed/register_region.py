@@ -215,7 +215,7 @@ class RegisterRegion(object):
                                               region_id=region)
         if not result:
             result = self.keystone.endpoints.create(service=service_id, interface=interface,
-                                                    url=url, region=region, region_id=region)
+                                                    url=url, region=region)
         else:
             result = result[0]
             if result.url != url:
