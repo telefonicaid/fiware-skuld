@@ -30,7 +30,6 @@ from subprocess import check_call
 import time
 import json
 from subprocess import Popen, PIPE
-from os import environ as env
 
 from fiwareskuld.change_password import PasswordChanger
 from fiwareskuld.utils.osclients import OpenStackClients
@@ -47,6 +46,8 @@ region = meta["Region"]
 region2 = meta["region_keystone"]
 if region2:
     os.environ['OS_REGION_NAME'] = region2
+
+time.sleep(10)
 
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
