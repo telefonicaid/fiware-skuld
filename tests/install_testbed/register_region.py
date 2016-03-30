@@ -152,11 +152,6 @@ class RegisterRegion(object):
             self.keystone.regions.find(id=region_id)
         except NotFound:
             self.keystone.regions.create(region_id)
-        except:
-            try:
-                self.keystone.regions.get(region_id)
-            except:
-                self.keystone.regions.create(region_id)
 
     def project_exists(self, tenant_name, domain_id='default'):
         """Ensure that the project exists: create if it does not.
