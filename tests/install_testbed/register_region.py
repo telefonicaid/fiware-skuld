@@ -110,7 +110,7 @@ default_region_json = """
             "internal": "http://$CONTROLLER:8080/v1/AUTH_%(tenant_id)s"
         },
         {
-            "name": "keystone$REGION",
+            "name": "keystone",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
             "admin": "http://$KEYSTONE_HOST:5000/v3/",
@@ -148,10 +148,20 @@ class RegisterRegion(object):
         :param region_id: the region id (the region name)
         :return: Nothing
         """
-        try:
-            self.keystone.regions.find(id=region_id)
-        except NotFound:
+        if not self.is_region(region_id):
             self.keystone.regions.create(region_id)
+
+    def is_region(self, region_id):
+        """
+
+        :param region_id:
+        :return:
+        """
+        regions = self.keystone.regions.list()
+        for region in regions:
+            if region.id == region_id:
+                return True
+        return False
 
     def project_exists(self, tenant_name, domain_id='default'):
         """Ensure that the project exists: create if it does not.
