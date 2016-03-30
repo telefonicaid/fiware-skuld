@@ -32,7 +32,8 @@ from fiwareskuld.utils.osclients import osclients
 import settings
 
 
-def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keystone_ip=None, region=None, region_keystone=None):
+def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keystone_ip=None,
+              region=None, region_keystone=None):
     """ Launch a VM and wait until it is ready.
 
     :param vm_n: virtual machine name

@@ -139,6 +139,7 @@ def deploy_testbeds():
                             settings.image_name_test, nics, init_script, keystone_ip, region,
                             region_keystone)
 
+    time.sleep(120)
     print 'RegionTwo'
     region = 'RegionTwo'
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
