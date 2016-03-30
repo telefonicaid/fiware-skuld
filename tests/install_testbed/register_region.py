@@ -153,9 +153,9 @@ class RegisterRegion(object):
 
     def is_region(self, region_id):
         """
-
-        :param region_id:
-        :return:
+        It checks if the region exists.
+        :param region_id: the region id
+        :return: True/False
         """
         regions = self.keystone.regions.list()
         for region in regions:
@@ -221,7 +221,7 @@ class RegisterRegion(object):
         :param region: the region id.
         :return: the endpoint id.
         """
-        endpoint = self.is_endpoint(service_id, interface, region)
+        endpoint = self.get_endpoint(service_id, interface, region)
         if endpoint:
             result = endpoint
             if result.url != url:
@@ -233,11 +233,13 @@ class RegisterRegion(object):
 
         return result.id
 
-    def is_endpoint(self, service_id, interface, region_id):
+    def get_endpoint(self, service_id, interface, region_id):
         """
-
-        :param region_id:
-        :return:
+        It obtains the endpoint
+        :param service_id: the service associated
+        :param interface: the interface
+        :param region_id: the region
+        :return: the endpoint
         """
         endpoints = self.keystone.endpoints.list(service=service_id, interface=interface)
 
