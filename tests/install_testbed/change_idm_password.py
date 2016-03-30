@@ -46,7 +46,7 @@ keystone_ip = meta["keystone_ip"]
 region = meta["Region"]
 region2 = meta["region_keystone"]
 if region2:
-    os.environ['OS_REGION_NAME']=region2
+    os.environ['OS_REGION_NAME'] = region2
 
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
@@ -87,7 +87,7 @@ with open(file_path, 'w') as f:
     f.write(content)
 
 # Change the admin token in the keystone config file
-os.environ['OS_REGION_NAME']=region
+os.environ['OS_REGION_NAME'] = region
 content = open(etckeystone_path).read()
 content = content.replace("admin_token=ADMIN", "admin_token=" + new_password)
 check_call(['sudo', 'chmod', '777', etckeystone_path])
