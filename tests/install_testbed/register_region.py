@@ -150,7 +150,7 @@ class RegisterRegion(object):
         """
         try:
             self.keystone.regions.find(id=region_id)
-        except NotFound:
+        except:
             self.keystone.regions.create(region_id)
 
     def project_exists(self, tenant_name, domain_id='default'):
