@@ -1,4 +1,4 @@
-tests/install_testbed/launch_vm.py >cmd.log 2>&1
+tests/install_testbed/deploytwotestbeds.py >cmd.log 2>&1
 cat cmd.log
 export ip=`grep "Assigning floating IP" cmd.log | awk '{print $4}'`
 export uuid=`grep UUID cmd.log | awk '{print $5}'`
@@ -27,15 +27,21 @@ export OS_IDENTITY_API_VERSION=3
 export OS_AUTH_URL=http://$ip:5000/v3" >> credentials
 
 cat credentials
+unset OS_USERNAME
 export OS_USERNAME=$username
+unset OS_PASSWORD
 export OS_PASSWORD=$password
+unset OS_TENANT_NAME
 export OS_TENANT_NAME=$username
+unset OS_REGION_NAME
 export OS_REGION_NAME=$region
-export OS_PROJECT_DOMAIN_NAME=default
+unset OS_PROJECT_DOMAIN_ID
+export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
-export OS_AUTH_URL=http://$ip:5000/v3
-
+unset OS_AUTH_URL
+export OS_AUTH_URL=http://$ip:5000/v3/
+export OS_AUTH_URL_V2=http://$ip:5000/v2.0/
 nova list
 neutron net-list
 keystone user-list
