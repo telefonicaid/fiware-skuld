@@ -221,16 +221,30 @@ class RegisterRegion(object):
         :param region: the region id.
         :return: the endpoint id.
         """
-        result = self.keystone.endpoints.list(service=service_id, interface=interface, region=region,
-                                              region_id=region)
-        if not result:
-            result = self.keystone.endpoints.create(service=service_id, interface=interface,
-                                                    url=url, region=region)
-        else:
-            result = result[0]
+        endpoint = self.is_endpoint(service_id, interface, region)
+        if endpoint:
+            result = endpoint
             if result.url != url:
                 self.keystone.endpoints.update(result.id, url=url)
+
+        else:
+            result = self.keystone.endpoints.create(service=service_id, interface=interface,
+                                                    url=url, region=region)
+
         return result.id
+
+    def is_endpoint(self, service_id, interface, region_id):
+        """
+
+        :param region_id:
+        :return:
+        """
+        endpoints = self.keystone.endpoints.list(service=service_id, interface=interface)
+
+        for endpoint in endpoints:
+            if endpoint.region == region_id:
+                return endpoint
+        return None
 
     def register_region(self, region, set_passwords=False):
         """Register the region data. It is intended to create all the users
