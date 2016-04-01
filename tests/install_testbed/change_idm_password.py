@@ -30,9 +30,48 @@ from subprocess import check_call
 import time
 import json
 from subprocess import Popen, PIPE
+import socket
+import errno
 
 from fiwareskuld.change_password import PasswordChanger
 from fiwareskuld.utils.osclients import OpenStackClients
+
+def wait_net_service(server, port, timeout=None):
+    """ Wait for network service to appear
+        @param timeout: in seconds, if None or 0 wait forever
+        @return: True of False, if timeout is None may return only True or
+                 throw unhandled network exception
+    """
+
+    s = socket.socket()
+    if timeout:
+        from time import time as now
+        # time module is needed to calc timeout shared between two exceptions
+        end = now() + timeout
+
+    while True:
+        try:
+            if timeout:
+                next_timeout = end - now()
+                if next_timeout < 0:
+                    return False
+                else:
+            	    s.settimeout(next_timeout)
+
+            s.connect((server, port))
+
+        except socket.timeout, err:
+            # this exception occurs only if timeout is set
+            if timeout:
+                return False
+
+        except socket.error, err:
+            # catch timeout exception from underlying network library
+            # this one is different from socket.timeout
+            pass
+        else:
+            s.close()
+            return True
 
 file_path = '/home/ubuntu/idm/conf/settings.py'
 etckeystone_path = '/home/ubuntu/idm/keystone/etc/keystone.conf'
@@ -47,7 +86,7 @@ region2 = meta["region_keystone"]
 if region2:
     os.environ['OS_REGION_NAME'] = region2
 
-time.sleep(20)
+wait_net_service(keystone_ip, 5000, timeout=360)
 
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
@@ -101,3 +140,4 @@ check_call(['sudo', 'service', 'keystone_idm', 'restart'])
 
 # Pause needed before running other commands that connects to keystone
 time.sleep(10)
+
