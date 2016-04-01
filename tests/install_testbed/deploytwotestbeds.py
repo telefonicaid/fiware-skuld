@@ -59,11 +59,9 @@ def deploy_testbeds():
                                               'gateway_ip': None}})
 
     # Get a floating IP
-    print 'ips'
     floating_ip = []
     for ip in neutron.list_floatingips()['floatingips']:
         floating_ip.append(ip['floating_ip_address'])
-        print ip['floating_ip_address']
         if len(floating_ip) == 2:
             break
 
@@ -117,8 +115,9 @@ def deploy_testbeds():
     else:
         nics = [{'net-id': network['management']}]
 
-    print 'RegionOne'
     keystone_ip = floating_ip[0]
+    print "Keystone IP {0}".format(keystone_ip)
+    print "Region1 IP: RegionOne {0}".format(keystone_ip)
     region = 'RegionOne'
     region_keystone = 'RegionOne'
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
@@ -146,7 +145,7 @@ def deploy_testbeds():
     server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                                  settings.image_name, nics, init_script, keystone_ip, region,
                                  region_keystone)
-
+    print "Region2 IP: RegionTwo {0}".format(floating_ip[1])
     # assign the floating ip
     if floating_ip:
         print('Assigning floating IP ' + floating_ip[1])

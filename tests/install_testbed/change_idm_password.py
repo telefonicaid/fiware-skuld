@@ -36,6 +36,7 @@ import errno
 from fiwareskuld.change_password import PasswordChanger
 from fiwareskuld.utils.osclients import OpenStackClients
 
+
 def wait_net_service(server, port, timeout=None):
     """ Wait for network service to appear
         @param timeout: in seconds, if None or 0 wait forever
@@ -56,7 +57,7 @@ def wait_net_service(server, port, timeout=None):
                 if next_timeout < 0:
                     return False
                 else:
-            	    s.settimeout(next_timeout)
+                    s.settimeout(next_timeout)
 
             s.connect((server, port))
 
@@ -140,4 +141,3 @@ check_call(['sudo', 'service', 'keystone_idm', 'restart'])
 
 # Pause needed before running other commands that connects to keystone
 time.sleep(10)
-

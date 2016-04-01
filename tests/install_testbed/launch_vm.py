@@ -63,7 +63,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
         vm_n, flavor=flavor.id, image=image_id, key_name=settings.key_name,
         security_groups=[securityg_n], nics=ifaces, **extra_params)
 
-    print('Created VM with UUID ' + server.id)
+    print('{0}: VM with UUID {1}'.format(region, server.id))
 
     # wait until the vm is active
     tries = 1
