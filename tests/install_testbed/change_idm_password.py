@@ -87,7 +87,7 @@ region2 = meta["region_keystone"]
 if region2:
     os.environ['OS_REGION_NAME'] = region2
 
-wait_net_service(keystone_ip, 5000, timeout=360)
+wait_net_service(keystone_ip, 5000, timeout=720)
 
 osclients = OpenStackClients('http://{0}:5000/v3/'.format(keystone_ip))
 
