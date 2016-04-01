@@ -205,7 +205,8 @@ def deploy_testbed():
     server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                        settings.image_name, nics, init_script, keystone_ip, region,
                        region_keystone)
-
+    print "Keystone IP {0}".format(keystone_ip)
+    print "Region1 IP: RegionOne {0}".format(keystone_ip)
     # assign the floating ip
     if floating_ip:
         print('Assigning floating IP ' + floating_ip)
