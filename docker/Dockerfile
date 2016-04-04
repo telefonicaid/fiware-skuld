@@ -11,6 +11,7 @@ RUN python setup.py install
 
 WORKDIR /opt/fiware-skuld/tests/acceptance/
 RUN pip install -r requirements.txt
+RUN mkdir testreport
 COPY configuration.py common/configuration.py
 COPY start.sh .
 CMD ./start.sh
