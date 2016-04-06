@@ -39,7 +39,7 @@ def destroy_testbeds():
     """
     nova = osclients.get_novaclient()
 
-    ## Delete vms
+    # Delete vms
     servers = nova.servers.findall()
     for server in servers:
         if server.name == settings.vm_name:

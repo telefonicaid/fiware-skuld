@@ -84,7 +84,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
 
 
 def deploy_security_groups(sg_name):
-     # Create security group if it does not exist
+    # Create security group if it does not exist
     nova = osclients.get_novaclient()
     neutron = osclients.get_neutronclient()
     sec_groups = nova.security_groups.findall(name=sg_name)
@@ -141,7 +141,7 @@ def obtain_floating_ips(num_floating_ips):
         if not ip["fixed_ip_address"]:
             available_floating_ips.append(ip["floating_ip_address"])
 
-    if booked_ip and not booked_ip in available_floating_ips:
+    if booked_ip and  booked_ip not in available_floating_ips:
         print 'Error'
         exit()
     else:
