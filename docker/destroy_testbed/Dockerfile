@@ -10,6 +10,7 @@ RUN git branch
 RUN pip install -r requirements.txt
 RUN pip install -r test-requirements.txt
 RUN python setup.py install
+RUN mkdir /root/.ssh
 COPY start.sh /home/ubuntu/fiware-skuld/start.sh
 CMD ./start.sh
 
