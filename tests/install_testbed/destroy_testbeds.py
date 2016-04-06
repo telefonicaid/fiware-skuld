@@ -64,6 +64,7 @@ def destroy_testbeds():
         print "Deleting sec group " + sec.name
         nova.security_groups.delete(sec)
 
+
 def vm_exists(nova, server):
     try:
         ser = nova.servers.get(server)
