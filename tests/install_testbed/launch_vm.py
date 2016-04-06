@@ -27,7 +27,7 @@ import time
 import sys
 import os
 import os.path
-
+from os import environ as env
 from fiwareskuld.utils.osclients import osclients
 import settings
 
@@ -81,6 +81,84 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
         sys.exit(-1)
 
     return server
+
+
+def deploy_security_groups(sg_name):
+    # Create security group if it does not exist
+    nova = osclients.get_novaclient()
+    neutron = osclients.get_neutronclient()
+    sec_groups = nova.security_groups.findall(name=sg_name)
+    if not sec_groups:
+        g = nova.security_groups.create(name=sg_name, description=sg_name)
+        # Open
+        nova.security_group_rules.create(
+            g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr=settings.ingress_icmp_ip_range)
+        # Open SSH (port TCP 22)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=8774, to_port=8776, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=9696, to_port=9696, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=8080, to_port=8080, cidr=settings.ingress_ssh_ip_range)
+        nova.security_group_rules.create(
+            g.id, ip_protocol='tcp', from_port=9292, to_port=9292, cidr=settings.ingress_ssh_ip_range)
+        # This type of rule requires the neutron API
+
+        neutron.create_security_group_rule(
+            {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
+                                     'remote_group_id': g.id}})
+
+
+def create_key_pair():
+    nova = osclients.get_novaclient()
+    keys = nova.keypairs.findall(name=settings.key_name)
+    if not keys:
+        new_key = nova.keypairs.create(settings.key_name)
+        filename = os.path.expanduser('~/.ssh/' + settings.key_name)
+        with open(filename, 'w') as f:
+            f.write(new_key.private_key)
+        # make the file only readable by the owner
+        os.chmod(filename, 0600)
+
+
+def obtain_floating_ips(num_floating_ips):
+    neutron = osclients.get_neutronclient()
+    nova = osclients.get_novaclient()
+
+    # Get a floating IP
+    booked_ip = None
+    if "BOOKED_IP" in env:
+        booked_ip = env["BOOKED_IP"]
+
+    floating_ips = []
+    available_floating_ips = []
+
+    for ip in neutron.list_floatingips()['floatingips']:
+        if not ip["fixed_ip_address"]:
+            available_floating_ips.append(ip["floating_ip_address"])
+
+    if booked_ip and  booked_ip not in available_floating_ips:
+        print 'Error'
+        exit()
+    else:
+        floating_ips.append(booked_ip)
+
+    for ip in available_floating_ips:
+        if ip not in floating_ips:
+            floating_ips.append(ip)
+        if len(floating_ips) == num_floating_ips:
+            break
+
+    while len(floating_ips) < num_floating_ips:
+        # allocate floating ip if it does not exist
+        new_floating_ip = nova.floating_ips.create('public-ext-net-01').ip
+        floating_ips.append(new_floating_ip)
+
+    return floating_ips
 
 
 def create_port_multi_ip(security_group_id=None):
@@ -140,55 +218,13 @@ def deploy_testbed():
                                               'gateway_ip': None}})
 
     # Get a floating IP
-    floating_ip = None
-    for ip in neutron.list_floatingips()['floatingips']:
-        floating_ip = ip['floating_ip_address']
-        if not settings.preferred_ip or settings.preferred_ip == floating_ip:
-            break
+    floating_ip = obtain_floating_ips(1)[0]
 
-    if not floating_ip:
-        # allocate floating ip if it does not exist
-        floating_ip = nova.floating_ips.create('ext-net').ip
+    create_key_pair()
 
-    keys = nova.keypairs.findall(name=settings.key_name)
-    if not keys:
-        new_key = nova.keypairs.create(settings.key_name)
-        filename = os.path.expanduser('~/.ssh/' + settings.key_name)
-        with open(filename, 'w') as f:
-            f.write(new_key.private_key)
-        # make the file only readable by the owner
-        os.chmod(filename, 0600)
+    sg_name = sg_name = settings.security_group
+    deploy_security_groups(sg_name)
 
-    # Create security group if it does not exist
-    sg_name = settings.security_group
-    sec_groups = nova.security_groups.findall(name=sg_name)
-    if not sec_groups:
-        g = nova.security_groups.create(name=sg_name, description=sg_name)
-        # Open
-        nova.security_group_rules.create(
-            g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr=settings.ingress_icmp_ip_range)
-        # Open SSH (port TCP 22)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8774, to_port=8776, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9696, to_port=9696, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8080, to_port=8080, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9292, to_port=9292, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=35357, to_port=35357, cidr=settings.ingress_ssh_ip_range)
-        # This type of rule requires the neutron API
-
-        neutron.create_security_group_rule(
-            {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
-                                     'remote_group_id': g.id}})
-
-    # Launch testbed VM
     if settings.multinetwork:
         security_group_id = nova.security_groups.find(name=sg_name).id
         port = create_port_multi_ip(security_group_id)
