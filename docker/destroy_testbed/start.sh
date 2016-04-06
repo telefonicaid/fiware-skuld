@@ -1,1 +1,1 @@
-./tests/install_testbed/destroy_testbeds.py
+./tests/install_testbed/destroytestbeds.py
