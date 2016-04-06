@@ -49,20 +49,21 @@ def destroy_testbeds():
             while vm_exists(nova, server):
                 time.sleep(5)
 
-    # Delete keypair
-    keys = nova.keypairs.findall(name=settings.key_name)
-    for key in keys:
-        print "Deleting keypair " + key.name
-        nova.keypairs.delete(key)
-        filename = os.path.expanduser('~/.ssh/' + settings.key_name)
-        os.remove(filename)
-
     # Delete securing groups
     sg_name = settings.security_group
     sec_groups = nova.security_groups.findall(name=sg_name)
     for sec in sec_groups:
         print "Deleting sec group " + sec.name
         nova.security_groups.delete(sec)
+
+    # Delete keypair
+    keys = nova.keypairs.findall(name=settings.key_name)
+    for key in keys:
+        print "Deleting keypair " + key.name
+        nova.keypairs.delete(key)
+        filename = os.path.expanduser('~/.ssh/' + settings.key_name)
+        if os.path.exists(filename):
+            os.remove(filename)
 
 
 def vm_exists(nova, server):
