@@ -141,11 +141,9 @@ def obtain_floating_ips(num_floating_ips):
         if not ip["fixed_ip_address"]:
             available_floating_ips.append(ip["floating_ip_address"])
 
-    if booked_ip and  booked_ip not in available_floating_ips:
+    if booked_ip and booked_ip not in available_floating_ips:
         print 'Error'
         exit()
-    else:
-        floating_ips.append(booked_ip)
 
     for ip in available_floating_ips:
         if ip not in floating_ips:

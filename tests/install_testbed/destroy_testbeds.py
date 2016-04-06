@@ -38,15 +38,16 @@ def destroy_testbeds():
     :return: nothing()
     """
     nova = osclients.get_novaclient()
+    servers = nova.servers.findall(name=settings.vm_name)
 
     # Delete vms
-    servers = nova.servers.findall()
+
     for server in servers:
         if server.name == settings.vm_name:
             print "Deleting VM " + server.id
             nova.servers.delete(server)
-            while nova.servers.find(server):
-                time.sleep(2)
+            while vm_exists(nova, server):
+                time.sleep(5)
 
     # Delete keypair
     keys = nova.keypairs.findall(name=settings.key_name)
@@ -62,6 +63,16 @@ def destroy_testbeds():
     for sec in sec_groups:
         print "Deleting sec group " + sec.name
         nova.security_groups.delete(sec)
+
+def vm_exists(nova, server):
+    try:
+        ser = nova.servers.get(server)
+        if ser:
+            return True
+    except:
+        return False
+
+
 
 if __name__ == "__main__":
     destroy_testbeds()

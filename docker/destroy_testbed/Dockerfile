@@ -10,5 +10,6 @@ RUN git branch
 RUN pip install -r requirements.txt
 RUN pip install -r test-requirements.txt
 RUN python setup.py install
-CMD ./tests/install_testbed/destroy_testbeds.py
+COPY start.sh /home/ubuntu/fiware-skuld/start.sh
+CMD ./start.sh
 
