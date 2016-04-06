@@ -72,7 +72,5 @@ def vm_exists(nova, server):
     except:
         return False
 
-
-
 if __name__ == "__main__":
     destroy_testbeds()
