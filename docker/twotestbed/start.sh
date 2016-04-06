@@ -120,6 +120,3 @@ export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
 unset OS_AUTH_URL
 export OS_AUTH_URL=$auth_url_global
-nova delete $uuid1
-nova delete $uuid2
-sleep 10000
