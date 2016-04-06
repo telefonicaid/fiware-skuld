@@ -35,6 +35,7 @@ import launch_vm
 
 # Get networks
 def deploy_testbeds():
+
     network = dict()
     neutron = osclients.get_neutronclient()
     nova = osclients.get_novaclient()
@@ -58,52 +59,12 @@ def deploy_testbeds():
             neutron.create_subnet({'subnet': {'network_id': network[n], 'ip_version': 4, 'cidr': settings.subnet[n],
                                               'gateway_ip': None}})
 
-    # Get a floating IP
-    floating_ip = []
-    for ip in neutron.list_floatingips()['floatingips']:
-        floating_ip.append(ip['floating_ip_address'])
-        if len(floating_ip) == 2:
-            break
+    floating_ips = launch_vm.obtain_floating_ips(2)
 
-    while len(floating_ip) < 2:
-        # allocate floating ip if it does not exist
-        floating_ip = nova.floating_ips.create('public-ext-net-01').ip
+    launch_vm.create_key_pair()
 
-    keys = nova.keypairs.findall(name=settings.key_name)
-    if not keys:
-        new_key = nova.keypairs.create(settings.key_name)
-        filename = os.path.expanduser('~/.ssh/' + settings.key_name)
-        with open(filename, 'w') as f:
-            f.write(new_key.private_key)
-        # make the file only readable by the owner
-        os.chmod(filename, 0600)
-
-    # Create security group if it does not exist
     sg_name = settings.security_group
-    sec_groups = nova.security_groups.findall(name=sg_name)
-    if not sec_groups:
-        g = nova.security_groups.create(name=sg_name, description=sg_name)
-        # Open
-        nova.security_group_rules.create(
-            g.id, ip_protocol='icmp', from_port=-1, to_port=-1, cidr=settings.ingress_icmp_ip_range)
-        # Open SSH (port TCP 22)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8774, to_port=8776, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9696, to_port=9696, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8080, to_port=8080, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9292, to_port=9292, cidr=settings.ingress_ssh_ip_range)
-        # This type of rule requires the neutron API
-
-        neutron.create_security_group_rule(
-            {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
-                                     'remote_group_id': g.id}})
+    launch_vm.deploy_security_groups(sg_name)
 
     # Launch testbed VM
     if settings.multinetwork:
@@ -115,7 +76,7 @@ def deploy_testbeds():
     else:
         nics = [{'net-id': network['management']}]
 
-    keystone_ip = floating_ip[0]
+    keystone_ip = floating_ips[0]
     print "Keystone IP {0}".format(keystone_ip)
     print "Region1 IP: RegionOne {0}".format(keystone_ip)
     region = 'RegionOne'
@@ -126,9 +87,9 @@ def deploy_testbeds():
                                  region_keystone)
 
     # assign the floating ip
-    if floating_ip:
-        print('Assigning floating IP ' + floating_ip[0])
-        server.add_floating_ip(floating_ip[0])
+    if floating_ips:
+        print('Assigning floating IP ' + floating_ips[0])
+        server.add_floating_ip(floating_ips[0])
 
     if settings.multinetwork:
         # Launch test VM
@@ -145,11 +106,11 @@ def deploy_testbeds():
     server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                                  settings.image_name, nics, init_script, keystone_ip, region,
                                  region_keystone)
-    print "Region2 IP: RegionTwo {0}".format(floating_ip[1])
+    print "Region2 IP: RegionTwo {0}".format(floating_ips[1])
     # assign the floating ip
-    if floating_ip:
-        print('Assigning floating IP ' + floating_ip[1])
-        server.add_floating_ip(floating_ip[1])
+    if floating_ips:
+        print('Assigning floating IP ' + floating_ips[1])
+        server.add_floating_ip(floating_ips[1])
 
     if settings.multinetwork:
         # Launch test VM
