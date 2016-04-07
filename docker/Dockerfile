@@ -7,8 +7,8 @@ RUN git clone https://github.com/telefonicaid/fiware-skuld/ /opt/fiware-skuld/
 WORKDIR /opt/fiware-skuld/
 RUN pip install -r requirements.txt
 RUN pip install -r test-requirements.txt
+COPY settings.py conf/settings.py
 RUN python setup.py install
-
 WORKDIR /opt/fiware-skuld/tests/acceptance/
 RUN pip install -r requirements.txt
 RUN mkdir testreport
