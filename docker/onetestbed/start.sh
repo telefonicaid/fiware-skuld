@@ -52,4 +52,3 @@ export OS_AUTH_URL_V2=http://$ip1:5000/v2.0/
 nova list
 neutron net-list
 openstack user list
-sleep 10000

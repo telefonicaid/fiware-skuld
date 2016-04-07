@@ -239,14 +239,18 @@ def deploy_testbed():
         nics = [{'net-id': network['management']}]
 
     keystone_ip = floating_ip
-    region = 'RegionOne'
-    region_keystone = 'RegionOne'
+    if env["Region1"]:
+        region = env["Region1"]
+    else:
+        region = 'RegionOne'
+
+    region_keystone = region
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
     server = launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                        settings.image_name, nics, init_script, keystone_ip, region,
                        region_keystone)
     print "Keystone IP {0}".format(keystone_ip)
-    print "Region1 IP: RegionOne {0}".format(keystone_ip)
+    print "Region1 IP: {0} {1}".format(region, keystone_ip)
     # assign the floating ip
     if floating_ip:
         print('Assigning floating IP ' + floating_ip)

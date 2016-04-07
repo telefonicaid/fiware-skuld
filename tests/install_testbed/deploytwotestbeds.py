@@ -27,6 +27,7 @@ import time
 import sys
 import os
 import os.path
+from os import environ as env
 
 from fiwareskuld.utils.osclients import osclients
 import settings
@@ -77,10 +78,15 @@ def deploy_testbeds():
         nics = [{'net-id': network['management']}]
 
     keystone_ip = floating_ips[0]
+    if env["Region1"]:
+        region = env["Region1"]
+    else:
+        region = 'RegionOne'
+    print region
     print "Keystone IP {0}".format(keystone_ip)
-    print "Region1 IP: RegionOne {0}".format(keystone_ip)
-    region = 'RegionOne'
-    region_keystone = 'RegionOne'
+    print "Region1 IP: {0} {0}".format(region, keystone_ip)
+
+    region_keystone = region
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
     server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                                  settings.image_name, nics, init_script, keystone_ip, region,
@@ -100,13 +106,17 @@ def deploy_testbeds():
                             region_keystone)
 
     time.sleep(120)
-    print 'RegionTwo'
-    region = 'RegionTwo'
+    if env["Region2"]:
+        region = env["Region2"]
+    else:
+        region = 'RegionTwo'
+
+    print region
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script)
     server = launch_vm.launch_vm(settings.vm_name, settings.flavor_name, sg_name,
                                  settings.image_name, nics, init_script, keystone_ip, region,
                                  region_keystone)
-    print "Region2 IP: RegionTwo {0}".format(floating_ips[1])
+    print "Region2 IP: {0} {1}".format(region, floating_ips[1])
     # assign the floating ip
     if floating_ips:
         print('Assigning floating IP ' + floating_ips[1])

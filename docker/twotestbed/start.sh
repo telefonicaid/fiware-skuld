@@ -100,6 +100,3 @@ nova list
 neutron net-list
 openstack user list
 
-nova delete $uuid1
-nova delete $uuid2
-sleep 10000
