@@ -36,23 +36,15 @@ nova console-log $uuid2 > logvm2
 export region=`grep OS_REGION_NAME logvm | sed  's/export OS_REGION_NAME=//g' | sed 's/OS_REGION_NAME=//g' | awk 'NR==1{print $2}'`
 export password=`grep OS_PASSWORD logvm | sed  's/export OS_PASSWORD=//g' | sed 's/OS_PASSWORD=//g' | awk 'NR==1{print $2}'`
 export username=`grep OS_USERNAME logvm | sed  's/export OS_USERNAME=//g' | sed 's/OS_USERNAME=//g' | awk 'NR==1{print $2}'`
-
-export password_global=$OS_PASSWORD
-export tenant_name_global=$OS_TENANT_NAME
-export region_name_global=$OS_REGION_NAME
-export project_name_global=$OS_PROJECT_DOMAIN_NAME
-export user_domain_name=$OS_USER_DOMAIN_NAME
-export auth_url_global=$OS_AUTH_URL
-
-
 echo "export OS_USERNAME=$username
 export OS_PASSWORD=$password
 export OS_TENANT_NAME=$username
 export OS_REGION_NAME=$region
-export OS_PROJECT_DOMAIN_NAME=default
+export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
-export OS_AUTH_URL=http://$ip1:5000/v3" >> credentials1
+export OS_AUTH_URL=http://$ip1:5000/v3" >> credentials
+
 
 cat credentials
 unset OS_USERNAME
@@ -64,6 +56,7 @@ export OS_TENANT_NAME=$username
 unset OS_REGION_NAME
 export OS_REGION_NAME=$region
 unset OS_PROJECT_DOMAIN_ID
+unset OS_PROJECT_DOMAIN_NAME
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
@@ -81,7 +74,7 @@ echo "export OS_USERNAME=$username
 export OS_PASSWORD=$password
 export OS_TENANT_NAME=$username
 export OS_REGION_NAME=$region
-export OS_PROJECT_DOMAIN_NAME=default
+export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
 export OS_AUTH_URL=http://$ip1:5000/v3" >> credentials
@@ -96,6 +89,7 @@ export OS_TENANT_NAME=$username
 unset OS_REGION_NAME
 export OS_REGION_NAME=$region
 unset OS_PROJECT_DOMAIN_ID
+unset OS_PROJECT_DOMAIN_NAME
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
@@ -106,20 +100,6 @@ nova list
 neutron net-list
 openstack user list
 
-unset OS_USERNAME
-export OS_USERNAME=$username_global
-unset OS_PASSWORD
-export OS_PASSWORD=$password_global
-unset OS_TENANT_NAME
-export OS_TENANT_NAME=$tenant_name_global
-unset OS_REGION_NAME
-export OS_REGION_NAME=$region_name_global
-unset OS_PROJECT_DOMAIN_ID
-export OS_PROJECT_DOMAIN_ID=default
-export OS_USER_DOMAIN_NAME=Default
-export OS_IDENTITY_API_VERSION=3
-unset OS_AUTH_URL
-export OS_AUTH_URL=$auth_url_global
 nova delete $uuid1
 nova delete $uuid2
 sleep 10000

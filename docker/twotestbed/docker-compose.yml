@@ -8,4 +8,4 @@ fiware-skuld-two-testbed:
    - OS_REGION_NAME
    - OS_PROJECT_DOMAIN_NAME
    - OS_USER_DOMAIN_NAME
-
+   - BOOKED_IP
