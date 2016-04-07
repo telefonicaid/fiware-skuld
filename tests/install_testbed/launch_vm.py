@@ -250,7 +250,7 @@ def deploy_testbed():
                        settings.image_name, nics, init_script, keystone_ip, region,
                        region_keystone)
     print "Keystone IP {0}".format(keystone_ip)
-    print "Region1 IP: {0} {1}".format(region, keystone_ip)
+    print "Region1 IP: {0} {1}".format(keystone_ip, region)
     # assign the floating ip
     if floating_ip:
         print('Assigning floating IP ' + floating_ip)
