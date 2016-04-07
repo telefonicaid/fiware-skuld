@@ -27,7 +27,7 @@ echo "export OS_USERNAME=$username
 export OS_PASSWORD=$password
 export OS_TENANT_NAME=$username
 export OS_REGION_NAME=$region
-export OS_PROJECT_DOMAIN_NAME=default
+export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3
 export OS_AUTH_URL=http://$ip1:5000/v3" >> credentials
@@ -42,6 +42,7 @@ export OS_TENANT_NAME=$username
 unset OS_REGION_NAME
 export OS_REGION_NAME=$region
 unset OS_PROJECT_DOMAIN_ID
+unset OS_PROJECT_DOMAIN_NAME
 export OS_PROJECT_DOMAIN_ID=default
 export OS_USER_DOMAIN_NAME=Default
 export OS_IDENTITY_API_VERSION=3

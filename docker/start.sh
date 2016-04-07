@@ -6,4 +6,3 @@ sed -i -e "s/{ADM_USERNAME}/${ADM_USERNAME}/" commons/configuration.py
 
 export PYTHONPATH=../..
 behave features/ --tags ~@skip --junit --junit-directory testreport
-sleep 12000
