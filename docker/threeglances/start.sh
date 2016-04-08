@@ -1,4 +1,4 @@
-./../../tests/install_testbed/deploythreeglances.py >cmd.log 2>&1
+./tests/install_testbed/deploythreeglances.py >cmd.log 2>&1
 cat cmd.log
 export ip1=`grep "Region1 IP:" cmd.log | awk '{print $4}'`
 export ip2=`grep "Region2 IP:" cmd.log | awk '{print $4}'`
