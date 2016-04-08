@@ -34,6 +34,7 @@ image_name = 'keyrock-R4.4'
 vm_name = 'testbedskuld'
 # filename of init_script
 init_script = 'cloudconfig'
+init_script_only_glance = 'cloudconfig_only_glance'
 
 # Accept ICMP and SSH (TCP 22) traffic from these ranges of IPs
 # 0.0.0.0/0 means any IP

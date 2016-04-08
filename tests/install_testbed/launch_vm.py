@@ -177,7 +177,7 @@ def create_port_multi_ip(security_group_id=None):
     :param security_group_id: The security group
     :return: a pre-allocated port
     """
-
+    neutron = osclients.get_neutronclient()
     subnet_external = None
     for subnet in neutron.list_subnets()['subnets']:
         if subnet['network_id'] == network['external']:
@@ -194,6 +194,30 @@ def create_port_multi_ip(security_group_id=None):
     if security_group_id:
         p['port']['security_groups'] = [security_group_id]
     return neutron.create_port(p)
+
+
+def prepare_networks():
+    network = dict()
+    neutron = osclients.get_neutronclient()
+    for net in neutron.list_networks()['networks']:
+        for n in settings.network_names:
+            if net['name'] == settings.network_names[n]:
+                network[n] = net['id']
+
+    for n in settings.network_names:
+        if n not in network:
+            if n == 'management':
+                sys.stderr.write('Fatal error: network ' + settings.network_names[n] +
+                                 'not found.\n')
+                sys.exit(-1)
+
+            network[n] = neutron.create_network(
+                {'network': {'name': settings.network_names[n], 'admin_state_up': True}})['network']['id']
+            # create subnetwork. It is not possible to assign a network
+            # to a VM without a subnetwork.
+            neutron.create_subnet({'subnet': {'network_id': network[n], 'ip_version': 4, 'cidr': settings.subnet[n],
+                                              'gateway_ip': None}})
+    return network
 
 
 # Get networks
