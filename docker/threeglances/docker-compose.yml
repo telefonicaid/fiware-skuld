@@ -1,5 +1,5 @@
-fiware-skuld-two-testbed:
-  image: fiware-skuld-two-testbed
+fiware-skuld-three-glances:
+  image: fiware-skuld-three-glances 
   environment: 
    - OS_AUTH_URL
    - OS_USERNAME
