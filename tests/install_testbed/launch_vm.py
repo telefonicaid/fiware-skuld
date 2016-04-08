@@ -195,6 +195,7 @@ def create_port_multi_ip(security_group_id=None):
         p['port']['security_groups'] = [security_group_id]
     return neutron.create_port(p)
 
+
 def prepare_networks():
     network = dict()
     neutron = osclients.get_neutronclient()
@@ -217,6 +218,7 @@ def prepare_networks():
             neutron.create_subnet({'subnet': {'network_id': network[n], 'ip_version': 4, 'cidr': settings.subnet[n],
                                               'gateway_ip': None}})
     return network
+
 
 # Get networks
 def deploy_testbed():

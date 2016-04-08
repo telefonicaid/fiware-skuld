@@ -37,8 +37,6 @@ import launch_vm
 # Get networks
 def deploy_three_glances():
 
-
-    neutron = osclients.get_neutronclient()
     nova = osclients.get_novaclient()
 
     network = launch_vm.prepare_networks()
