@@ -70,7 +70,6 @@ def deploy_three_glances():
     region_keystone = region
     deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[0], network)
 
-    time.sleep(120)
     if "Region2" in env:
         region = env["Region2"]
     else:
