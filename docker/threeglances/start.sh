@@ -68,10 +68,11 @@ export OS_IDENTITY_API_VERSION=3
 unset OS_AUTH_URL
 export OS_AUTH_URL=http://$ip1:5000/v3/
 export OS_AUTH_URL_V2=http://$ip1:5000/v2.0/
-nova list
-neutron net-list
+glance image-list
 openstack user list
-
+openstack user create qa --password qa --project qa
+openstack role add --user qa --project qa admin
+openstack user list
 export region=`grep OS_REGION_NAME logvm2 | sed  's/export OS_REGION_NAME=//g' | sed 's/OS_REGION_NAME=//g' | awk 'NR==1{print $2}'`
 export password=`grep OS_PASSWORD logvm2 | sed  's/export OS_PASSWORD=//g' | sed 's/OS_PASSWORD=//g' | awk 'NR==1{print $2}'`
 export username=`grep OS_USERNAME logvm2 | sed  's/export OS_USERNAME=//g' | sed 's/OS_USERNAME=//g' | awk 'NR==1{print $2}'`
@@ -101,7 +102,6 @@ export OS_IDENTITY_API_VERSION=3
 unset OS_AUTH_URL
 export OS_AUTH_URL=http://$ip1:5000/v3/
 export OS_AUTH_URL_V2=http://$ip1:5000/v2.0/
-nova list
-neutron net-list
+glance image-list
 openstack user list
 
