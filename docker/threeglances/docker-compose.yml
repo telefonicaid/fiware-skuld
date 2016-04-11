@@ -8,7 +8,8 @@ fiware-skuld-three-glances:
    - OS_REGION_NAME
    - OS_PROJECT_DOMAIN_NAME
    - OS_USER_DOMAIN_NAME
-   - BOOKED_IP
+   - BOOKED_IP1
+   - BOOKED_IP2
    - Region1
    - Region2
    - Region3
