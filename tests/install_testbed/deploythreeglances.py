@@ -41,7 +41,7 @@ def deploy_three_glances():
 
     network = launch_vm.prepare_networks()
 
-    floating_ips = launch_vm.obtain_floating_ips(3)
+    floating_ips = launch_vm.obtain_floating_ips(3, 2)
 
     launch_vm.create_key_pair()
     sg_name = settings.security_group
@@ -77,8 +77,8 @@ def deploy_three_glances():
         region = 'RegionTwo'
 
     print region
-    print "Region2 IP: {0} {1}".format(region, floating_ips[1])
-    deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[1], network)
+    print "Region2 IP: {0} {1}".format(region, floating_ips[2])
+    deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[2], network)
 
     if "Region3" in env:
         region = env["Region3"]
@@ -86,8 +86,10 @@ def deploy_three_glances():
         region = 'RegionThree'
 
     print region
-    print "Region3 IP: {0} {1}".format(region, floating_ips[2])
-    deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[2], network)
+    region_keystone = region
+    keystone_ip = floating_ips[1]
+    print "Region3 IP: {0} {1}".format(region, floating_ips[1])
+    deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[1], network)
 
 
 def deploy_glance(nics, keystone_ip, region, region_keystone, floating_ip, network):

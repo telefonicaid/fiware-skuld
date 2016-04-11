@@ -128,14 +128,20 @@ def create_key_pair():
         os.chmod(filename, 0600)
 
 
-def obtain_floating_ips(num_floating_ips):
+def obtain_floating_ips(num_floating_ips, booked_ips_num):
     neutron = osclients.get_neutronclient()
     nova = osclients.get_novaclient()
 
     # Get a floating IP
-    booked_ip = None
-    if "BOOKED_IP" in env:
-        booked_ip = env["BOOKED_IP"]
+    booked_ips = []
+    if booked_ips_num == 1:
+        if "BOOKED_IP" in env:
+            booked_ips.append(env["BOOKED_IP"])
+    elif booked_ips_num == 2:
+        if "BOOKED_IP1" in env:
+            booked_ips.append(env["BOOKED_IP1"])
+        if "BOOKED_IP2" in env:
+            booked_ips.append(env["BOOKED_IP2"])
 
     floating_ips = []
     available_floating_ips = []
@@ -144,12 +150,13 @@ def obtain_floating_ips(num_floating_ips):
         if not ip["fixed_ip_address"]:
             available_floating_ips.append(ip["floating_ip_address"])
 
-    if booked_ip:
-        if booked_ip not in available_floating_ips:
-            print 'ERROR. The booked ip {0} is not available'.format(booked_ip)
-            exit()
-        else:
-            floating_ips.append(booked_ip)
+    if booked_ips:
+        for booked_ip in booked_ips:
+            if booked_ip not in available_floating_ips:
+                print 'ERROR. The booked ip {0} is not available'.format(booked_ip)
+                exit()
+            else:
+                floating_ips.append(booked_ip)
 
     for ip in available_floating_ips:
         if ip not in floating_ips:
