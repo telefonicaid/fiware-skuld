@@ -41,7 +41,7 @@ def deploy_three_glances():
 
     network = launch_vm.prepare_networks()
 
-    floating_ips = launch_vm.obtain_floating_ips(3 ,2)
+    floating_ips = launch_vm.obtain_floating_ips(3, 2)
 
     launch_vm.create_key_pair()
     sg_name = settings.security_group

@@ -143,7 +143,6 @@ def obtain_floating_ips(num_floating_ips, booked_ips_num):
         if "BOOKED_IP2" in env:
             booked_ips.append(env["BOOKED_IP2"])
 
-
     floating_ips = []
     available_floating_ips = []
 
