@@ -70,6 +70,7 @@ export OS_AUTH_URL=http://$ip1:5000/v3/
 export OS_AUTH_URL_V2=http://$ip1:5000/v2.0/
 glance image-list
 openstack user list
+openstack project create qa
 openstack user create qa --password qa --project qa
 openstack role add --user qa --project qa admin
 openstack user list
