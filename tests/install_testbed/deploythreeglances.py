@@ -85,8 +85,6 @@ def deploy_three_glances():
         region = 'RegionThree'
 
     print region
-    region_keystone = region
-    keystone_ip = floating_ips[1]
     print "Region3 IP: {0} {1}".format(region, floating_ips[1])
     deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[1], network)
 

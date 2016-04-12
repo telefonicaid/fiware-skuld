@@ -253,7 +253,7 @@ def deploy_testbed():
                                               'gateway_ip': None}})
 
     # Get a floating IP
-    floating_ip = obtain_floating_ips(1)[0]
+    floating_ip = obtain_floating_ips(1, 1)[0]
 
     create_key_pair()
 
