@@ -60,7 +60,7 @@ def deploy_testbeds():
             neutron.create_subnet({'subnet': {'network_id': network[n], 'ip_version': 4, 'cidr': settings.subnet[n],
                                               'gateway_ip': None}})
 
-    floating_ips = launch_vm.obtain_floating_ips(2)
+    floating_ips = launch_vm.obtain_floating_ips(2, 1)
 
     launch_vm.create_key_pair()
 
