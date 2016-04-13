@@ -3,6 +3,8 @@ echo $OS_TENANT_NAME
 echo $OS_PASSWORD
 echo $OS_REGION_NAME
 echo $OS_AUTH_URL
+echo $BOOKED_IP
+
 tests/install_testbed/launch_vm.py >cmd.log 2>&1
 cat cmd.log
 export ip1=`grep "Region1 IP:" cmd.log | awk '{print $4}'`
