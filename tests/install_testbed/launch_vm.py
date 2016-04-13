@@ -161,7 +161,6 @@ def obtain_floating_ips(num_floating_ips, booked_ips_num):
                 print 'ERROR. The booked ip {0} is not available'.format(booked_ip)
                 exit()
 
-
     for ip in available_floating_ips:
         if ip not in floating_ips:
             floating_ips.append(ip)
