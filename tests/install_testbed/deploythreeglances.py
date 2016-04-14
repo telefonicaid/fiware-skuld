@@ -80,7 +80,6 @@ def deploy_three_glances():
     print "Region2 IP: {0} {1}".format(region, floating_ips[2])
     deploy_glance(nics, keystone_ip, region, region_keystone, floating_ips[2], network)
 
-
     if "Region3" in env:
         region = env["Region3"]
     else:
