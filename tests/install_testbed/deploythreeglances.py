@@ -84,7 +84,9 @@ def deploy_three_glances():
         region = env["Region3"]
     else:
         region = 'RegionThree'
-    region_keystone = region
+
+    if "Region2keystone" in env:
+        region_keystone = env["Region2keystone"]
     keystone_ip = floating_ips[1]
     print region
     print "Region3 IP: {0} {1}".format(region, floating_ips[1])
