@@ -150,11 +150,8 @@ def obtain_floating_ips(num_floating_ips, booked_ips_num):
         if not ip["fixed_ip_address"]:
             available_floating_ips.append(ip["floating_ip_address"])
 
-    print booked_ips
     if booked_ips:
         for booked_ip in booked_ips:
-            print booked_ip
-            print available_floating_ips
             if booked_ip in available_floating_ips:
                 floating_ips.append(booked_ip)
             else:
