@@ -3,7 +3,7 @@
 FIWARE Trial Users Management
 =============================
 
-| |Build Status| |Coveralls| |StackOverflow|
+| |License Badge| |StackOverflow| |Build Status| |Coveralls|
 
 .. contents:: :local:
 
@@ -565,13 +565,15 @@ License
 .. |Build Status| image:: https://travis-ci.org/telefonicaid/fiware-skuld.svg?branch=develop
    :target: https://travis-ci.org/telefonicaid/fiware-skuld
    :alt: Build status
-.. |StackOverflow| image:: http://b.repl.ca/v1/help-stackoverflow-orange.png
+.. |StackOverflow| image:: https://img.shields.io/badge/support-sof-yellowgreen.svg
    :target: https://stackoverflow.com/questions/tagged/fiware-skuld
    :alt: Help? Ask questions
 .. |Coveralls| image:: https://coveralls.io/repos/telefonicaid/fiware-skuld/badge.svg?branch=develop&service=github
    :target: https://coveralls.io/github/telefonicaid/fiware-skuld?branch=develop
    :alt: Unit tests coverage
-
+.. |License Badge| image:: https://img.shields.io/badge/license-Apache_2.0-blue.svg
+   :target: LICENSE
+   :alt: Apache 2.0
 
 .. REFERENCES
 
