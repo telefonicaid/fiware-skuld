@@ -572,7 +572,7 @@ License
    :target: https://coveralls.io/github/telefonicaid/fiware-skuld?branch=develop
    :alt: Unit tests coverage
 .. |License Badge| image:: https://img.shields.io/badge/license-Apache_2.0-blue.svg
-   :target: LICENSE.txt
+   :target: LICENSE
    :alt: Apache 2.0
 
 .. REFERENCES
