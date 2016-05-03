@@ -35,10 +35,12 @@ sudo apt-get update
 sudo apt-get install -y pwgen
 
 pip install -r ~/fiware-skuld/requirements.txt --allow-all-external
+pip install -e git+https://github.com/ging/python-keystoneclient.git#egg=python-keystoneclient
 
 export PYTHONPATH=~/fiware-skuld
 
 # change idm default password & generate new credential
+https://github.com/ging/keystone/blob/master/keystone/contrib/initial_data/data.py
 ./change_idm_password.py
 
 # create properties

@@ -211,6 +211,12 @@ class RegisterRegion(object):
         except:
             pass
 
+        for endpoint_group in self.keystone.endpoint_groups.list(region='Spain2'):
+            self.keystone.endpoint_groups.delete(endpoint_group)
+
+    def create_endpoint_group(self, region):
+        self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region} )
+
     def endpoint_exists(self, service_id, interface, url, region):
         """check that enpoint exists. Otherwise, create it. Also check that the
         URLs are the same; if they are different, update.
@@ -287,6 +293,8 @@ class RegisterRegion(object):
             self.endpoint_exists(service_id, 'public', s['public'], region_name)
             self.endpoint_exists(service_id, 'admin', s['admin'], region_name)
             self.endpoint_exists(service_id, 'internal', s['internal'], region_name)
+
+        self.create_endpoint_group(region_name)
 
     @staticmethod
     def transform_json(data, env):
