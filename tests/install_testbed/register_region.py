@@ -211,8 +211,9 @@ class RegisterRegion(object):
         except:
             pass
 
-        for endpoint_group in self.keystone.endpoint_groups.list(region='Spain2'):
-            self.keystone.endpoint_groups.delete(endpoint_group)
+        for endpoint_group in self.keystone.endpoint_groups.list():
+            if endpoint_group.filters['region_id'] == "Spain2":
+                self.keystone.endpoint_groups.delete(endpoint_group)
 
     def create_endpoint_group(self, region):
         self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region} )
