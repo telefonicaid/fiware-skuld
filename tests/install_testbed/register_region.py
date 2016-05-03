@@ -212,7 +212,7 @@ class RegisterRegion(object):
             pass
 
         for endpoint_group in self.keystone.endpoint_groups.list():
-            if endpoint_group.filters and endpoint_group.filters['region_id']:
+            if endpoint_group.filters and endpoint_group.filters.get('region_id'):
                 if endpoint_group.filters['region_id'] == "Spain2":
                     self.keystone.endpoint_groups.delete(endpoint_group)
 
