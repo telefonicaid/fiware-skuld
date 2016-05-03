@@ -40,7 +40,6 @@ pip install -e git+https://github.com/ging/python-keystoneclient.git#egg=python-
 export PYTHONPATH=~/fiware-skuld
 
 # change idm default password & generate new credential
-https://github.com/ging/keystone/blob/master/keystone/contrib/initial_data/data.py
 ./change_idm_password.py
 
 # create properties
