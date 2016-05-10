@@ -1,0 +1,12 @@
+fiware-skuld-phomehome:
+  image: fiware-skuld-phomehome
+  environment: 
+   - OS_AUTH_URL
+   - OS_USERNAME
+   - OS_TENANT_NAME
+   - OS_PASSWORD
+   - OS_REGION_NAME
+   - OS_PROJECT_DOMAIN_NAME
+   - OS_USER_DOMAIN_NAME
+   - BOOKED_IP
+   - Region1
