@@ -65,7 +65,8 @@ def deploy_testbeds():
     launch_vm.create_key_pair()
 
     sg_name = settings.security_group
-    launch_vm.deploy_security_groups(sg_name)
+    ports = [5000, 35357, 8774, 9696,8080, 9292]
+    launch_vm.deploy_security_groups(sg_name, ports)
 
     # Launch testbed VM
     if settings.multinetwork:
