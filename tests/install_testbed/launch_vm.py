@@ -83,7 +83,7 @@ def launch_vm(vm_n, flavor_n, securityg_n, image_n, ifaces, user_data=None, keys
     return server
 
 
-def deploy_security_groups(sg_name):
+def deploy_security_groups(sg_name, ports):
     # Create security group if it does not exist
     nova = osclients.get_novaclient()
     neutron = osclients.get_neutronclient()
@@ -96,24 +96,14 @@ def deploy_security_groups(sg_name):
         # Open SSH (port TCP 22)
         nova.security_group_rules.create(
             g.id, ip_protocol='tcp', from_port=22, to_port=22, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=5000, to_port=5000, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8774, to_port=8776, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9696, to_port=9696, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=8080, to_port=8080, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=9292, to_port=9292, cidr=settings.ingress_ssh_ip_range)
-        nova.security_group_rules.create(
-            g.id, ip_protocol='tcp', from_port=35357, to_port=35357, cidr=settings.ingress_ssh_ip_range)
-
-        # This type of rule requires the neutron API
-
+        for port in ports:
+            nova.security_group_rules.create(
+                g.id, ip_protocol='tcp', from_port=port, to_port=port, cidr=settings.ingress_ssh_ip_range)
         neutron.create_security_group_rule(
             {'security_group_rule': {'direction': 'ingress', 'security_group_id': g.id,
                                      'remote_group_id': g.id}})
+
+
 
 
 def create_key_pair():
@@ -258,7 +248,8 @@ def deploy_testbed():
     create_key_pair()
 
     sg_name = sg_name = settings.security_group
-    deploy_security_groups(sg_name)
+    ports = [5000, 35357, 8774, 9696, 8080, 9292]
+    deploy_security_groups(sg_name, ports)
 
     if settings.multinetwork:
         security_group_id = nova.security_groups.find(name=sg_name).id

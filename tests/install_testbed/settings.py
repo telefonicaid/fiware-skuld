@@ -30,11 +30,14 @@ preferred_ip = None
 
 # Testbed image
 flavor_name = 'm1.large'
+flavor_name_phone_home = "m1.small"
 image_name = 'keyrock-R4.4'
+image_phone_home = 'base_ubuntu_14.04'
 vm_name = 'testbedskuld'
 # filename of init_script
 init_script = 'cloudconfig'
 init_script_only_glance = 'cloudconfig_only_glance'
+init_script_phone_home = 'cloudconfig_phone_home'
 
 # Accept ICMP and SSH (TCP 22) traffic from these ranges of IPs
 # 0.0.0.0/0 means any IP
