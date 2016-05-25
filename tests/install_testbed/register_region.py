@@ -160,8 +160,12 @@ class RegisterRegion(object):
         """
         os.environ['OS_USER_DOMAIN_NAME'] = "Default"
         os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
-        domain = self.keystone.domains.find(name="Default")
-        self.keystone.domains.update(domain, name="default")
+        try:
+            domain = self.keystone.domains.find(name="Default")
+            self.keystone.domains.update(domain, name="default")
+        except:
+            pass
+
         os.environ['OS_USER_DOMAIN_NAME'] = "default"
         os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
 
