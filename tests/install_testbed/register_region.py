@@ -152,13 +152,12 @@ class RegisterRegion(object):
             self.keystone.regions.create(region_id)
 
     def change_domain_name(self):
-        """ Ensure that the region exists: create if it does not.
-
-        :param region_id: the region id (the region name)
-        :return: Nothing
+        """ It change the domain name to default, which is the
+        one used in FIWARE Lab.
+        :return: nothing
         """
         domain = self.keystone.domains.find(name="Default")
-        self.keystone.domains.update(domain,name="default")
+        self.keystone.domains.update(domain, name="default")
 
     def is_region(self, region_id):
         """
@@ -226,7 +225,12 @@ class RegisterRegion(object):
                     self.keystone.endpoint_groups.delete(endpoint_group)
 
     def create_endpoint_group(self, region):
-        self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region} )
+        """
+        It create the endpoint group for the region.
+        :param region: the region
+        :return: nothing
+        """
+        self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region})
 
     def endpoint_exists(self, service_id, interface, url, region):
         """check that enpoint exists. Otherwise, create it. Also check that the

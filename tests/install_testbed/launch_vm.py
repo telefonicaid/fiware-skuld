@@ -104,9 +104,8 @@ def deploy_security_groups(sg_name, ports):
                                      'remote_group_id': g.id}})
 
 
-
-
 def create_key_pair():
+    # It creates the keypair
     nova = osclients.get_novaclient()
     keys = nova.keypairs.findall(name=settings.key_name)
     if not keys:

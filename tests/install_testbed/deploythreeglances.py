@@ -45,7 +45,7 @@ def deploy_three_glances():
 
     launch_vm.create_key_pair()
     sg_name = settings.security_group
-    ports = [5000, 35357, 8774, 9696,8080, 9292]
+    ports = [5000, 35357, 8774, 9696, 8080, 9292]
     launch_vm.deploy_security_groups(sg_name, ports)
 
     # Launch testbed VM

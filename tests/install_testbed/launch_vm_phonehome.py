@@ -81,7 +81,7 @@ def deploy_phone_home_vm():
 
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script_phone_home)
     server = launch_vm.launch_vm(vm_name, settings.flavor_name_phone_home, sg_name,
-                       settings.image_phone_home, nics, init_script, keystone_ip, '', '')
+                                 settings.image_phone_home, nics, init_script, keystone_ip, '', '')
     print "Keystone IP {0}".format(keystone_ip)
 
     # assign the floating ip
