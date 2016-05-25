@@ -156,8 +156,12 @@ class RegisterRegion(object):
         one used in FIWARE Lab.
         :return: nothing
         """
+        os.environ['OS_USER_DOMAIN_NAME'] = "Default"
+        os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
         domain = self.keystone.domains.find(name="Default")
         self.keystone.domains.update(domain, name="default")
+        os.environ['OS_USER_DOMAIN_NAME'] = "default"
+        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
 
     def is_region(self, region_id):
         """
