@@ -113,8 +113,8 @@ default_region_json = """
             "name": "keystone$REGION",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
-            "admin": "http://localhost:5000/v3/",
-            "internal": "http://localhost:35357/v3/"
+            "admin": "http://$KEYSTONE_HOST:5000/v3/",
+            "internal": "http://$KEYSTONE_HOST:35357/v3/"
         }
     ]
 }
