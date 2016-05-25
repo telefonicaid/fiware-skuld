@@ -127,6 +127,8 @@ class RegisterRegion(object):
         """constructor"""
         self.osclients = OpenStackClients()
         self.keystone = self.osclients.get_keystoneclient()
+        self.change_domain_name()
+
         self.password_changer = PasswordChanger(self.osclients)
 
     def service_exists(self, service_name, service_type):
@@ -295,7 +297,6 @@ class RegisterRegion(object):
         """
         region_name = region['region']
         self.region_exists(region_name)
-        self.change_domain_name()
 
         for user in region['users']:
             userobj = self.user_exists(user['username'], user['password'])
