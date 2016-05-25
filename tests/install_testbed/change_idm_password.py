@@ -106,8 +106,8 @@ credential = """export OS_AUTH_URL=http://{0}:5000/v3/
 export OS_AUTH_URL_V2=http://{0}:5000/v2.0/
 export OS_USERNAME={2}
 export OS_TENANT_NAME=idm
-export OS_PROJECT_DOMAIN_ID=default
-export OS_USER_DOMAIN_NAME=Default
+export OS_PROJECT_DOMAIN_NAME=default
+export OS_USER_DOMAIN_NAME=default
 export OS_REGION_NAME={3}
 export OS_IDENTITY_API_VERSION=3
 """.format(keystone_ip, keystone_ip, "idm", region)

@@ -32,7 +32,7 @@ preferred_ip = None
 flavor_name = 'm1.large'
 flavor_name_phone_home = "m1.small"
 image_name = 'keyrock-R4.4'
-image_phone_home = 'base_ubuntu_14.04'
+image_phone_home = 'base_centos_7'
 vm_name = 'testbedskuld'
 # filename of init_script
 init_script = 'cloudconfig'

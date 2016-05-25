@@ -49,12 +49,11 @@ class TestExpiredUsers(TestCase):
     def testwrongadmintoken(self, m):
         """testworngadmintoken check that we have a worg credential data"""
         response = {
-            "error":
-                {
-                    "message": "The request you have made requires authentication.",
-                    "code": 401,
-                    "title": "Unauthorized"
-                }
+            "error": {
+                "message": "The request you have made requires authentication.",
+                "code": 401,
+                "title": "Unauthorized"
+            }
         }
 
         m.post(requests_mock.ANY, json=response, status_code=401)

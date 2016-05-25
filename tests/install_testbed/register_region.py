@@ -113,8 +113,8 @@ default_region_json = """
             "name": "keystone$REGION",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
-            "admin": "http://$KEYSTONE_HOST:5000/v3/",
-            "internal": "http://$KEYSTONE_HOST:35357/v3/"
+            "admin": "http://localhost:5000/v3/",
+            "internal": "http://localhost:35357/v3/"
         }
     ]
 }
@@ -127,6 +127,8 @@ class RegisterRegion(object):
         """constructor"""
         self.osclients = OpenStackClients()
         self.keystone = self.osclients.get_keystoneclient()
+        self.change_domain_name()
+
         self.password_changer = PasswordChanger(self.osclients)
 
     def service_exists(self, service_name, service_type):
@@ -150,6 +152,22 @@ class RegisterRegion(object):
         """
         if not self.is_region(region_id):
             self.keystone.regions.create(region_id)
+
+    def change_domain_name(self):
+        """ It change the domain name to default, which is the
+        one used in FIWARE Lab.
+        :return: nothing
+        """
+        os.environ['OS_USER_DOMAIN_NAME'] = "Default"
+        os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
+        try:
+            domain = self.keystone.domains.find(name="Default")
+            self.keystone.domains.update(domain, name="default")
+        except:
+            pass
+
+        os.environ['OS_USER_DOMAIN_NAME'] = "default"
+        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
 
     def is_region(self, region_id):
         """
@@ -217,7 +235,12 @@ class RegisterRegion(object):
                     self.keystone.endpoint_groups.delete(endpoint_group)
 
     def create_endpoint_group(self, region):
-        self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region} )
+        """
+        It create the endpoint group for the region.
+        :param region: the region
+        :return: nothing
+        """
+        self.keystone.endpoint_groups.create("Region Group", filters={"region_id": region})
 
     def endpoint_exists(self, service_id, interface, url, region):
         """check that enpoint exists. Otherwise, create it. Also check that the

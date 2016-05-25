@@ -104,9 +104,8 @@ def deploy_security_groups(sg_name, ports):
                                      'remote_group_id': g.id}})
 
 
-
-
 def create_key_pair():
+    # It creates the keypair
     nova = osclients.get_novaclient()
     keys = nova.keypairs.findall(name=settings.key_name)
     if not keys:
@@ -261,7 +260,7 @@ def deploy_testbed():
         nics = [{'net-id': network['management']}]
 
     keystone_ip = floating_ip
-    if env["Region1"]:
+    if env.get("Region1"):
         region = env["Region1"]
     else:
         region = 'RegionOne'
