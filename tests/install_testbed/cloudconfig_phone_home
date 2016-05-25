@@ -3,7 +3,7 @@
 manage_etc_hosts: localhost
 
 runcmd:
-  - sudo iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8081 -j ACCEPT
-  - echo "GatewayPorts yes" >> /etc/ssh/sshd_config
+  - iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8081 -j ACCEPT
+  - /bin/sh -c 'echo -e "\nGatewayPorts yes" >> /etc/ssh/sshd_config'
   - service sshd restart
 

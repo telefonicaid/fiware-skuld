@@ -113,8 +113,8 @@ default_region_json = """
             "name": "keystone$REGION",
             "type": "identity",
             "public": "http://$KEYSTONE_HOST:35357/v3/",
-            "admin": "http://$KEYSTONE_HOST:5000/v3/",
-            "internal": "http://$KEYSTONE_HOST:35357/v3/"
+            "admin": "http://localhost:5000/v3/",
+            "internal": "http://localhost:35357/v3/"
         }
     ]
 }
@@ -150,6 +150,15 @@ class RegisterRegion(object):
         """
         if not self.is_region(region_id):
             self.keystone.regions.create(region_id)
+
+    def change_domain_name(self):
+        """ Ensure that the region exists: create if it does not.
+
+        :param region_id: the region id (the region name)
+        :return: Nothing
+        """
+        domain = self.keystone.domains.find(name="Default")
+        self.keystone.domains.update(domain,name="default")
 
     def is_region(self, region_id):
         """
@@ -278,6 +287,7 @@ class RegisterRegion(object):
         """
         region_name = region['region']
         self.region_exists(region_name)
+        self.change_domain_name()
 
         for user in region['users']:
             userobj = self.user_exists(user['username'], user['password'])

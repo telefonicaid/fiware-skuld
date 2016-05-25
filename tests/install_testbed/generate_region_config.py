@@ -101,8 +101,8 @@ class GenerateTemplateRegion(object):
             f.write('export OS_PASSWORD=$ADMIN_REGION_PASS\n')
             f.write('export OS_USERNAME=admin-$REGION\n')
             f.write('export OS_TENANT_NAME=$OS_USERNAME\n')
-            f.write('export OS_PROJECT_DOMAIN_ID=default\n')
-            f.write('export OS_USER_DOMAIN_NAME=Default\n')
+            f.write('export OS_PROJECT_DOMAIN_NAME=default\n')
+            f.write('export OS_USER_DOMAIN_NAME=default\n')
             f.write('export OS_IDENTITY_API_VERSION=3\n')
 
 

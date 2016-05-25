@@ -261,7 +261,7 @@ def deploy_testbed():
         nics = [{'net-id': network['management']}]
 
     keystone_ip = floating_ip
-    if env["Region1"]:
+    if env.get("Region1"):
         region = env["Region1"]
     else:
         region = 'RegionOne'
