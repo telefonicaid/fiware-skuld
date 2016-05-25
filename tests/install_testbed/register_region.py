@@ -125,11 +125,26 @@ class RegisterRegion(object):
     """Class to register users with role assignments, services and endpoints"""
     def __init__(self):
         """constructor"""
-        self.osclients = OpenStackClients()
+        self.osclients = self.get_os_clients_spain2()
         self.keystone = self.osclients.get_keystoneclient()
-        self.change_domain_name()
-
         self.password_changer = PasswordChanger(self.osclients)
+        self.change_domain_name()
+        region_name = os.environ['REGION']
+        self.region_exists(region_name)
+        self.osclients = self.get_os_clients_region()
+        self.keystone = self.osclients.get_keystoneclient()
+
+    def get_os_clients_spain2(self):
+        os.environ['OS_USER_DOMAIN_NAME'] = "Default"
+        os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
+        os.environ['OS_REGION_NAME'] = "Spain2"
+        return OpenStackClients()
+
+    def get_os_clients_region(self):
+        os.environ['OS_USER_DOMAIN_NAME'] = "default"
+        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
+        os.environ['OS_REGION_NAME'] = os.environ['REGION']
+        return  OpenStackClients()
 
     def service_exists(self, service_name, service_type):
         """Ensure that the service exists: create if it does not.
@@ -158,16 +173,12 @@ class RegisterRegion(object):
         one used in FIWARE Lab.
         :return: nothing
         """
-        os.environ['OS_USER_DOMAIN_NAME'] = "Default"
-        os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
+
         try:
             domain = self.keystone.domains.find(name="Default")
             self.keystone.domains.update(domain, name="default")
         except:
             pass
-
-        os.environ['OS_USER_DOMAIN_NAME'] = "default"
-        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
 
     def is_region(self, region_id):
         """
@@ -300,8 +311,6 @@ class RegisterRegion(object):
         :return: nothing
         """
         region_name = region['region']
-        self.region_exists(region_name)
-
         for user in region['users']:
             userobj = self.user_exists(user['username'], user['password'])
             admin_role = self.keystone.roles.find(name='admin')

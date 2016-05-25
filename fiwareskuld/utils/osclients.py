@@ -43,7 +43,6 @@ modules_available = {
     'swift': 'swiftclient.client'
 }
 
-
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
     sharing the session:
@@ -139,7 +138,7 @@ class OpenStackClients(object):
         else:
             self.__user_domain_id = None
 
-        if 'OS_USEr_DOMAIN_NAME' in env:
+        if 'OS_USER_DOMAIN_NAME' in env:
             self.__user_domain_name = env['OS_USER_DOMAIN_NAME']
         else:
             self.__user_domain_name = None
