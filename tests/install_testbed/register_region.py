@@ -172,27 +172,34 @@ class RegisterRegion(object):
         :return: nothing
         """
         self.keystone = self.get_credentials()
-
-        domain = self.keystone.domains.find(name="default")
-        if domain:
-            print "domain ok"
-        else:
-            domain = self.keystone.domains.find(name="Default")
-            self.keystone.domains.update(domain, name="default")
+        try:
+            domain = self.keystone.domains.find(name="default")
+        except:
+            try:
+                domain = self.keystone.domains.find(name="Default")
+            except Exception as e:
+                print e
+        self.keystone.domains.update(domain, name="default")
         self.keystone = self.return_credentails()
 
     def get_credentials(self):
+        os.environ['OS_REGION_NAME'] = self.get_region()
         osclients = OpenStackClients()
         keystone = osclients.get_keystoneclient()
-        os.environ['OS_REGION_NAME'] = self.get_region()
         try:
+            print os.environ['OS_REGION_NAME']
+            print os.environ['OS_USER_DOMAIN_NAME']
             self.keystone.domains.find(name="default")
+            print ok
             return keystone
-        except:
+        except Exception as e:
+            print e
             os.environ['OS_USER_DOMAIN_NAME'] = "Default"
             os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
             os.environ['OS_REGION_NAME'] = "Spain2"
-            osclients = self.get_os_clients_spain2()
+            print os.environ['OS_REGION_NAME']
+            print os.environ['OS_USER_DOMAIN_NAME']
+            osclients = OpenStackClients()
             return osclients.get_keystoneclient()
 
     def return_credentails(self):
