@@ -190,7 +190,6 @@ class RegisterRegion(object):
             print os.environ['OS_REGION_NAME']
             print os.environ['OS_USER_DOMAIN_NAME']
             self.keystone.domains.find(name="default")
-            print ok
             return keystone
         except Exception as e:
             print e
