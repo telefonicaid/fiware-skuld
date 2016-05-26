@@ -28,6 +28,7 @@ import re
 import os
 import sys
 from fiwareskuld.change_password import PasswordChanger
+from subprocess import Popen, PIPE
 
 from keystoneclient.exceptions import NotFound
 
@@ -125,26 +126,23 @@ class RegisterRegion(object):
     """Class to register users with role assignments, services and endpoints"""
     def __init__(self):
         """constructor"""
-        self.osclients = self.get_os_clients_spain2()
+        self.osclients = OpenStackClients()
         self.keystone = self.osclients.get_keystoneclient()
-        self.password_changer = PasswordChanger(self.osclients)
         self.change_domain_name()
-        region_name = os.environ['REGION']
-        self.region_exists(region_name)
-        self.osclients = self.get_os_clients_region()
-        self.keystone = self.osclients.get_keystoneclient()
-
-    def get_os_clients_spain2(self):
-        os.environ['OS_USER_DOMAIN_NAME'] = "Default"
-        os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
-        os.environ['OS_REGION_NAME'] = "Spain2"
-        return OpenStackClients()
-
-    def get_os_clients_region(self):
-        os.environ['OS_USER_DOMAIN_NAME'] = "default"
-        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
+        self.password_changer = PasswordChanger(self.osclients)
         os.environ['OS_REGION_NAME'] = os.environ['REGION']
-        return  OpenStackClients()
+        self.region_exists(os.environ['REGION'])
+
+
+    def get_region(self):
+        p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], stdout=PIPE)
+        metadatajson, err = p2.communicate()
+        meta = json.loads(metadatajson)["meta"]
+        region = meta["Region"]
+        region2 = meta["region_keystone"]
+        if region2:
+            return region2
+        return region
 
     def service_exists(self, service_name, service_type):
         """Ensure that the service exists: create if it does not.
@@ -173,12 +171,36 @@ class RegisterRegion(object):
         one used in FIWARE Lab.
         :return: nothing
         """
+        self.keystone = self.get_credentials()
 
-        try:
+        domain = self.keystone.domains.find(name="default")
+        if domain:
+            print "domain ok"
+        else:
             domain = self.keystone.domains.find(name="Default")
             self.keystone.domains.update(domain, name="default")
+        self.keystone = self.return_credentails()
+
+    def get_credentials(self):
+        osclients = OpenStackClients()
+        keystone = osclients.get_keystoneclient()
+        os.environ['OS_REGION_NAME'] = self.get_region()
+        try:
+            self.keystone.domains.find(name="default")
+            return keystone
         except:
-            pass
+            os.environ['OS_USER_DOMAIN_NAME'] = "Default"
+            os.environ['OS_PROJECT_DOMAIN_ID'] = "default"
+            os.environ['OS_REGION_NAME'] = "Spain2"
+            osclients = self.get_os_clients_spain2()
+            return osclients.get_keystoneclient()
+
+    def return_credentails(self):
+        os.environ['OS_USER_DOMAIN_NAME'] = "default"
+        os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
+        os.environ['OS_REGION_NAME'] = os.environ['REGION']
+        osclients = OpenStackClients()
+        return osclients.get_keystoneclient()
 
     def is_region(self, region_id):
         """
