@@ -7,9 +7,7 @@ echo $BOOKED_IP
 
 tests/install_testbed/launch_vm_phonehome.py >cmd.log 2>&1
 cat cmd.log
-export ip1=`grep "Region1 IP:" cmd.log | awk '{print $4}'`
-export region1=`grep "Region1 IP:" cmd.log | awk '{print $3}'`
-export region2=`grep "Region2 IP:" cmd.log | awk '{print $3}'`
+export ip1=`grep "IP:" cmd.log | awk '{print $2}'`
 export uuid1=`grep "$region1: VM with UUID" cmd.log | awk '{print $5}'`
 if [ -z "${ip1}" ]; then
     echo "Error to deploy the VM or obtain the IP"

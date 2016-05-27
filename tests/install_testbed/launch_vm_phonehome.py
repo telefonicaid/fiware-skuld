@@ -35,6 +35,7 @@ import launch_vm
 
 # Get networks
 def deploy_phone_home_vm():
+    env["BOOKED_IP"] = "130.206.119.128"
     network = dict()
     neutron = osclients.get_neutronclient()
     nova = osclients.get_novaclient()
@@ -82,7 +83,7 @@ def deploy_phone_home_vm():
     init_script = os.path.join(os.path.split(sys.argv[0])[0], settings.init_script_phone_home)
     server = launch_vm.launch_vm(vm_name, settings.flavor_name_phone_home, sg_name,
                                  settings.image_phone_home, nics, init_script, keystone_ip, '', '')
-    print "IP {0}".format(keystone_ip)
+    print "IP: {0}".format(keystone_ip)
 
     # assign the floating ip
     if floating_ip:
