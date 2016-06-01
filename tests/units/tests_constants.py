@@ -38,3 +38,5 @@ LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE = 'list_role_assignments_response.json'
 LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 = 'list_role_assignments_response1.json'
 LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED2 = 'list_role_assignments_response2.json'
 LIST_USERS_TO_DELETE = 'users_to_delete.txt'
+
+NO_DATA = 'No data'

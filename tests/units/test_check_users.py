@@ -26,7 +26,7 @@ from unittest import TestCase
 from requests import Response
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1, \
     LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED2, LIST_USERS_TO_DELETE, LIST_USERS_RESPONSE_FILE2, \
-    LIST_USERS_RESPONSE_FILE3
+    LIST_USERS_RESPONSE_FILE3, NO_DATA
 from httplib import OK
 from os import environ
 import os
@@ -80,11 +80,13 @@ class MySessionMock(MagicMock):
 
 
 class ContextualStringIO(StringIO):
+    # Extend StringIO class to get __enter__, __exit__ and __getitem__ methods.
+
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
-        self.close()  # icecrime does it, so I guess I should, too
+        self.close()
         return False  # Indicate that we haven't handled the exception, if received
 
     def __getitem__(self, item):
@@ -129,38 +131,60 @@ class TestCheckUsers(TestCase):
             del os.environ['KEYSTONE_ADMIN_ENDPOINT']
 
     def side_effect_function(self, *args, **kwargs):
-        if 'users_to_delete.txt' in args[0]:
+        """
+        Get the corresponding resource data from the file, some users are not Basic
+        but they has know tipe.
+        :param args:
+        :param kwargs: More arguments, in this case nothing important.
+        :return: ContextualStringIO simulating that it is read from file.
+        """
+
+        if LIST_USERS_TO_DELETE in args[0]:
             data = self.list_user_to_delete
-        elif 'list_role_assignments_response1.json' in args[0]:
+        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 in args[0]:
             data = self.list_role_assignment1
-        elif 'list_users_response2.json' in args[0]:
+        elif LIST_USERS_RESPONSE_FILE2 in args[0]:
             data = self.list_users_response2
         else:
-            data = 'No data'
+            data = NO_DATA
 
         return ContextualStringIO(data)
 
     def side_effect_function2(self, *args, **kwargs):
-        if 'users_to_delete.txt' in args[0]:
+        """
+        Get the corresponding resource data from the file, some users are unknow type
+        :param args:
+        :param kwargs: More arguments, in this case nothing important.
+        :return: ContextualStringIO simulating that it is read from file.
+        """
+
+        if LIST_USERS_TO_DELETE in args[0]:
             data = self.list_user_to_delete
-        elif 'list_role_assignments_response1.json' in args[0]:
+        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 in args[0]:
             data = self.list_role_assignment1
-        elif 'list_users_response3.json' in args[0]:
+        elif LIST_USERS_RESPONSE_FILE3 in args[0]:
             data = self.list_users_response3
         else:
-            data = 'No data'
+            data = NO_DATA
 
         return ContextualStringIO(data)
 
     def side_effect_function3(self, *args, **kwargs):
-        if 'users_to_delete.txt' in args[0]:
+        """
+        Get the corresponding resource data from the file, all the users are Basic.
+        :param args:
+        :param kwargs: More arguments, in this case nothing important.
+        :return: ContextualStringIO simulating that it is read from file.
+        """
+
+        if LIST_USERS_TO_DELETE in args[0]:
             data = self.list_user_to_delete
-        elif 'list_role_assignments_response1.json' in args[0]:
+        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 in args[0]:
             data = self.list_role_assignment2
-        elif 'list_users_response3.json' in args[0]:
+        elif LIST_USERS_RESPONSE_FILE3 in args[0]:
             data = self.list_users_response3
         else:
-            data = 'No data'
+            data = NO_DATA
 
         return ContextualStringIO(data)
 
@@ -168,8 +192,8 @@ class TestCheckUsers(TestCase):
     def test_check_user_init(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = set(['fake1', 'fake2', 'fake3'])
-        expectedUserBasicSet = set([u'fake1', u'fake2'])
+        expectedUserSet = {'fake1', 'fake2', 'fake3'}
+        expectedUserBasicSet = {u'fake1', u'fake2'}
 
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function
@@ -186,8 +210,8 @@ class TestCheckUsers(TestCase):
     def test_report_not_basic_users(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = set(['fake3'])
-        expectedUserTypeSet = set(['community'])
+        expectedUserSet = {'fake3'}
+        expectedUserTypeSet = {'community'}
 
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function
@@ -206,8 +230,8 @@ class TestCheckUsers(TestCase):
     def test_report_invalid_users_type(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = set(['fake3'])
-        expectedUserTypeSet = set(['unkown'])
+        expectedUserSet = {'fake3'}
+        expectedUserTypeSet = {'unkown'}
 
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function2
@@ -226,8 +250,8 @@ class TestCheckUsers(TestCase):
     def test_report_all_users_basic(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = set([])
-        expectedUserTypeSet = set([])
+        expectedUserSet = set()
+        expectedUserTypeSet = set()
 
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function3
