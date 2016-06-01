@@ -23,11 +23,11 @@
 # contact with opensource@tid.es
 #
 
-import queries
-from utils.osclients import osclients
+from fiwareskuld.utils.queries import Queries
+from utils.osclients import OpenStackClients # osclients
 from conf import settings
 
-q = queries.Queries()
+q = Queries()
 
 
 class CheckUsers(object):
@@ -40,6 +40,9 @@ class CheckUsers(object):
         basic_type = settings.BASIC_ROLE_ID
         self.ids = set(
             line.strip() for line in open('users_to_delete.txt').readlines())
+
+        osclients = OpenStackClients()
+
         keystone = osclients.get_keystoneclientv3()
         self.users_basic = set(
             asig.user['id']
@@ -49,6 +52,7 @@ class CheckUsers(object):
     def report_not_basic_users(self):
         """report if there are users to delete that are not basic now"""
         no_basic_users = self.ids - self.users_basic
+        no_basic_userstype = set()
         if not no_basic_users:
             print('All is OK')
         else:
@@ -59,6 +63,12 @@ class CheckUsers(object):
                 except Exception:
                     user_type = 'unkown'
                 print(user + ' ' + user_type)
+
+                no_basic_userstype.add(user_type)
+
+        return no_basic_users, no_basic_userstype
+
+
 
 if __name__ == '__main__':
     check = CheckUsers()
