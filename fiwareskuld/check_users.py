@@ -24,7 +24,7 @@
 #
 
 from fiwareskuld.utils.queries import Queries
-from utils.osclients import OpenStackClients # osclients
+from utils.osclients import OpenStackClients
 from conf import settings
 
 q = Queries()
@@ -67,7 +67,6 @@ class CheckUsers(object):
                 no_basic_userstype.add(user_type)
 
         return no_basic_users, no_basic_userstype
-
 
 
 if __name__ == '__main__':
