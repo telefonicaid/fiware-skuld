@@ -206,6 +206,8 @@ class TestCheckUsers(TestCase):
             self.assertSetEqual(expectedUserBasicSet, check.users_basic,
                                 "The expected users with Basic role is not obtained")
 
+            self.assertTrue(mocked_open.called)
+
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_report_not_basic_users(self):
         from fiwareskuld.check_users import CheckUsers
@@ -225,6 +227,8 @@ class TestCheckUsers(TestCase):
 
             self.assertSetEqual(expectedUserTypeSet, no_basic_userstype,
                                 "The expected set of type of no basic users is wrong")
+
+            self.assertTrue(mocked_open.called)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_report_invalid_users_type(self):
@@ -246,6 +250,8 @@ class TestCheckUsers(TestCase):
             self.assertSetEqual(expectedUserTypeSet, no_basic_userstype,
                                 "The expected set of type of no basic users is wrong")
 
+            self.assertTrue(mocked_open.called)
+
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_report_all_users_basic(self):
         from fiwareskuld.check_users import CheckUsers
@@ -265,3 +271,5 @@ class TestCheckUsers(TestCase):
 
             self.assertSetEqual(expectedUserTypeSet, no_basic_userstype,
                                 "The expected set of type of no basic users is wrong")
+
+            self.assertTrue(mocked_open.called)
