@@ -144,7 +144,7 @@ class RegisterRegion(object):
         os.environ['OS_USER_DOMAIN_NAME'] = "default"
         os.environ['OS_PROJECT_DOMAIN_NAME'] = "default"
         os.environ['OS_REGION_NAME'] = os.environ['REGION']
-        return  OpenStackClients()
+        return OpenStackClients()
 
     def service_exists(self, service_name, service_type):
         """Ensure that the service exists: create if it does not.
