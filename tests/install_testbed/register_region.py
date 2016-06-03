@@ -133,7 +133,6 @@ class RegisterRegion(object):
         os.environ['OS_REGION_NAME'] = os.environ['REGION']
         self.region_exists(os.environ['REGION'])
 
-
     def get_region(self):
         p2 = Popen(["curl", "http://169.254.169.254/openstack/latest/meta_data.json"], stdout=PIPE)
         metadatajson, err = p2.communicate()

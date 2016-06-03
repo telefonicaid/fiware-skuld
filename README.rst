@@ -417,7 +417,18 @@ Testing
 Unit tests
 ----------
 
-To run unit test, invoke *nosetest test_expired_users.py* inside *tests* folder
+To run the unit tests, you need to create a virtualenv using the requirements
+both contained in requirements.txt and test-requirements.txt. You only need to
+execute the nosetests program in the root directory of the fiware-skuld
+code. Keep in mind that it requires python2.7 to execute the unit tests.
+
+.. code::
+
+     virtualenv -p <root to python v2.7> venv
+     source ./venv/bin/activate
+     pip install -r requirements.txt
+     pip install -r test-requirements.txt
+     nosetests --with-coverage --cover-package=./ --exe
 
 Acceptance tests
 ----------------

@@ -37,9 +37,7 @@ MAX_NUMBER_OF_DAYS = 14  # days
 NOTIFY_BEFORE_EXPIRED = 7  # days
 STOP_BEFORE_DELETE = 0  # days
 TRUSTID_VALIDITY = 36000  # seconds
-DONT_DELETE_DOMAINS = set((
-   'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu',
-   'gatv.ssr.upm.es', 'thalesgroup.com', 'atos.net', 'uth.gr', 'bth.se',
-   'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',
-   'it-innovation.soton.ac.uk', 'cesnet.cz', 'rt.cesnet.cz', 'rt3.cesnet.cz',
-   'fokus.fraunhofer.de'))
+DONT_DELETE_DOMAINS = ([
+    'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu', 'gatv.ssr.upm.es', 'thalesgroup.com',
+    'atos.net', 'uth.gr', 'bth.se', 'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',
+    'it-innovation.soton.ac.uk', 'cesnet.cz', 'rt.cesnet.cz', 'rt3.cesnet.cz', 'fokus.fraunhofer.de'])
