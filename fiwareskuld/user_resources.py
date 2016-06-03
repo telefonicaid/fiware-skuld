@@ -70,6 +70,7 @@ class UserResources(object):
 
         self.logger = logging.getLogger(__name__)
         self.clients = OpenStackClients()
+
         if tenant_id:
             self.clients.set_credential(username, password,
                                         tenant_id=tenant_id)
@@ -82,30 +83,40 @@ class UserResources(object):
         else:
             raise(
                 'Either tenant_id or tenant_name or trust_id must be provided')
+
         region = self.clients.region
         self.clients.override_endpoint(
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
+
         self.user_id = self.clients.get_session().get_user_id()
         session = self.clients.get_session()
         self.user_name = username
         self.nova = NovaResources(self.clients)
         self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
+
         try:
             self.neutron = NeutronResources(self.clients)
         except Exception:
             # The region does not support Neutron
             # It would be better to check the endpoint
             self.neutron = None
-        self.blueprints = BluePrintResources(self.clients)
+
+        try:
+            self.blueprints = BluePrintResources(self.clients)
+        except Exception:
+            # The region does not support PaaS Manager
+            # It would be better to check the endpoint
+            self.blueprints = None
+
         try:
             self.swift = SwiftResources(self.clients)
         except Exception:
             # The region does not support Swift
             # It would be better to check the endpoint
             self.swift = None
-        # Images in use is a set used to avoid deleting formerly glance images
 
+        # Images in use is a set used to avoid deleting formerly glance images
         # in use by other tenants
         self.imagesinuse = set()
 
@@ -123,8 +134,10 @@ class UserResources(object):
         self.clients.set_region(region)
         self.clients.override_endpoint(
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
+
         self.nova.on_region_changed()
         self.glance.on_region_changed()
+
         try:
             if self.swift:
                 self.swift.on_region_changed()
@@ -135,7 +148,16 @@ class UserResources(object):
             self.swift = None
 
         self.cinder.on_region_changed()
-        self.blueprint.on_region_changed()
+
+        try:
+            if self.blueprints:
+                self.blueprint.on_region_changed()
+            else:
+                self.blueprints = BluePrintResources(self.clients)
+        except Exception:
+            # The region has not configured paas manager
+            self.blueprints = None
+
         try:
             if self.neutron:
                 self.neutron.on_region_changed()
@@ -193,8 +215,10 @@ class UserResources(object):
         while self.blueprints.get_tenant_blueprints() and count < 120:
             time.sleep(1)
             count += 1
+
         if count >= 120:
             self.logger.warning('Waiting for blueprint more than 120 seconds')
+
         try:
             self.nova.delete_tenant_vms()
         except Exception, e:
@@ -214,6 +238,7 @@ class UserResources(object):
         while self.nova.get_tenant_vms() and count < 120:
             time.sleep(1)
             count += 1
+
         if count >= 120:
             self.logger.warning('Waiting for VMs more than 120 seconds')
 
@@ -232,6 +257,7 @@ class UserResources(object):
         while self.cinder.get_tenant_volume_snapshots() and count < 120:
             time.sleep(1)
             count += 1
+
         if count >= 120:
             self.logger.warning('Waiting for volume snapshots > 120 seconds')
 
@@ -307,28 +333,29 @@ class UserResources(object):
         :return: a dictionary with the user's resources
         """
         resources = dict()
-        resources['blueprints'] = set(self.blueprints.get_tenant_blueprints())
-        resources['templates'] = set(self.blueprints.get_tenant_templates())
+
+        if self.blueprints:
+            resources['blueprints'] = set(self.blueprints.get_tenant_blueprints())
+            resources['templates'] = set(self.blueprints.get_tenant_templates())
+
         resources['keys'] = set(self.nova.get_user_keypairs())
         resources['vms'] = set(self.nova.get_tenant_vms())
-        resources['security_groups'] = set(
-            self.nova.get_tenant_security_groups())
+        resources['security_groups'] = set(self.nova.get_tenant_security_groups())
+
         resources['images'] = self.glance.get_tenant_images()
-        resources['volumesnapshots'] = set(
-            self.cinder.get_tenant_volume_snapshots())
+        resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
+
         resources['volumes'] = set(self.cinder.get_tenant_volumes())
-        resources['backupvolumes'] = set(
-            self.cinder.get_tenant_backup_volumes())
+        resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
+
         if self.neutron:
-            resources['floatingips'] = set(
-                self.neutron.get_tenant_floatingips())
-            resources['networks'] = set(
-                self.neutron.get_tenant_networks())
-            resources['nsecuritygroups'] = set(
-                self.neutron.get_tenant_securitygroups())
+            resources['floatingips'] = set(self.neutron.get_tenant_floatingips())
+            resources['networks'] = set(self.neutron.get_tenant_networks())
+            resources['nsecuritygroups'] = set(self.neutron.get_tenant_securitygroups())
             resources['routers'] = set(self.neutron.get_tenant_routers())
             resources['subnets'] = set(self.neutron.get_tenant_subnets())
             resources['ports'] = set(self.neutron.get_tenant_ports())
+
         if self.swift:
             resources['objects'] = set(self.swift.get_tenant_objects())
 
@@ -339,10 +366,11 @@ class UserResources(object):
         print('Tenant id is: ' + self.clients.get_session().get_project_id())
         print('User id is: ' + self.clients.get_session().get_user_id())
 
-        print('Tenant blueprint instances: ')
-        print(self.blueprints.get_tenant_blueprints())
-        print('Tenant blueprint templates: ')
-        print(self.blueprints.get_tenant_templates())
+        if self.blueprints:
+            print('Tenant blueprint instances: ')
+            print(self.blueprints.get_tenant_blueprints())
+            print('Tenant blueprint templates: ')
+            print(self.blueprints.get_tenant_templates())
 
         print('User keypairs:')
         print(self.nova.get_user_keypairs())

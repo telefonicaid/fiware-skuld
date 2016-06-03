@@ -613,7 +613,7 @@ class OpenStackClients(object):
         for service in self.get_catalog():
             if service['type'] == service_type:
                 return service['endpoints']
-        raise Exception('not found')
+        raise Exception('The endpoint of the service "{}" was not found.'.format(service_type))
 
     def get_interface_endpoint(self, service_type, interface, region=None):
         """Get the URL of the region's public/internal/admin endpoint
