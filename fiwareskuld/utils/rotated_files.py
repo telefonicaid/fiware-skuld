@@ -44,9 +44,11 @@ def rotate_files(name, max_level, rename_to):
 
     for path in names:
         if len(path) > len(name):
+            # We increase in 1 due to we want to express that the rotation is one day more.
             next_name = name + '.' + str(int(path[-3:]) + 1).zfill(3)
         else:
             next_name = name + '.001'
+
         if next_name == target:
             os.rename(path, rename_to)
         else:
