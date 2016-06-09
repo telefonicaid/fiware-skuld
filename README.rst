@@ -441,6 +441,7 @@ Environment preparation
   (pip install -r requirements.txt --allow-all-external).
 - Configure file in tests/acceptance_tests/commons/configuration.py adding the
   keystone url, and a valid, user, password and tenant ID.
+- It is possible to deploy a valid Openstack testbed by using the fiware-testbed-deploy component: https://github.com/telefonicaid/fiware-testbed-deploy/
 
 Tests execution
 ***************
