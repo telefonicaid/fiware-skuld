@@ -1,0 +1,89 @@
+{
+  "role_assignments": [
+    {
+      "scope": {
+        "project": {
+          "id": "c16b8de8a02946029258c4cbe2135578"
+        }
+      },
+      "role": {
+        "id": "0bcb7fa6e85046cb9e89ded5656b192b"
+      },
+      "user": {
+        "id": "fake1"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/c16b8de8a02946029258c4cbe2135578/users/01a7cf9cca83476b8a784bd8591087ad/roles/9eb0158e4c0b48d4a06c6144ab08a25d"
+      }
+    },
+    {
+      "scope": {
+        "project": {
+          "id": "e69cb1a9a7314c5580a2cddbc57e917a"
+        }
+      },
+      "role": {
+        "id": "9eb0158e4c0b48d4a06c6144ab08a25d"
+      },
+      "user": {
+        "id": "fake1"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/e69cb1a9a7314c5580a2cddbc57e917a/users/01a7cf9cca83476b8a784bd8591087ad/roles/9eb0158e4c0b48d4a06c6144ab08a25d"
+      }
+    },
+    {
+      "scope": {
+        "project": {
+          "id": "00000000000003228460960090160000"
+        }
+      },
+      "role": {
+        "id": "0bcb7fa6e85046cb9e89ded5656b192b"
+      },
+      "user": {
+        "id": "fake2"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/00000000000003228460960090160000/users/02e177877dca4bc59ef1a7cf55a86e31/roles/bcefc16468f344829a739512b96624df"
+      }
+    },
+    {
+      "scope": {
+        "domain": {
+          "id": "default"
+        }
+      },
+      "role": {
+        "id": "23a17930700f44bfa527818bd41765ef"
+      },
+      "user": {
+        "id": "fake2"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/06c02275d4b1400bb0318677d6568d52/roles/23a17930700f44bfa527818bd41765ef"
+      }
+    },
+    {
+      "scope": {
+        "project": {
+          "id": "ff07c23310b542b191c57ab16727a51d"
+        }
+      },
+      "role": {
+        "id": "24b85c710a1a4868935451a5ed9e4ecd"
+      },
+      "user": {
+        "id": "fake3"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/ff07c23310b542b191c57ab16727a51d/users/02e177877dca4bc59ef1a7cf55a86e31/roles/24b85c710a1a4868935451a5ed9e4ecd"
+      }
+    }
+  ],
+    "links": {
+        "self": "http://identity:35357/v3/role_assignments",
+        "previous": null,
+        "next": null
+    }
+}

@@ -43,6 +43,7 @@ modules_available = {
     'swift': 'swiftclient.client'
 }
 
+
 class OpenStackClients(object):
     """This class provides methods to obtains several openstack clients,
     sharing the session:

@@ -1,0 +1,25 @@
+{
+  "role_assignments": [
+    {
+      "scope": {
+        "domain": {
+          "id": "default"
+        }
+      },
+      "role": {
+        "id": "23a17930700f44bfa527818bd41765ef"
+      },
+      "user": {
+        "id": "fake3"
+      },
+      "links": {
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/fake3/roles/23a17930700f44bfa527818bd41765ef"
+      }
+    }
+  ],
+  "links": {
+    "self": "http://cloud.lab.fiware.org:4730/v3/role_assignments?user.id=fake3&scope.domain.id=default",
+    "previous": null,
+    "next": null
+  }
+}
