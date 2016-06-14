@@ -433,7 +433,7 @@ code. Keep in mind that it requires python2.7 to execute the unit tests.
 Acceptance tests
 ----------------
 
-The acceptante tests are inside the folder *tests/acceptance_tests*
+The acceptance tests are inside the folder *tests/acceptance_tests*
 
 Prerequisites
 *************
@@ -459,7 +459,7 @@ Tests execution
 
 1) Change to the tests/acceptance folder of the project if not already on it
 2) Assign the PYTHONPATH environment variable executing "export PYTHONPATH=../.."
-3) Run lettuce_tools with appropriate params (see available ones with the -h option)
+3) Run behave features/ --tags ~@skip --junit --junit-directory testreport.
 
 Tools
 -----
