@@ -432,8 +432,8 @@ code. Keep in mind that it requires python2.7 to execute the unit tests.
 
 Unit tests with Docker execution
 ********************************
-Skuld unit tests can be executed by docker. To do that, firtly it is required to create the docker image, with the
-following command:
+Skuld unit tests can be executed by docker. To do that, firstly it is required the creation of
+the docker image, with the following command:
 
 .. code::
 
@@ -504,15 +504,16 @@ Top_
 
 Acceptance tests with Docker execution
 **************************************
-Skuld acceptance tests can be executed by Docker. To do that, firtly it is required to create the docker image.
+Skuld acceptance tests can be executed by Docker. To do that, firstly it is required the creation of
+the docker image.
 To do that:
 
 .. code::
 
     docker build -t fiware-skuld -f docker/Dockerfile docker
 
-Once the fiware-skuld image is created, we can run it by using docker-compose (to include the environment variables). To export then
-is required:
+Once the fiware-skuld image is created, we can run it by using docker-compose (exporting the right
+environment variables).
 
 .. code::
 
