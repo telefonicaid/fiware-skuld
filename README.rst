@@ -531,6 +531,9 @@ When docker has finished, you can obtain the tests results by
 
    docker cp docker_fiwareskuld_1:/opt/fiware-skuld/tests/acceptance/testreport .
 
+All the scripts and docker files for the deployment of Openstack testsbed have been moved to
+to fiware-testbed-deploy component: https://github.com/telefonicaid/fiware-testbed-deploy/
+
 Top_
 
 Deletion of Unaccepted Terms & Conditions users
