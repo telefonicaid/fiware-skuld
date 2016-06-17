@@ -430,6 +430,28 @@ code. Keep in mind that it requires python2.7 to execute the unit tests.
      pip install -r test-requirements.txt
      nosetests --with-coverage --cover-package=./ --exe
 
+Unit tests with Docker execution
+********************************
+Skuld unit tests can be executed by docker. To do that, firstly it is required the creation of
+the docker image, with the following command:
+
+.. code::
+
+    docker build -t fiware-skuld-build -f docker/Dockerfile_build docker
+
+Once the fiware-skuld-build image is created, we can run it by:
+
+.. code::
+
+    docker run --name fiware-skuld-build fiware-skuld-build
+
+Finally, it is possible to obtain tests results and coverage information by:
+
+.. code::
+
+    docker cp fiware-skuld-build:/opt/fiware-skuld/test_results .
+    docker cp fiware-skuld-build:/opt/fiware-skuld/coverage .
+
 Acceptance tests
 ----------------
 
@@ -480,6 +502,39 @@ advantage is that the script support OS_TRUST_ID, while other tools as nova does
 
 Top_
 
+Acceptance tests with Docker execution
+**************************************
+Skuld acceptance tests can be executed by Docker. To do that, firstly it is required the creation of
+the docker image.
+To do that:
+
+.. code::
+
+    docker build -t fiware-skuld -f docker/Dockerfile docker
+
+Once the fiware-skuld image is created, we can run it by using docker-compose (exporting the right
+environment variables).
+
+.. code::
+
+    export OS_AUTH_URL = {the auth uri of the testbed agains the tests are going to be execute}
+    export OS_USERNAME = {the user name}
+    export OS_TENANT_NAME = {the tenant name}
+    export OS_PASSWORD = {the password}
+    export OS_REGION_NAME = {the region}
+    export OS_PROJECT_DOMAIN_NAME = {the project domain name}
+    export OS_USER_DOMAIN_NAME = {the user domain name}
+    docker-compose -f docker/docker-compose.yml up
+
+When docker has finished, you can obtain the tests results by
+.. code::
+
+   docker cp docker_fiwareskuld_1:/opt/fiware-skuld/tests/acceptance/testreport .
+
+All the scripts and docker files for the deployment of Openstack testsbed have been moved to
+to fiware-testbed-deploy component: https://github.com/telefonicaid/fiware-testbed-deploy/
+
+Top_
 
 Deletion of Unaccepted Terms & Conditions users
 ===============================================
