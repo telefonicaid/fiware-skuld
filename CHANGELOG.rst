@@ -1,6 +1,50 @@
 Changelog
 =========
 
+v1.3.0 (2016-07-06)
+-------------------
+New
+~~~
+- Add docker files.
+- Create docker files to deploy a testing environment of Skuld.
+- Add new tests for deployment of two testbeds.
+- Add Unit Tests associated to check users and rotated files.
+- Separate the management of Skuld Testing Deployment to fiware-testeb-deploy component (https://github.com/telefonicaid/fiware-testbed-deploy/tree/develop).
+- Update documentation and README file.
+
+Fix
+~~~
+
+- Coding style configuration in Travis CI tool.
+- Run test from main folder.
+- Fix imports and requirements.
+- Generalize Region name in testing environment.
+- Obtain public IP from endpoints in the testing environment.
+
+Bug
+~~~
+
+- Resolve not service entrypoint for missing FIWARE services.
+
+
+v1.2.0 (2016-03-07)
+-------------------
+
+New
+~~~
+
+- Script to install a testbed used by the tests.
+- Create script to recover all the user from one region.
+- Improve osclients.py
+
+Fix
+~~~
+
+- Add docstings to python file.
+- Support domain with v3 API and fix Default name.
+- Issue/change readme.
+- Adding library to the requirements file.
+
 v1.1.0 (2016-02-03)
 -------------------
 
