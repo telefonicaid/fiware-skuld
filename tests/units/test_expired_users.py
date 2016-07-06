@@ -47,7 +47,7 @@ class TestExpiredUsers(TestCase):
         self.assertEqual(expectedToken, resultToken)
 
     def testwrongadmintoken(self, m):
-        """testworngadmintoken check that we have a worg credential data"""
+        """testworngadmintoken check that we have a wrong credential data"""
         response = {
             "error": {
                 "message": "The request you have made requires authentication.",
@@ -291,3 +291,35 @@ class TestExpiredUsers(TestCase):
         result = expiredusers.get_keystone_endpoint()
 
         self.assertEqual(expectedresult, result)
+
+    def testget_yellow_red_users(self, m):
+        """ Test that we obtain the correct list of expired users and the
+            lists of user to be expired in the next days.
+        """
+        response_admin_token = {'access': {'token': {'id': '49ede5a9ce224631bc778cceedc0cca1'}}}
+        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        url = 'http://cloud.lab.fiware.org:4730/v2.0/tokens'
+        m.post(url, json=response_admin_token)
+
+        response_trial_users = {
+            "role_assignments": [
+                {"user": {"id": "0f4de1ea94d342e696f3f61320c15253"}, "links": {"assignment": "http://aurl.com/abc"}
+                 },
+                {"user": {"id": "24396976a1b84eafa5347c3f9818a66a"}, "links": {"assignment": "http://a.com"}
+                 },
+                {"user": {"id": "24cebaa9b665426cbeab579f1a3ac733"}, "links": {"assignment": "http://b.com"}
+                 },
+                {"user": {"id": "zippitelli"}, "links": {"assignment": "http://c.com"}
+                 }
+            ],
+            "links": {"self": "http://d.com"}
+        }
+        url = 'http://cloud.lab.fiware.org:4730/v3/role_assignments?role.id=7698be72802342cdb2a78f89aa55d8ac'
+        m.get(url, json=response_trial_users)
+
+        url = 'http://cloud.lab.fiware.org:4730/v3/users/0f4de1ea94d342e696f3f61320c15253'
+
+        (yellow, red) = expiredusers.get_yellow_red_users()
+
+        self.assertEqual(yellow, 1)
+        self.assertEqual(red, 2)
