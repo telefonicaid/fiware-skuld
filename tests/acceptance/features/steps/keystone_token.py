@@ -25,8 +25,8 @@
 # -*- coding: utf-8 -*-
 import requests
 from behave import when, then, given
-from skuld.expired_users import ExpiredUsers
-from tests.acceptance.commons.configuration import KEYSTONE_URL, TOKEN_LENGTH
+from fiwareskuld.expired_users import ExpiredUsers
+from commons.configuration import KEYSTONE_URL, TOKEN_LENGTH
 
 __author__ = 'fla'
 

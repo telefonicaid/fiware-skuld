@@ -1,7 +1,0 @@
-#cloud-config
-
-manage_etc_hosts: localhost
-
-runcmd:
-  - su - ubuntu -c "git clone https://github.com/telefonicaid/fiware-skuld.git"
-  - su - ubuntu -c "~/fiware-skuld/tests/install_testbed/install.sh"

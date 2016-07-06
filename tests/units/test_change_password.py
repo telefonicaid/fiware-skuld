@@ -21,11 +21,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
 
 from os import environ
 from unittest import TestCase
-from skuld import change_password
+from fiwareskuld import change_password
 from mock import patch
 from test_openstackmap import MySessionMock, OS_TENANT_ID
 
@@ -53,21 +52,21 @@ class TestChangePassword(TestCase):
         environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
         environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
 
-    @patch('utils.osclients.session', mock_session2)
+    @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):
         """test_get_user_by_name check that we could get a user by name."""
         passwordChanger = change_password.PasswordChanger()
         user = passwordChanger.get_user_byname(self.mock_user_name)
         self.assertEqual(self.mock_user_name, user.name)
 
-    @patch('utils.osclients.session', mock_session2)
+    @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
         passwordChanger = change_password.PasswordChanger()
         user = passwordChanger.get_user_byid(OS_TENANT_ID)
         self.assertEqual(OS_TENANT_ID, user.id)
 
-    @patch('utils.osclients.session', mock_session2)
+    @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_list_users_with_cred(self):
         """test_get_list_users_with_cred check that we could patch the Password to a list of users"""
         passwordChanger = change_password.PasswordChanger()

@@ -21,12 +21,11 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 
-__author__ = 'gjp'
 
 from os import environ
 from unittest import TestCase
 from mock import patch, MagicMock
-from utils.osclients import OpenStackClients
+from fiwareskuld.utils.osclients import OpenStackClients
 import cinderclient.v2.client
 import cinderclient.v1.client
 import neutronclient.v2_0.client
@@ -41,13 +40,15 @@ from collections import defaultdict
 # catalog
 service = {
     u'endpoints': [
-        {u'url': u'http://83.26.10.2:8080/v1/AUTH_00000000000000000000000000000001',
-                   u'interface': u'public', u'region': u'Spain2',
-                   u'id': u'00000000000000000000000000000002'},
-        {u'url': u'http://172.0.0.1:8080', u'interface': u'admin',
-                   u'region': u'Spain2',
-                   u'id': u'00000000000000000000000000000001'}],
-    u'type': u'object-store', u'id': u'00000000000000000000000000000044'}
+        {u'url': u'http://83.26.10.2:8080/v1/AUTH_00000000000000000000000000000001', u'interface': u'public',
+         u'region': u'Spain2', u'id': u'00000000000000000000000000000002'
+         },
+        {u'url': u'http://172.0.0.1:8080', u'interface': u'admin', u'region': u'Spain2',
+         u'id': u'00000000000000000000000000000001'
+         }
+    ],
+    u'type': u'object-store', u'id': u'00000000000000000000000000000044'
+}
 
 
 class MySessionMock(MagicMock):
@@ -173,7 +174,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(novaClient, novaclient.v2.client.Client)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_glanceclient(self):
         """test_get_glanceclient check that we could retrieve a Session client to work with glance"""
 
@@ -183,7 +184,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(glanceClient, glanceclient.v1.client.Client)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_swiftclient(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v3"""
 
@@ -192,7 +193,7 @@ class TestOSClients(TestCase):
 
         self.assertIsInstance(swiftClient, Connection)
 
-    @patch('utils.osclients.session', mock_session)
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_swiftclient_with_keystone_v2(self):
         """test_get_swiftclient check that we could retrieve a Session client to work with swift using keystone v2"""
 
@@ -279,18 +280,15 @@ class TestOSClients(TestCase):
         self.assertEqual(osclients._OpenStackClients__tenant_id, self.OS_TENANT_ID)
 
         # SECOND CHECK: updating Credentials with tenant_id
-        osclients.set_credential(username, password,
-                       tenant_id=tenant_id)
+        osclients.set_credential(username, password, tenant_id=tenant_id)
         self.assertEqual(osclients._OpenStackClients__tenant_id, tenant_id)
 
         # THIRD CHECK: updating Credentials with tenant_name
-        osclients.set_credential(username, password,
-                       tenant_name=tenant_name)
+        osclients.set_credential(username, password, tenant_name=tenant_name)
         self.assertEqual(osclients._OpenStackClients__tenant_name, tenant_name)
 
         # FOURTH CHECK: updating Credentials with trust_id
-        osclients.set_credential(username, password,
-                       trust_id=trust_id)
+        osclients.set_credential(username, password, trust_id=trust_id)
         self.assertEqual(osclients._OpenStackClients__trust_id, trust_id)
 
         # FIFTH CHECK: updating Credentials without trust_id, tenant_id and tenant_name
@@ -390,8 +388,7 @@ class TestOSClients(TestCase):
 
         osclients = OpenStackClients()
 
-        osclients.set_credential("", self.OS_PASSWORD,
-                       tenant_id=self.OS_TENANT_ID)
+        osclients.set_credential("", self.OS_PASSWORD, tenant_id=self.OS_TENANT_ID)
 
         # Checking v3
         try:
@@ -460,7 +457,7 @@ class TestOSClientsOverrideEndpoint(TestCase):
         self.override_endpoint()
         self.assertOverrideEndpoint()
 
-    @patch('utils.osclients.session')
+    @patch('fiwareskuld.utils.osclients.session')
     def test_override_endpoint_multiple(self, mock):
         """test that override works with an already created session and then
         with a new one without invoking the method again"""
