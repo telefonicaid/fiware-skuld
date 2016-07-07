@@ -28,17 +28,106 @@ from unittest import TestCase
 from mock import patch, MagicMock
 from collections import defaultdict
 from requests import Response
-from httplib import OK
+from httplib import OK, NOT_FOUND
 import tempfile
 import cPickle as pickle
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
-    LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
+    LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
+    LIST_USERS_RESPONSE_FILE4
 
 from fiwareskuld.openstackmap import OpenStackMap
 
 OS_TENANT_ID = '00000000000000000000000000000001'
+OS_TENANT_ID2 = '00000000000000000000000000000002'
 
+
+class MySessionFakeMock(MagicMock):
+    # Mock of a keystone Session
+    def get_endpoint(self, auth, **kwargs):
+
+        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
+        return endpoint
+
+    def get_access(self, session):
+
+        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
+                                    u'interface': u'public', u'region': u'Spain2',
+                                    u'id': u'00000000000000000000000000000002'},
+                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
+                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
+                                    }
+                                   ],
+                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
+
+        d = defaultdict(list)
+        d['catalog'].append(service2)
+
+        return d
+
+    def request(self, url, method, **kwargs):
+
+        resp = Response()
+
+        if url == '/users':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+        elif url == '/users/' + OS_TENANT_ID:
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+            resp.reason = 'No data received'
+        elif url == '/users/' + OS_TENANT_ID2:
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        return resp
+
+class MySessionFakeMock2(MagicMock):
+    # Mock of a keystone Session
+    def get_endpoint(self, auth, **kwargs):
+
+        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
+        return endpoint
+
+    def get_access(self, session):
+
+        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
+                                    u'interface': u'public', u'region': u'Spain2',
+                                    u'id': u'00000000000000000000000000000002'},
+                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
+                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
+                                    }
+                                   ],
+                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
+
+        d = defaultdict(list)
+        d['catalog'].append(service2)
+
+        return d
+
+    def request(self, url, method, **kwargs):
+
+        resp = Response()
+
+        if url == '/users':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE4).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+        elif url == '/users/' + OS_TENANT_ID2:
+            if method == 'GET':
+                json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+                resp.status_code = OK
+                resp._content = json_data
+            elif method == 'PATCH':
+                json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+                resp.status_code = NOT_FOUND
+                resp._content = json_data
+                resp.reason = 'No PATCH'
+
+        return resp
 
 class MySessionMock(MagicMock):
     # Mock of a keystone Session

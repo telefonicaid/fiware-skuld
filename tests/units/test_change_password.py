@@ -22,15 +22,21 @@
 # contact with opensource@tid.es
 
 
-from os import environ
+from os import environ, getcwd
 from unittest import TestCase
 from fiwareskuld import change_password
 from mock import patch
-from test_openstackmap import MySessionMock, OS_TENANT_ID
+from test_openstackmap import MySessionMock, MySessionFakeMock, MySessionFakeMock2, \
+    OS_TENANT_ID, OS_TENANT_ID2
+from test_check_users import ContextualStringIO
+from tests_constants import NO_DATA
+
 
 
 class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
+    mock_session3 = MySessionFakeMock()
+    mock_session4 = MySessionFakeMock2()
 
     def setUp(self):
         self.mock_user_name = 'user'
@@ -51,6 +57,17 @@ class TestChangePassword(TestCase):
         environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
         environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
         environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
+
+        dir = getcwd()
+        if '/tests/units' in dir:
+            self.list_users_response = open('./resources/list_users_response.json').read()
+            self.get_users_response = open('./resources/get_user_response.json').read()
+            self.list_users_response2 = open('./resources/list_users_response4.json').read()
+        else:
+            self.list_users_response = open('./tests/units/resources/list_users_response.json').read()
+            self.get_users_response = open('./tests/units/resources/get_user_response.json').read()
+            self.list_users_response2 = open('./tests/units/resources/list_users_response4.json').read()
+
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):
@@ -74,3 +91,74 @@ class TestChangePassword(TestCase):
         mylist.append(OS_TENANT_ID)
         result = passwordChanger.get_list_users_with_cred(mylist)
         self.assertIsNotNone(result)
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session2)
+    def test_init_process_with_keystone_admin_endpoint_in_environment(self):
+        """test_init_process_with_keystone_admin_endpoint_in_environment check that we
+        could init the class with PasswordChanger with keystone defined in environment
+        variable"""
+
+        # Put the current variable in the environment.
+        environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_KEYSTONE_ADMIN_ENDPOINT)
+
+        passwordChanger = change_password.PasswordChanger()
+
+        # Restore the setup value of the variable.
+        del environ['KEYSTONE_ADMIN_ENDPOINT']
+
+        expected_user_id = '00000000000000000000000000000001'
+
+        self.assertTrue(passwordChanger.keystone is not None)
+        self.assertEqual(passwordChanger.users_by_id[expected_user_id].cloud_project_id, expected_user_id)
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session3)
+    def test_changepassword_exceptions(self):
+        """ We test that we ctry to change password but when we request info,
+        we get an error from kesytone.
+        """
+        with patch('__builtin__.open') as mocked_open:
+            mocked_open.side_effect = self.side_effect_function
+
+            passwordChanger = change_password.PasswordChanger()
+            user = passwordChanger.get_user_byid(OS_TENANT_ID)
+
+            try:
+                passwordChanger.change_password(user, 'foo')
+            except Exception as ex:
+                self.assertEqual(ex.message, '404 No data received')
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session4)
+    def test_changepassword_exceptions2(self):
+        """ We test that we try to change password but when we try to patch
+        we get an error.
+        """
+        with patch('__builtin__.open') as mocked_open:
+            mocked_open.side_effect = self.side_effect_function
+
+            passwordChanger = change_password.PasswordChanger()
+            user = passwordChanger.get_user_byid(OS_TENANT_ID2)
+
+            try:
+                passwordChanger.change_password(user, 'foo')
+            except Exception as ex:
+                self.assertEqual(ex.message, '404 No PATCH')
+
+    def side_effect_function(self, *args, **kwargs):
+        """
+        Get the corresponding resource data from the file, some users are not Basic
+        but they has know tipe.
+        :param args: path to the file to be loaded.
+        :param kwargs: More arguments, in this case nothing important.
+        :return: ContextualStringIO simulating that it is read from file.
+        """
+
+        if 'tests/units/resources/list_users_response.json' in args[0]:
+            data = self.list_users_response
+        elif 'tests/units/resources/get_user_response.json' in args[0]:
+            data = self.get_users_response
+        elif 'tests/units/resources/list_users_response4.json' in args[0]:
+            data = self.list_users_response2
+        else:
+            data = NO_DATA
+
+        return ContextualStringIO(data)
