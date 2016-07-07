@@ -32,7 +32,6 @@ from test_check_users import ContextualStringIO
 from tests_constants import NO_DATA
 
 
-
 class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
     mock_session3 = MySessionFakeMock()
@@ -67,7 +66,6 @@ class TestChangePassword(TestCase):
             self.list_users_response = open('./tests/units/resources/list_users_response.json').read()
             self.get_users_response = open('./tests/units/resources/get_user_response.json').read()
             self.list_users_response2 = open('./tests/units/resources/list_users_response4.json').read()
-
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):

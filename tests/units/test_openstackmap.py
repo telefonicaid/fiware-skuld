@@ -85,6 +85,7 @@ class MySessionFakeMock(MagicMock):
 
         return resp
 
+
 class MySessionFakeMock2(MagicMock):
     # Mock of a keystone Session
     def get_endpoint(self, auth, **kwargs):
@@ -128,6 +129,7 @@ class MySessionFakeMock2(MagicMock):
                 resp.reason = 'No PATCH'
 
         return resp
+
 
 class MySessionMock(MagicMock):
     # Mock of a keystone Session
