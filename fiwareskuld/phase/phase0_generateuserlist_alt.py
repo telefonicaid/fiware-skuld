@@ -37,14 +37,6 @@ __author__ = 'chema'
 
 logger = utils.log.init_logs('phase0')
 
-env['OS_USERNAME'] = "idm"
-env['OS_PASSWORD'] = "idm"
-env['OS_TENANT_NAME'] = "idm"
-env["OS_AUTH_URL"]= "http://130.206.120.23:5000/v3"
-env["OS_REGION_NAME"]="Valladolid"
-env["OS_PROJECT_DOMAIN_NAME"]="default"
-env["OS_IDENTITY_API_VERSION"]="3"
-
 
 class ExpiredUsers:
     def __init__(self):

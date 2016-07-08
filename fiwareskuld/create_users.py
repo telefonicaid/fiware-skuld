@@ -39,7 +39,6 @@ class CreateUser(object):
         self.neutron_c = clients.get_neutronclient()
         self.keystone = clients.get_keystoneclientv3()
 
-
     def add_domain_user_role(self, user, role, domain):
         """ It adds a role to a user.
         :param user: the user
@@ -103,14 +102,22 @@ class CreateUser(object):
         return users[0]
 
     def update_user(self, user, date=None):
+        """
+        It updates the users.
+        :param user: the user
+        :param date: the date
+        :return: nothing()
+        """
         self.update_domain_to_role(user, self.role_name, date)
         self.update_quota(user, self.role_name)
 
     def delete_user(self, user):
-        """ It creates a user
-        :return:
         """
-        d = self.keystone.users.list(username = user.username)
+        It deletes the user
+        :param user: the user to be deleted.
+        :return: nothing()
+        """
+        d = self.keystone.users.list(username=user.username)
         if d or len(d) > 0:
             projects = self.keystone.projects.list(user=d[0])
             for pro in projects:
@@ -118,10 +125,13 @@ class CreateUser(object):
             self.keystone.users.delete(d[0])
 
     def delete_user_id(self, user_id):
-        print "Deleting" + user_id
-        d = self.keystone.users.list(username = user_id)
-        self.delete_user(d[0])
-
+        """
+        It delete the user by its user_id
+        :param user_id: the user_id
+        :return: nothing
+        """
+        user = self.keystone.users.list(username=user_id)
+        self.delete_user(user[0])
 
     def update_quota(self, user, role):
         """ It updates the quota for the user according to role requirements
@@ -129,7 +139,6 @@ class CreateUser(object):
         :param role: the role
         :return: nothing
         """
-
         kargs = self.get_nova_quota(user, role)
         self.nova_c.quotas.update(user.cloud_project_id, **kargs)
         self.neutron_c.update_quota(user.cloud_project_id, self.get_neutron_quota(role))

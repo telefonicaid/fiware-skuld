@@ -53,10 +53,10 @@ def before_scenario(context, scenario):
     context.expiredusers.delete_community_users()
     context.expiredusers.delete_trial_users()
     context.expiredusers.delete_basic_users()
-    context.out_trial =  str(datetime.date.today() -
-                               datetime.timedelta(days=30))
-    context.out_community = str(datetime.date.today() -datetime.timedelta(days=180))
-
+    context.out_trial = str(datetime.date.today() -
+                            datetime.timedelta(days=30))
+    context.out_community = str(datetime.date.today() -
+                                datetime.timedelta(days=180))
 
 
 def after_scenario(context, scenario):
@@ -79,4 +79,3 @@ def after_all(context):
     """
 
     __logger__.info("Teardown")
-

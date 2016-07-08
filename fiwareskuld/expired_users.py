@@ -103,18 +103,29 @@ class ExpiredUsers:
         """
         return self.keystoneclient.users.list()
 
-
     def delete_trial_users(self):
+        """
+        It deletes the trial users.
+        :return:
+        """
         users_trial = self.get_trial_users()
         for user in users_trial:
             self.user_create.delete_user(user)
 
     def delete_community_users(self):
+        """
+        It deletes the community users.
+        :return:
+        """
         users_community = self.get_community_users()
         for user in users_community:
             self.user_create.delete_user(user)
 
     def delete_basic_users(self):
+        """
+        It deletes the basic users.
+        :return:
+        """
         users_basic = self.get_basic_users()
         for user in users_basic:
             self.user_create.delete_user(user)
@@ -155,13 +166,11 @@ class ExpiredUsers:
         "finalList" of the class.
         :return: Lists of Users id who have Trial role and expired
         """
-        print("Get list expired user trials")
         users = self.get_trial_users()
         finalList = []
 
         # Extract the list of user_ids
         for user in users:
-            print user
             if not user.trial_started_at:
                 continue
             trial_started_at = user.trial_started_at
@@ -169,13 +178,8 @@ class ExpiredUsers:
                 trial_duration = user.trial_duration
             else:
                 trial_duration = self.TRIAL_MAX_NUMBER_OF_DAYS
-
-            print("tiempos")
-            print(trial_started_at)
-            print (trial_duration)
             if self.check_time(trial_started_at, trial_duration):
                 # If true means that the user trial period has expired
-                print "expired"
                 finalList.append(user)
 
         logger.info("Number of expired users found: %d", len(finalList))
@@ -230,7 +234,6 @@ class ExpiredUsers:
         if difference.days > duration:
             result = True
         else:
-            print ("NO expired")
             result = False
 
         return result
@@ -258,50 +261,3 @@ class ExpiredUsers:
         difference = date_object_new - date_object_old
 
         return trial_duration - difference.days
-exp = ExpiredUsers()
-user = CreateUser()
-userstrial = exp.get_trial_users()
-userscommu = exp.get_community_users()
-
-for i in userstrial:
-    user.delete_user(i)
-for i in userscommu:
-    user.delete_user(i)
-out_trial =  str(datetime.date.today() -
-                               datetime.timedelta(days=30))
-out_community = str(datetime.date.today() -datetime.timedelta(days=180))
-
-user.create_user("qa11f1sfadd11fdfssfdfsf11", "qda2", "trial", out_trial)
-user.create_user("qa11f1sfadd11fdfsddsfdfsf11", "qda2", "trial", out_trial)
-user.create_user("qa11ddffddd1s11ffaffasdff2s11", "qda2", "trial")
-user.create_user("qa11ddfdfdddfs1fs1f1f2s11", "qad2", "trial")
-user.create_user("qa211ffdffdfdf1sfddf11", "qa2", "community", out_community)
-user.create_user("qa211fadsddffffffd1sddf11", "qa2", "community")
-user.create_user("qa211ffdffdfdfsfg1sfddf11", "qa2", "community", out_community)
-user.create_user("qa211fadsddfgsdffffffd1sddf11", "qa2", "community")
-
-userstrial = exp.get_trial_users()
-print "trial users lenght {0}".format(len(userstrial))
-
-
-
-userscommu = exp.get_community_users()
-
-print "community users lenght {0}".format(len(userscommu))
-
-
-a = exp.get_list_expired_trial_users()
-print "trial users expired {0}".format(len(a))
-
-a = exp.get_list_expired_community_users()
-print "trial community expired {0}".format(len(a))
-
-for i in userstrial:
-    user.delete_user(i)
-for i in userscommu:
-    user.delete_user(i)
-
-users = exp.get_users()
-print "all users {0}".format(len(users))
-
-

@@ -97,13 +97,16 @@ def step_check_returned_token(context):
 def step_check_list_users_returned(context, listusers):
     list_qa_users = context.expiredusers.get_trial_users()
     assert list_qa_users is not None, 'Expected a valid list users but obtained no token'
-    assert len(list_qa_users) == int(listusers), 'Expected a list of users with {0} length and found {1}'.format(listusers, len(list_qa_users))
+    assert len(list_qa_users) == int(listusers), \
+        'Expected a list of users with {0} length and found {1}'.format(listusers, len(list_qa_users))
+
 
 @then(u'the Keystone returns a list with community "{listcommunity}" users')
 def step_check_list_users_returned(context, listcommunity):
     list_qa_users = context.expiredusers.get_community_users()
     assert list_qa_users is not None, 'Expected a valid list users but obtained no token'
-    assert len(list_qa_users) == int(listcommunity), 'Expected a list of users with {0} length and found {1}'.format(listcommunity, len(list_qa_users))
+    assert len(list_qa_users) == int(listcommunity), \
+        'Expected a list of users with {0} length and found {1}'.format(listcommunity, len(list_qa_users))
 
 
 @when(u'I request a list of trial users from the Keystone')
@@ -115,6 +118,7 @@ def step_request_trial_users_list(context):
     :return: Nothing.
     """
     context.expiredusers.get_trial_users()
+
 
 @when(u'I request a list of community users from the Keystone')
 @given(u'a list of community users from the Keystone')
@@ -140,6 +144,7 @@ def step_create_user(context, username, password, role):
         print(e)
         context.message = e.message
         assert False, 'Error to create the user {0}'.format(e.message)
+
 
 @when(u'an expired user with name "{username}", password "{password}" and role "{role}" is created')
 @given(u'an expired user with name "{username}", password "{password}" and role "{role}"')
@@ -180,7 +185,7 @@ def step_request_list_expired_users(context):
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """
-    result= context.expiredusers.get_list_expired_trial_users()
+    result = context.expiredusers.get_list_expired_trial_users()
     print ("in the result")
     print(result)
     context.expiredusers.finalTrialList = result
@@ -198,11 +203,14 @@ def step_get_list_expired_users(context, number):
         result = context.expiredusers.finalTrialList
 
         print('\n      Number of expired trial users found: {}\n\n'.format(len(result)))
-        assert result is not None, 'Expected a valid list expired users'
-        assert len(result) == int(number), 'Expected a list of users with {0} length and found {1}'.format(number, len(result))
+        assert result is not None, \
+            'Expected a valid list expired users'
+        assert len(result) == int(number), \
+            'Expected a list of users with {0} length and found {1}'.format(number, len(result))
 
     except ValueError:
         assert False, 'Cannot recover the list of trial users'
+
 
 @when(u'I request a list of expired community users')
 def step_request_list_expired_users(context):
@@ -225,7 +233,8 @@ def step_get_list_expired_users(context, number):
         result = context.expiredusers.finalCommunityList
         print('\n      Number of expired community users found: {}\n\n'.format(len(result)))
         assert result is not None, 'Expected a valid list expired users'
-        assert len(result) == int(number), 'Expected a list of users with {0} length and found {1}'.format(number, len(result))
+        assert len(result) == int(number), \
+            'Expected a list of users with {0} length and found {1}'.format(number, len(result))
 
     except ValueError:
         assert False, 'Cannot recover the list of community users'
