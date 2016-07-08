@@ -79,15 +79,6 @@ class OpenStackClients(object):
         """
         global modules_available
 
-        env['OS_USERNAME'] = "idm"
-        env['OS_PASSWORD'] = "idm"
-        env['OS_TENANT_NAME'] = "idm"
-        env["OS_AUTH_URL"]= "http://130.206.119.127:5000/v3"
-        env["OS_REGION_NAME"]="Valladolid"
-        env["OS_PROJECT_DOMAIN_NAME"]="default"
-        env["OS_IDENTITY_API_VERSION"]="3"
-
-
         self.use_v3 = True
 
         if auth_url:
