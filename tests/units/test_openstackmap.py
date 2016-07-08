@@ -42,7 +42,7 @@ OS_TENANT_ID = '00000000000000000000000000000001'
 OS_TENANT_ID2 = '00000000000000000000000000000002'
 
 
-class MySessionFakeMock(MagicMock):
+class MySessionBaseMock(MagicMock):
     # Mock of a keystone Session
     def get_endpoint(self, auth, **kwargs):
 
@@ -65,6 +65,8 @@ class MySessionFakeMock(MagicMock):
 
         return d
 
+
+class MySessionFakeMock(MySessionBaseMock):
     def request(self, url, method, **kwargs):
 
         resp = Response()
@@ -86,29 +88,7 @@ class MySessionFakeMock(MagicMock):
         return resp
 
 
-class MySessionFakeMock2(MagicMock):
-    # Mock of a keystone Session
-    def get_endpoint(self, auth, **kwargs):
-
-        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
-        return endpoint
-
-    def get_access(self, session):
-
-        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
-                                    u'interface': u'public', u'region': u'Spain2',
-                                    u'id': u'00000000000000000000000000000002'},
-                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
-                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
-                                    }
-                                   ],
-                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
-
-        d = defaultdict(list)
-        d['catalog'].append(service2)
-
-        return d
-
+class MySessionFakeMock2(MySessionBaseMock):
     def request(self, url, method, **kwargs):
 
         resp = Response()
@@ -131,30 +111,7 @@ class MySessionFakeMock2(MagicMock):
         return resp
 
 
-class MySessionMock(MagicMock):
-    # Mock of a keystone Session
-
-    def get_endpoint(self, auth, **kwargs):
-
-        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
-        return endpoint
-
-    def get_access(self, session):
-
-        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
-                                    u'interface': u'public', u'region': u'Spain2',
-                                    u'id': u'00000000000000000000000000000002'},
-                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
-                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
-                                    }
-                                   ],
-                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
-
-        d = defaultdict(list)
-        d['catalog'].append(service2)
-
-        return d
-
+class MySessionMock(MySessionBaseMock):
     def request(self, url, method, **kwargs):
 
         resp = Response()

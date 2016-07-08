@@ -36,58 +36,61 @@ class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
     mock_session3 = MySessionFakeMock()
     mock_session4 = MySessionFakeMock2()
+    mock_user_name = 'user'
 
-    def setUp(self):
-        self.mock_user_name = 'user'
+    OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
+    OS_USERNAME = 'user'
+    OS_PASSWORD = 'password'
+    OS_TENANT_NAME = 'user cloud'
+    OS_TENANT_ID = OS_TENANT_ID
+    OS_REGION_NAME = 'Spain2'
+    OS_TRUST_ID = ''
+    OS_KEYSTONE_ADMIN_ENDPOINT = 'http://cloud.lab.fiware.org:4730'
 
-        self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
-        self.OS_USERNAME = 'user'
-        self.OS_PASSWORD = 'password'
-        self.OS_TENANT_NAME = 'user cloud'
-        self.OS_TENANT_ID = OS_TENANT_ID
-        self.OS_REGION_NAME = 'Spain2'
-        self.OS_TRUST_ID = ''
-        self.OS_KEYSTONE_ADMIN_ENDPOINT = 'http://cloud.lab.fiware.org:4730'
+    list_users_response = None
+    get_users_response = None
+    list_users_response2 = None
 
-        environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
-        environ.setdefault('OS_USERNAME', self.OS_USERNAME)
-        environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
-        environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
-        environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
-        environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
-        environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
+    @classmethod
+    def setUpClass(cls):
+        environ.setdefault('OS_AUTH_URL', cls.OS_AUTH_URL)
+        environ.setdefault('OS_USERNAME', cls.OS_USERNAME)
+        environ.setdefault('OS_PASSWORD', cls.OS_PASSWORD)
+        environ.setdefault('OS_TENANT_NAME', cls.OS_TENANT_NAME)
+        environ.setdefault('OS_TENANT_ID', cls.OS_TENANT_ID)
+        environ.setdefault('OS_REGION_NAME', cls.OS_REGION_NAME)
+        environ.setdefault('OS_TRUST_ID', cls.OS_TRUST_ID)
 
-        dir = getcwd()
-        if '/tests/units' in dir:
-            self.list_users_response = open('./resources/list_users_response.json').read()
-            self.get_users_response = open('./resources/get_user_response.json').read()
-            self.list_users_response2 = open('./resources/list_users_response4.json').read()
+        if '/tests/units' in getcwd():
+            cls.list_users_response = open('./resources/list_users_response.json').read()
+            cls.get_users_response = open('./resources/get_user_response.json').read()
+            cls.list_users_response2 = open('./resources/list_users_response4.json').read()
         else:
-            self.list_users_response = open('./tests/units/resources/list_users_response.json').read()
-            self.get_users_response = open('./tests/units/resources/get_user_response.json').read()
-            self.list_users_response2 = open('./tests/units/resources/list_users_response4.json').read()
+            cls.list_users_response = open('./tests/units/resources/list_users_response.json').read()
+            cls.get_users_response = open('./tests/units/resources/get_user_response.json').read()
+            cls.list_users_response2 = open('./tests/units/resources/list_users_response4.json').read()
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_name(self):
         """test_get_user_by_name check that we could get a user by name."""
-        passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byname(self.mock_user_name)
-        self.assertEqual(self.mock_user_name, user.name)
+        passwordchanger = change_password.PasswordChanger()
+        user = passwordchanger.get_user_byname(TestChangePassword.mock_user_name)
+        self.assertEqual(TestChangePassword.mock_user_name, user.name)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
-        passwordChanger = change_password.PasswordChanger()
-        user = passwordChanger.get_user_byid(OS_TENANT_ID)
+        passwordchanger = change_password.PasswordChanger()
+        user = passwordchanger.get_user_byid(OS_TENANT_ID)
         self.assertEqual(OS_TENANT_ID, user.id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
     def test_get_list_users_with_cred(self):
         """test_get_list_users_with_cred check that we could patch the Password to a list of users"""
-        passwordChanger = change_password.PasswordChanger()
-        mylist = []
+        passwordchanger = change_password.PasswordChanger()
+        mylist = list()
         mylist.append(OS_TENANT_ID)
-        result = passwordChanger.get_list_users_with_cred(mylist)
+        result = passwordchanger.get_list_users_with_cred(mylist)
         self.assertIsNotNone(result)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session2)
@@ -97,17 +100,17 @@ class TestChangePassword(TestCase):
         variable"""
 
         # Put the current variable in the environment.
-        environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_KEYSTONE_ADMIN_ENDPOINT)
+        environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', TestChangePassword.OS_KEYSTONE_ADMIN_ENDPOINT)
 
-        passwordChanger = change_password.PasswordChanger()
+        passwordchanger = change_password.PasswordChanger()
 
         # Restore the setup value of the variable.
         del environ['KEYSTONE_ADMIN_ENDPOINT']
 
         expected_user_id = '00000000000000000000000000000001'
 
-        self.assertTrue(passwordChanger.keystone is not None)
-        self.assertEqual(passwordChanger.users_by_id[expected_user_id].cloud_project_id, expected_user_id)
+        self.assertTrue(passwordchanger.keystone is not None)
+        self.assertEqual(passwordchanger.users_by_id[expected_user_id].cloud_project_id, expected_user_id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session3)
     def test_changepassword_exceptions(self):
@@ -117,11 +120,11 @@ class TestChangePassword(TestCase):
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function
 
-            passwordChanger = change_password.PasswordChanger()
-            user = passwordChanger.get_user_byid(OS_TENANT_ID)
+            passwordchanger = change_password.PasswordChanger()
+            user = passwordchanger.get_user_byid(OS_TENANT_ID)
 
             try:
-                passwordChanger.change_password(user, 'foo')
+                passwordchanger.change_password(user, 'foo')
             except Exception as ex:
                 self.assertEqual(ex.message, '404 No data received')
 
@@ -133,11 +136,11 @@ class TestChangePassword(TestCase):
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function
 
-            passwordChanger = change_password.PasswordChanger()
-            user = passwordChanger.get_user_byid(OS_TENANT_ID2)
+            passwordchanger = change_password.PasswordChanger()
+            user = passwordchanger.get_user_byid(OS_TENANT_ID2)
 
             try:
-                passwordChanger.change_password(user, 'foo')
+                passwordchanger.change_password(user, 'foo')
             except Exception as ex:
                 self.assertEqual(ex.message, '404 No PATCH')
 
@@ -151,11 +154,11 @@ class TestChangePassword(TestCase):
         """
 
         if 'tests/units/resources/list_users_response.json' in args[0]:
-            data = self.list_users_response
+            data = TestChangePassword.list_users_response
         elif 'tests/units/resources/get_user_response.json' in args[0]:
-            data = self.get_users_response
+            data = TestChangePassword.get_users_response
         elif 'tests/units/resources/list_users_response4.json' in args[0]:
-            data = self.list_users_response2
+            data = TestChangePassword.list_users_response2
         else:
             data = NO_DATA
 
