@@ -114,6 +114,16 @@ class TestTrustFactory(unittest.TestCase):
         result = self.trustfactory.create_trust('trustor_id', 'trustee_id')
         self.assertCreateResult(result, trustor)
 
+    def test_no_create_trust(self):
+        """check result of create_trust"""
+        trustor = MagicMock(id='trustor_id', name='trustor_name')
+        trust = None
+        config = {'users.get.return_value': trustor,
+                  'trusts.create.return_value': trust}
+        self.trustfactory.keystone.configure_mock(**config)
+        result = self.trustfactory.create_trust('trustor_id', 'trustee_id')
+        self.assertTrue(result is None)
+
     def test_create_trust_admin(self):
         """check externals calls and result of create_trust_admin"""
         resp = MagicMock()
@@ -148,6 +158,41 @@ class TestTrustFactory(unittest.TestCase):
         self.trustfactory.keystone.trusts.client.post.assert_called_once_with(
             'OS-TRUST/trusts_for_admin', body=body)
 
+    def test_no_create_trust_admin(self):
+        """check externals calls and result of create_trust_admin"""
+        resp = MagicMock()
+        resp.ok = None
+        body_response = {'trust': {'id': 'generatedtrustid'}}
+        trustor = MagicMock(id='trustor_id', name='trustor_name',
+                            cloud_project_id='trustor_tenant')
+        trustee = MagicMock(id='trustee_id', name='trustee_name')
+        config = {
+            'trusts.client.post.return_value': (resp, body_response),
+            'users.get.return_value': trustor,
+            'users.find.return_value': trustee
+        }
+        self.trustfactory.keystone.configure_mock(**config)
+
+        now = time.time()
+        with patch('fiwareskuld.impersonate.time.time') as time_mock:
+            time_mock.configure_mock(return_value=now)
+            result = self.trustfactory.create_trust_admin(
+                'trustor_id', 'trustee_name')
+
+            # check result
+            self.assertTrue(result is None)
+
+        # check call
+        body = {'trust': {'impersonation': True, 'trustor_user_id': trustor.id,
+                          'allow_redelegation': True,
+                          'roles': [{'name': 'owner'}],
+                          'expires_at': timeutils.iso8601_from_timestamp(
+                              now + self.trustfactory.trustid_validity, True),
+                          'trustee_user_id': trustee.id,
+                          'project_id': trustor.cloud_project_id}}
+        self.trustfactory.keystone.trusts.client.post.assert_called_once_with(
+            'OS-TRUST/trusts_for_admin', body=body)
+
     def test_delete_trust(self):
         """test delete_trust method call to keystone client"""
         id = 'id1'
@@ -165,3 +210,10 @@ class TestTrustFactory(unittest.TestCase):
         self.trustfactory.keystone.users.client.delete.assert_called_once_with(
             'OS-TRUST/trusts_for_admin/' + id)
         self.assertEquals(return_value, resp.ok)
+
+    def test_import(self):
+        """ Test the import with the correct value
+        """
+        from fiwareskuld.impersonate import TRUSTID_VALIDITY
+
+        self.assertEqual(TRUSTID_VALIDITY, 36000)

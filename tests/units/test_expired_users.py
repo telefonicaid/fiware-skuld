@@ -47,7 +47,7 @@ class TestExpiredUsers(TestCase):
         self.assertEqual(expectedToken, resultToken)
 
     def testwrongadmintoken(self, m):
-        """testworngadmintoken check that we have a worg credential data"""
+        """testworngadmintoken check that we have a wrong credential data"""
         response = {
             "error": {
                 "message": "The request you have made requires authentication.",
@@ -291,3 +291,64 @@ class TestExpiredUsers(TestCase):
         result = expiredusers.get_keystone_endpoint()
 
         self.assertEqual(expectedresult, result)
+
+    def testget_yellow_red_users(self, m):
+        """ Test that we obtain the correct list of expired users and the
+            lists of user to be expired in the next days.
+        """
+        self.mock_complete_url(m)
+
+        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+
+        (yellow, red) = expiredusers.get_yellow_red_users()
+
+        expected_yellow_value = [u'0f4de1ea94d342e696f3f61320c15253']
+        expected_red_value = [u'24396976a1b84eafa5347c3f9818a66a', u'e3294fcf05984b3f934e189fa92c6990']
+
+        self.assertEqual(yellow, expected_yellow_value)
+        self.assertEqual(red, expected_red_value)
+
+    def test_listusers(self, m):
+        """ Test that we obtain the correct list of expired users.
+        """
+        self.mock_complete_url(m)
+
+        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+
+        result = expiredusers.getlistusers()
+
+        expected_result = [u'24396976a1b84eafa5347c3f9818a66a', u'e3294fcf05984b3f934e189fa92c6990']
+
+        self.assertEqual(result, expected_result)
+
+    def mock_complete_url(self, m):
+        """
+        Configure the complete mock to check the expired users use case.
+        """
+        response_admin_token = {'access': {'token': {'id': '49ede5a9ce224631bc778cceedc0cca1'}}}
+        url = 'http://cloud.lab.fiware.org:4730/v2.0/tokens'
+        m.post(url, json=response_admin_token)
+
+        response_trial_users = {
+            "role_assignments": [
+                {"user": {"id": "0f4de1ea94d342e696f3f61320c15253"}, "links": {"assignment": "http://aurl.com/abc"}
+                 },
+                {"user": {"id": "24396976a1b84eafa5347c3f9818a66a"}, "links": {"assignment": "http://a.com"}
+                 },
+                {"user": {"id": "e3294fcf05984b3f934e189fa92c6990"}, "links": {"assignment": "http://b.com"}
+                 }
+            ],
+            "links": {"self": "http://d.com"}
+        }
+
+        url = 'http://cloud.lab.fiware.org:4730/v3/role_assignments?role.id=7698be72802342cdb2a78f89aa55d8ac'
+        m.get(url, json=response_trial_users)
+
+        url_base = 'http://cloud.lab.fiware.org:4730/v3/users/'
+
+        url1 = url_base + '0f4de1ea94d342e696f3f61320c15253'
+        url2 = url_base + '24396976a1b84eafa5347c3f9818a66a'
+        url3 = url_base + 'e3294fcf05984b3f934e189fa92c6990'
+        m.get(url1, json=self.text_callback)
+        m.get(url2, json=self.text_callback)
+        m.get(url3, json=self.text_callback)

@@ -28,21 +28,22 @@ from unittest import TestCase
 from mock import patch, MagicMock
 from collections import defaultdict
 from requests import Response
-from httplib import OK
+from httplib import OK, NOT_FOUND
 import tempfile
 import cPickle as pickle
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
-    LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE
+    LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
+    LIST_USERS_RESPONSE_FILE4
 
 from fiwareskuld.openstackmap import OpenStackMap
 
 OS_TENANT_ID = '00000000000000000000000000000001'
+OS_TENANT_ID2 = '00000000000000000000000000000002'
 
 
-class MySessionMock(MagicMock):
+class MySessionBaseMock(MagicMock):
     # Mock of a keystone Session
-
     def get_endpoint(self, auth, **kwargs):
 
         endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
@@ -64,6 +65,53 @@ class MySessionMock(MagicMock):
 
         return d
 
+
+class MySessionFakeMock(MySessionBaseMock):
+    def request(self, url, method, **kwargs):
+
+        resp = Response()
+
+        if url == '/users':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+        elif url == '/users/' + OS_TENANT_ID:
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+            resp.reason = 'No data received'
+        elif url == '/users/' + OS_TENANT_ID2:
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        return resp
+
+
+class MySessionFakeMock2(MySessionBaseMock):
+    def request(self, url, method, **kwargs):
+
+        resp = Response()
+
+        if url == '/users':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE4).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+        elif url == '/users/' + OS_TENANT_ID2:
+            if method == 'GET':
+                json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+                resp.status_code = OK
+                resp._content = json_data
+            elif method == 'PATCH':
+                json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+                resp.status_code = NOT_FOUND
+                resp._content = json_data
+                resp.reason = 'No PATCH'
+
+        return resp
+
+
+class MySessionMock(MySessionBaseMock):
     def request(self, url, method, **kwargs):
 
         resp = Response()
