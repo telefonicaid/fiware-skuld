@@ -22,19 +22,19 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-import warnings
-import os.path
 import logging
 import cPickle as pickle
 import sys
 
+import warnings
+import os.path
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
-
 from fiwareskuld.utils.osclients import osclients
-from conf.settings import HORIZON_ENDPOINT
-from fiwareskuld import utils
+from fiwareskuld.conf.settings import HORIZON_ENDPOINT
+from fiwareskuld.utils import log
+
 
 __author__ = 'chema'
 
@@ -92,7 +92,7 @@ class Notifier(object):
 
 
 if __name__ == '__main__':
-    logger = utils.log.init_logs('phase0c')
+    logger = log.init_logs('phase0c')
     try:
         users = open('users_to_notify.txt')
     except Exception:

@@ -26,8 +26,8 @@
 import time
 import logging
 
+from fiwareskuld.conf import settings
 import impersonate
-from conf import settings
 from utils.osclients import OpenStackClients
 from nova_resources import NovaResources
 from glance_resources import GlanceResources

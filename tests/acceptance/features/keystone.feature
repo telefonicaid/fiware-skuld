@@ -17,6 +17,11 @@ Feature: Get the list of expired users from the IdM.
       When I request a list of trial users from the Keystone
       Then the Keystone returns a list with all the trial users registered
 
+    Scenario: 03: Get the list of community users
+      Given a valid token from the Keystone
+      When I request a list of community users from the Keystone
+      Then the Keystone returns a list with all the community users registered
+
     Scenario: 03: Get the list of expired users
       Given a valid token from the Keystone
       And a list of trial users from the Keystone

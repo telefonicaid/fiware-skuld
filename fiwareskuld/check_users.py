@@ -22,10 +22,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+from fiwareskuld.conf import settings
 
 from fiwareskuld.utils.queries import Queries
 from utils.osclients import OpenStackClients
-from conf import settings
 
 q = Queries()
 

@@ -24,14 +24,14 @@
 #
 import logging
 import sys
-from os import environ as env
 
+from os import environ as env
 from fiwareskuld.impersonate import TrustFactory
-from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
+from fiwareskuld.conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
 from fiwareskuld.utils.osclients import OpenStackClients
 from fiwareskuld.check_users import CheckUsers
-
 from fiwareskuld.utils import log
+
 
 __author__ = 'chema'
 

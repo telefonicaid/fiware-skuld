@@ -23,8 +23,10 @@
 
 
 from fiwareskuld.expired_users import ExpiredUsers
+from fiwareskuld.create_users import CreateUser
 from commons.configuration import TENANT_NAME, USERNAME, PASSWORD
 from commons.logger_utils import get_logger
+import datetime
 
 __author__ = 'fla'
 __copyright__ = "Copyright 2015"
@@ -44,9 +46,17 @@ def before_scenario(context, scenario):
     __logger__.info("##############################")
 
     context.expiredusers = ExpiredUsers(TENANT_NAME, USERNAME, PASSWORD)
+    context.createusermanagement = CreateUser()
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
+    context.expiredusers.delete_community_users()
+    context.expiredusers.delete_trial_users()
+    context.expiredusers.delete_basic_users()
+    context.out_trial =  str(datetime.date.today() -
+                               datetime.timedelta(days=30))
+    context.out_community = str(datetime.date.today() -datetime.timedelta(days=180))
+
 
 
 def after_scenario(context, scenario):
@@ -57,6 +67,9 @@ def after_scenario(context, scenario):
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("Ending execution of scenario")
+    context.expiredusers.delete_community_users()
+    context.expiredusers.delete_trial_users()
+    context.expiredusers.delete_basic_users()
 
 
 def after_all(context):
@@ -66,3 +79,4 @@ def after_all(context):
     """
 
     __logger__.info("Teardown")
+

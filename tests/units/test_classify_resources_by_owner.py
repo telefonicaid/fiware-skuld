@@ -23,11 +23,12 @@
 # contact with opensource@tid.es
 #
 import unittest
-from mock import MagicMock, patch, call, ANY
 
+from mock import patch
 from fiwareskuld.scripts.classify_resources_by_owners import ClassifyResources, hidden_set
-from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
+from fiwareskuld.conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
     ADMIN_ROLE_ID
+
 
 __author__ = 'chema'
 

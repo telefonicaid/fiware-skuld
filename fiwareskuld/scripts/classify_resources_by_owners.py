@@ -23,12 +23,14 @@
 # contact with opensource@tid.es
 #
 import logging
-from fiwareskuld.openstackmap import OpenStackMap
-from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
-    ADMIN_ROLE_ID
-from fiwareskuld.utils import log
 import sys
 import argparse
+
+from fiwareskuld.openstackmap import OpenStackMap
+from fiwareskuld.conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
+    ADMIN_ROLE_ID
+from fiwareskuld.utils import log
+
 
 __author__ = 'chema'
 

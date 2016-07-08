@@ -22,10 +22,12 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from conf import settings
 import logging
-import os
 from logging.handlers import RotatingFileHandler
+
+from fiwareskuld.conf import settings
+import os
+
 
 __author__ = 'fla'
 
