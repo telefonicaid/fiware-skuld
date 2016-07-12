@@ -1,0 +1,36 @@
+{  
+   "role_assignments":[
+       {
+         "scope":{
+            "project":{
+               "id":"00000000000000000000000000000001"
+            }
+         },
+         "role":{
+            "id":"community_id"
+         },
+         "user":{
+            "id":"user_community1"
+         },
+         "links":{
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_community1"
+         }
+      },
+       {
+         "scope":{
+            "project":{
+               "id":"00000000000000000000000000000001"
+            }
+         },
+         "role":{
+            "id":"community_id"
+         },
+         "user":{
+            "id":"user_community2"
+         },
+         "links":{
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_community2"
+         }
+      }
+   ]
+}
