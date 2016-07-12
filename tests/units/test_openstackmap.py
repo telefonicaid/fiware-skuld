@@ -165,7 +165,6 @@ class MySessionMock(MySessionBaseMock):
             resp._content = json_data
 
         elif url == '/users' or url == '/users?name=user':
-            print (os.path.abspath("."))
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data

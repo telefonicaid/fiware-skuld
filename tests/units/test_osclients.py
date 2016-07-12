@@ -33,7 +33,7 @@ import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
 import keystoneclient.session
-import keystoneclient.auth.identity.v3.tokens
+
 from swiftclient.client import Connection
 from collections import defaultdict
 
@@ -411,7 +411,7 @@ class TestOSClients(TestCase):
         osclients.set_token('faketoken')
         session = osclients.get_session()
         self.assertIsInstance(session, keystoneclient.session.Session)
-        self.assertTrue(type(session.auth) == keystoneclient.auth.identity.v3.token.Token)
+        self.assertTrue(type(session.auth) == keystoneclient.auth.identity.v3.Token)
 
 
 class TestOSClientsOverrideEndpoint(TestCase):

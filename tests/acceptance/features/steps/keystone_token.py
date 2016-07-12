@@ -124,7 +124,7 @@ def step_request_trial_users_list(context):
 @given(u'a list of community users from the Keystone')
 def step_request_community_users_list(context):
     """
-    Request the list of trial users from the Keystone.
+    Request the list of community users from the Keystone.
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """

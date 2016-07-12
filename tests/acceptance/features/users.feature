@@ -37,12 +37,3 @@ Feature: Get the list of users from the IdM.
       Examples:
       | tenantName  | username  | password  | message                                            |
       | admin       | fake      | fake      | The request you have made requires authentication. |
-
-
-
-
-
-
-
-
-
