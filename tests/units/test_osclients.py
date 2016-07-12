@@ -271,7 +271,7 @@ class TestOSClients(TestCase):
         username = "new_user"
         password = "new_password"
         tenant_name = "new_user cloud"
-        tenant_id = "00000000000000000000000000000002"
+        tenant_id = "user_trial1"
         trust_id = "randomid0000000000000000000000001"
 
         # FIRST CHECK: Credentials from ENV
