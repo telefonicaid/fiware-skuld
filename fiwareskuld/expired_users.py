@@ -22,14 +22,11 @@
 # contact with opensource@tid.es
 
 
-import json
 import datetime
 
 from fiwareskuld.conf import settings
-import requests
 from fiwareskuld.utils.log import logger
 from fiwareskuld.utils import osclients
-from fiwareskuld.create_users import CreateUser
 
 
 class ExpiredUsers:
@@ -45,7 +42,6 @@ class ExpiredUsers:
         self.COMMUNITY_MAX_NUMBER_OF_DAYS = settings.COMMUNITY_MAX_NUMBER_OF_DAYS
         self.keystoneclient = clients.get_keystoneclientv3()
         self.protected = set()
-        self.user_create = CreateUser()
 
     def get_trial_user_ids(self):
         """Get a set of trial users; only the ids
@@ -58,7 +54,7 @@ class ExpiredUsers:
 
     def get_community_user_ids(self):
         """Get a set of community users; only the ids
-        :return: a set of user ids, corresponding to trial users.
+        :return: a set of user ids, corresponding to community users.
         """
         k = self.keystoneclient
         role = k.roles.find(name="community")
@@ -67,7 +63,7 @@ class ExpiredUsers:
 
     def get_basic_users_ids(self):
         """Get a set of basic users; only the ids
-        :return: a set of user ids, corresponding to trial users.
+        :return: a set of user ids, corresponding to basic users.
         """
         k = self.keystoneclient
         role = k.roles.find(name="basic")
@@ -76,7 +72,7 @@ class ExpiredUsers:
 
     def get_basic_users(self):
         """Get the list of basic users; the full objects are included.
-        :return: a list of trial users
+        :return: a list of basic users
         """
         user_ids = self.get_basic_users_ids()
         return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
@@ -98,37 +94,10 @@ class ExpiredUsers:
         return d
 
     def get_users(self):
-        """Get the list of trial users; the full objects are included.
-        :return: a list of trial users
+        """Get the list of users; the full objects are included.
+        :return: a list of users
         """
         return self.keystoneclient.users.list()
-
-    def delete_trial_users(self):
-        """
-        It deletes the trial users.
-        :return:
-        """
-        users_trial = self.get_trial_users()
-        for user in users_trial:
-            self.user_create.delete_user(user)
-
-    def delete_community_users(self):
-        """
-        It deletes the community users.
-        :return:
-        """
-        users_community = self.get_community_users()
-        for user in users_community:
-            self.user_create.delete_user(user)
-
-    def delete_basic_users(self):
-        """
-        It deletes the basic users.
-        :return:
-        """
-        users_basic = self.get_basic_users()
-        for user in users_basic:
-            self.user_create.delete_user(user)
 
     def get_yellow_red_users(self):
 
@@ -246,16 +215,18 @@ class ExpiredUsers:
         :return: remaining days (may be negative)
         """
 
-        trial_started_at = user['trial_started_at']
-        trial_duration = user.get(
-            'trial_duration', self.MAX_NUMBER_OF_DAYS)
+        trial_started_at = user.trial_started_at
+        if hasattr(user, 'trial_duration'):
+            trial_duration = user.trial_duration
+        else:
+            trial_duration = self.TRIAL_MAX_NUMBER_OF_DAYS
 
         formatter_string = "%Y-%m-%d"
 
-        datetime_object = datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.datetime.strptime(trial_started_at, formatter_string)
         date_object_old = datetime_object.date()
 
-        datetime_object = datetime.today()
+        datetime_object = datetime.datetime.today()
         date_object_new = datetime_object.date()
 
         difference = date_object_new - date_object_old

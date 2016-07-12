@@ -1,5 +1,5 @@
 {  
-   "role_assignments":[  
+   "role_assignments":[
       {  
          "scope":{  
             "project":{  
@@ -7,13 +7,61 @@
             }
          },
          "role":{  
-            "id":"00000000000000000000000000000001"
+            "id":"trial_id"
          },
          "user":{  
-            "id":"00000000000000000000000000000001"
+            "id":"user_trial1"
          },
          "links":{  
-            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/00000000000000000000000000000001"
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_id"
+         }
+      },
+       {
+         "scope":{
+            "project":{
+               "id":"00000000000000000000000000000001"
+            }
+         },
+         "role":{
+            "id":"trial_id"
+         },
+         "user":{
+            "id":"user_trial2"
+         },
+         "links":{
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_id"
+         }
+      },
+       {
+         "scope":{
+            "project":{
+               "id":"00000000000000000000000000000001"
+            }
+         },
+         "role":{
+            "id":"community_id"
+         },
+         "user":{
+            "id":"user_community1"
+         },
+         "links":{
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_community1"
+         }
+      },
+       {
+         "scope":{
+            "project":{
+               "id":"00000000000000000000000000000001"
+            }
+         },
+         "role":{
+            "id":"community_id"
+         },
+         "user":{
+            "id":"user_community2"
+         },
+         "links":{
+            "assignment":"http://cloud.host.fi-ware.org:4731/v3/projects/00000000000000000000000000000001/users/user_community2"
          }
       }
    ]

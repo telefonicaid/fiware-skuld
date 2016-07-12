@@ -1,16 +1,56 @@
 {  
    "users":[  
       {  
-         "username":"user",
-         "name":"user",
+         "username":"user_trial1",
+         "name":"user_trial1",
          "links":{  
-            "self":"http://cloud.host.fi-ware.org:4731/v3/users/00000000000000000000000000000001"
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_trial1"
          },
          "enabled":true,
+         "trial_started_at": "2016-07-08",
          "domain_id":"default",
          "default_project_id":"00000000000000000000000000000001",
          "cloud_project_id":"00000000000000000000000000000001",
-         "id":"00000000000000000000000000000001"
+         "id":"user_trial1"
+      },
+      {
+         "username":"user_trial2",
+         "name":"user_trial2",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_trial2"
+         },
+         "enabled":true,
+         "trial_started_at": "2016-06-26",
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"user_trial2"
+      },
+      {
+         "username":"user_community1",
+         "name":"user_community1",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_community1"
+         },
+         "enabled":true,
+         "community_started_at": "2016-06-26",
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"user_community1"
+      },
+      {
+         "username":"user_community2",
+         "name":"user_community2",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_community2"
+         },
+         "enabled":true,
+         "community_started_at": "2016-06-26",
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"user_community2"
       }
    ],
    "links":{  

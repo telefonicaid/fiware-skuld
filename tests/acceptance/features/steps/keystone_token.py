@@ -93,18 +93,18 @@ def step_check_returned_token(context):
                                         '\n Obtained a token with length: {}'.format(len(result))
 
 
-@then(u'the Keystone returns a list with trial "{listusers}" users')
-def step_check_list_users_returned(context, listusers):
+@then(u'the Keystone returns a list with "{listusers}" trial users')
+def step_check_list_trial_users_returned(context, listusers):
     list_qa_users = context.expiredusers.get_trial_users()
-    assert list_qa_users is not None, 'Expected a valid list users but obtained no token'
+    assert list_qa_users is not None, 'Expected a valid list users'
     assert len(list_qa_users) == int(listusers), \
         'Expected a list of users with {0} length and found {1}'.format(listusers, len(list_qa_users))
 
 
-@then(u'the Keystone returns a list with community "{listcommunity}" users')
-def step_check_list_users_returned(context, listcommunity):
+@then(u'the Keystone returns a list with "{listcommunity}" community users')
+def step_check_list_community_users_returned(context, listcommunity):
     list_qa_users = context.expiredusers.get_community_users()
-    assert list_qa_users is not None, 'Expected a valid list users but obtained no token'
+    assert list_qa_users is not None, 'Expected a valid list users'
     assert len(list_qa_users) == int(listcommunity), \
         'Expected a list of users with {0} length and found {1}'.format(listcommunity, len(list_qa_users))
 
@@ -137,11 +137,8 @@ def step_request_community_users_list(context):
 @given(u'a user with name "{username}", password "{password}" and role "{role}"')
 def step_create_user(context, username, password, role):
     try:
-        user = context.createusermanagement.create_user(username, password, role)
+        context.createusermanagement.create_user(username, password, role)
     except Exception as e:
-        print("bad user")
-        print ("ERRRRRROR")
-        print(e)
         context.message = e.message
         assert False, 'Error to create the user {0}'.format(e.message)
 
@@ -149,7 +146,6 @@ def step_create_user(context, username, password, role):
 @when(u'an expired user with name "{username}", password "{password}" and role "{role}" is created')
 @given(u'an expired user with name "{username}", password "{password}" and role "{role}"')
 def step_create_expired_user(context, username, password, role):
-    print ("create expired")
     try:
         if role == "trial":
             out_date = context.out_trial
@@ -157,8 +153,7 @@ def step_create_expired_user(context, username, password, role):
             out_date = context.out_community
         else:
             out_date = None
-        print(out_date)
-        user = context.createusermanagement.create_user(username, password, role, out_date)
+        context.createusermanagement.create_user(username, password, role, out_date)
     except Exception as e:
         context.message = e.message
         assert False, 'Error to create the user {0}'.format(e.message)
@@ -179,21 +174,18 @@ def step_get_list_trial_users(context):
 
 
 @when(u'I request a list of expired trial users')
-def step_request_list_expired_users(context):
+def step_request_list_trial_expired_users(context):
     """
     From the list of trial users, returns the list of expired users.
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """
     result = context.expiredusers.get_list_expired_trial_users()
-    print ("in the result")
-    print(result)
     context.expiredusers.finalTrialList = result
-    print (context.expiredusers.finalTrialList)
 
 
 @then(u'the component returns a list with "{number}" expired trial users')
-def step_get_list_expired_users(context, number):
+def step_get_list_community_expired_users(context, number):
     """
     Recover the list of expired trial users.
     :param context: Context of the acceptance test execution.
@@ -213,7 +205,7 @@ def step_get_list_expired_users(context, number):
 
 
 @when(u'I request a list of expired community users')
-def step_request_list_expired_users(context):
+def step_request_list_community_expired_users(context):
     """
     From the list of trial users, returns the list of expired users.
     :param context: Context of the acceptance test execution.
@@ -223,7 +215,7 @@ def step_request_list_expired_users(context):
 
 
 @then(u'the component returns a list with "{number}" expired community users')
-def step_get_list_expired_users(context, number):
+def step_get_list_community_expired_users(context, number):
     """
     Recover the list of expired trial users.
     :param context: Context of the acceptance test execution.

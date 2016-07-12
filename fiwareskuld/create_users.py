@@ -26,6 +26,7 @@ import datetime
 
 from fiwareskuld.conf import settings
 from fiwareskuld.utils import osclients
+from fiwareskuld.expired_users import ExpiredUsers
 
 
 class CreateUser(object):
@@ -38,13 +39,14 @@ class CreateUser(object):
         self.nova_c = clients.get_novaclient()
         self.neutron_c = clients.get_neutronclient()
         self.keystone = clients.get_keystoneclientv3()
+        self.exp = ExpiredUsers()
 
     def add_domain_user_role(self, user, role, domain):
         """ It adds a role to a user.
         :param user: the user
         :param role: the role to add
         :param domain: the domain
-        :return:
+        :return: nothing
         """
         manager = self.keystone.roles
         return manager.grant(role, user=user, domain=domain)
@@ -55,7 +57,7 @@ class CreateUser(object):
         :param user: the user
         :param role_name: the role
         :param duration: the duration for community
-        :return:
+        :return: nothing
         """
         role = self.keystone.roles.find(name=role_name)
 
@@ -66,8 +68,7 @@ class CreateUser(object):
 
         if self.role_name == "community":
             self.keystone.users.update(user, community_started_at=date_out, community_duration=duration)
-
-        if self.role_name == "trial":
+        elif self.role_name == "trial":
             self.keystone.users.update(user, trial_started_at=date_out)
 
         self.add_domain_user_role(
@@ -76,8 +77,13 @@ class CreateUser(object):
             domain='default')
 
     def create_user(self, user_name, password, role_name, date_now=None):
-        """ It creates a user
-        :return:
+        """
+        It creates a user.
+        :param user_name: username
+        :param password: password
+        :param role_name: the role
+        :param date_now: the date to be created
+        :return: the user
         """
         self.user_name = user_name
         self.password = password
@@ -106,7 +112,7 @@ class CreateUser(object):
         It updates the users.
         :param user: the user
         :param date: the date
-        :return: nothing()
+        :return: nothing
         """
         self.update_domain_to_role(user, self.role_name, date)
         self.update_quota(user, self.role_name)
@@ -115,14 +121,17 @@ class CreateUser(object):
         """
         It deletes the user
         :param user: the user to be deleted.
-        :return: nothing()
+        :return: nothing
         """
-        d = self.keystone.users.list(username=user.username)
-        if d or len(d) > 0:
-            projects = self.keystone.projects.list(user=d[0])
-            for pro in projects:
-                self.keystone.projects.delete(pro)
-            self.keystone.users.delete(d[0])
+        users = self.keystone.users.list(username=user.username)
+        if users or len(users) > 0:
+            # We delete the projects belonging to the user
+            projects = self.keystone.projects.list(user=users[0])
+            for project in projects:
+                self.keystone.projects.delete(project)
+            self.keystone.users.delete(users[0])
+        else:
+            raise Exception(404, "User {0} not found".format(user.username))
 
     def delete_user_id(self, user_id):
         """
@@ -130,11 +139,42 @@ class CreateUser(object):
         :param user_id: the user_id
         :return: nothing
         """
-        user = self.keystone.users.list(username=user_id)
-        self.delete_user(user[0])
+        users = self.keystone.users.list(username=user_id)
+        if users or len(users) > 0:
+            self.delete_user(users[0])
+        else:
+            raise Exception(404, "User {0} not found".format(user_id))
+
+    def delete_trial_users(self):
+        """
+        It deletes the trial users.
+        :return:
+        """
+        users_trial = self.exp.get_trial_users()
+        for user in users_trial:
+            self.delete_user(user)
+
+    def delete_community_users(self):
+        """
+        It deletes the community users.
+        :return:
+        """
+        users_community = self.exp.get_community_users()
+        for user in users_community:
+            self.delete_user(user)
+
+    def delete_basic_users(self):
+        """
+        It deletes the basic users.
+        :return:
+        """
+        users_basic = self.exp.get_basic_users()
+        for user in users_basic:
+            self.delete_user(user)
 
     def update_quota(self, user, role):
-        """ It updates the quota for the user according to role requirements
+        """ It updates the quota for the user according to role requirements.
+        the user should be registrated in keystone.
         :param user: the user
         :param role: the role
         :return: nothing
@@ -147,7 +187,7 @@ class CreateUser(object):
         """
         It gets the neutron quota parameters
         :param role: the user role
-        :return:
+        :return: the quota
         """
         if role == 'community':
             return {"quota": {"subnet": 1, "network": 1, "floatingip": 1,
@@ -164,18 +204,18 @@ class CreateUser(object):
 
     def get_nova_quota(self, user, role):
         """
-        It gest the nova quota parameters
+        It gets the nova quota parameters
         :param user: the user
         :param role: the role
-        :return: nothing
+        :return: the quota
         """
 
         if role == 'basic':
             return {"user_id": user.id, "instances": 0, "ram": 0,
                     "cores": 0, "floating_ips": 0}
         elif role == "trial":
-            return {"user_id": user.id, "instances": 3, "ram": 0,
-                    "cores": 0, "floating_ips": 1}
+            return {"user_id": user.id, "instances": 3, "ram": 6000,
+                    "cores": 5, "floating_ips": 1}
         else:
             return {"user_id": user.id, "instances": 5, "ram": 10240,
                     "cores": 10, "floating_ips": 0}

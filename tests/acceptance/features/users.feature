@@ -6,21 +6,21 @@ Feature: Get the list of users from the IdM.
       Given a user with name "trial2", password "trial" and role "trial"
       Given a user with name "basic1", password "trial" and role "basic"
       When I request a list of trial users from the Keystone
-      Then the Keystone returns a list with trial "2" users
+      Then the Keystone returns a list with "2" trial users
 
     Scenario: 02: Get the list of community users
       Given a user with name "community1", password "password" and role "community"
       Given a user with name "community2", password "password" and role "community"
       Given a user with name "basic1", password "password" and role "basic"
       When I request a list of community users from the Keystone
-      Then the Keystone returns a list with community "2" users
+      Then the Keystone returns a list with "2" community users
 
     Scenario Outline: 03: Get list of several users
       Given a user with name "<username>", password "<password>" and role "<role>"
       When I request a list of trial users from the Keystone
-      Then the Keystone returns a list with trial "<listtrial>" users
+      Then the Keystone returns a list with "<listtrial>" trial users
       When I request a list of community users from the Keystone
-      Then the Keystone returns a list with community "<listcommunity>" users
+      Then the Keystone returns a list with "<listcommunity>" community users
 
       Examples:
       | username | password  | role       | listtrial  |  listcommunity |
@@ -37,7 +37,6 @@ Feature: Get the list of users from the IdM.
       Examples:
       | tenantName  | username  | password  | message                                            |
       | admin       | fake      | fake      | The request you have made requires authentication. |
-
 
 
 

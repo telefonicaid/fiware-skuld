@@ -34,12 +34,14 @@ import cPickle as pickle
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FILE, LIST_VOLUMES_RESPONSE_FILE, \
     LIST_SNAPSHOTS_RESPONSE_FILE, LIST_ROLES_RESPONSE_FILE, LIST_BACKUPS_RESPONSE_FILE, LIST_USERS_RESPONSE_FILE, \
     LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
-    LIST_USERS_RESPONSE_FILE4
+    LIST_USERS_RESPONSE_FILE4, LIST_ROLES_TRIAL_RESPONSE_FILE, LIST_ROLES_COMMUNITY_RESPONSE_FILE, \
+    LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE, \
+    GET_USER_RESPONSE_FILE2
 
 from fiwareskuld.openstackmap import OpenStackMap
 
-OS_TENANT_ID = '00000000000000000000000000000001'
-OS_TENANT_ID2 = '00000000000000000000000000000002'
+OS_TENANT_ID = 'user_trial1'
+OS_TENANT_ID2 = 'user_trial2'
 
 
 class MySessionBaseMock(MagicMock):
@@ -75,16 +77,17 @@ class MySessionFakeMock(MySessionBaseMock):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
             resp.status_code = NOT_FOUND
             resp._content = json_data
-        elif url == '/users/' + OS_TENANT_ID:
+        elif url == '/users/' + OS_TENANT_ID or '/users?name={0}'.format(OS_TENANT_ID):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = NOT_FOUND
             resp._content = json_data
             resp.reason = 'No data received'
-        elif url == '/users/' + OS_TENANT_ID2:
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
-            resp.status_code = OK
-            resp._content = json_data
 
+        elif url == '/users/' + OS_TENANT_ID2 or '/users?name={0}'.format(OS_TENANT_ID2):
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = NOT_FOUND
+            resp._content = json_data
+            resp.reason = 'No data received'
         return resp
 
 
@@ -97,7 +100,12 @@ class MySessionFakeMock2(MySessionBaseMock):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE4).read()
             resp.status_code = NOT_FOUND
             resp._content = json_data
-        elif url == '/users/' + OS_TENANT_ID2:
+        elif url == '/users?name={0}'.format(OS_TENANT_ID):
+            if method == 'GET':
+                json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE2).read()
+                resp.status_code = OK
+                resp._content = json_data
+        elif url == '/users/' + OS_TENANT_ID or url == '/users/' + OS_TENANT_ID2:
             if method == 'GET':
                 json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
                 resp.status_code = OK
@@ -141,7 +149,23 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
+        elif url == '/roles?name=trial':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/roles?name=community' or url == '/roles?id=community_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/roles?id=community_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
         elif url == '/users' or url == '/users?name=user':
+            print (os.path.abspath("."))
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
@@ -158,6 +182,14 @@ class MySessionMock(MySessionBaseMock):
 
         elif url == '/role_assignments':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+        elif url == '/role_assignments?role.id=trial_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+        elif url == '/role_assignments?role.id=community_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 

@@ -581,6 +581,7 @@ class OpenStackClients(object):
         """Get a v3 keystone client. See get_keystoneclient for more details.
         :return: a keystone client"""
         session = self.get_session_v3()
+        session = self.get_session_v3()
         return keystonev3.Client(session=session)
 
     def get_catalog(self):

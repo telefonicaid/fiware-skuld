@@ -50,9 +50,9 @@ def before_scenario(context, scenario):
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
-    context.expiredusers.delete_community_users()
-    context.expiredusers.delete_trial_users()
-    context.expiredusers.delete_basic_users()
+    context.createusermanagement.delete_community_users()
+    context.createusermanagement.delete_trial_users()
+    context.createusermanagement.delete_basic_users()
     context.out_trial = str(datetime.date.today() -
                             datetime.timedelta(days=30))
     context.out_community = str(datetime.date.today() -
@@ -67,9 +67,9 @@ def after_scenario(context, scenario):
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("Ending execution of scenario")
-    context.expiredusers.delete_community_users()
-    context.expiredusers.delete_trial_users()
-    context.expiredusers.delete_basic_users()
+    context.createusermanagement.delete_community_users()
+    context.createusermanagement.delete_trial_users()
+    context.createusermanagement.delete_basic_users()
 
 
 def after_all(context):

@@ -1,16 +1,17 @@
 {  
    "user":
-      {
-         "username":"user",
-         "name":"user",
-         "links":{  
-            "self":"http://cloud.host.fi-ware.org:4731/v3/users/00000000000000000000000000000001"
+     {
+         "username":"user_trial1",
+         "name":"user_trial1",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_trial1"
          },
          "enabled":true,
+         "trial_started_at": "2016-07-08",
          "domain_id":"default",
          "default_project_id":"00000000000000000000000000000001",
          "cloud_project_id":"00000000000000000000000000000001",
-         "id":"00000000000000000000000000000001",
-         "password": "password"
-      }
+         "id":"user_trial1"
+
+     }
 }

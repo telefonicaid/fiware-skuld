@@ -26,7 +26,7 @@ from unittest import TestCase
 from requests import Response
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1, \
     LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED2, LIST_USERS_TO_DELETE, LIST_USERS_RESPONSE_FILE2, \
-    LIST_USERS_RESPONSE_FILE3, NO_DATA
+    LIST_USERS_RESPONSE_FILE3, NO_DATA, LIST_ROLES_COMMUNITY_RESPONSE_FILE
 from httplib import OK
 from os import environ
 import os
@@ -74,6 +74,10 @@ class MySessionMock(MagicMock):
             resp._content = json_data
         elif url == '/role_assignments?user.id=fake3&scope.domain.id=default':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE2).read()
+            resp.status_code = OK
+            resp._content = json_data
+        elif url == '/roles?id=community_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
         return resp
@@ -125,6 +129,7 @@ class TestCheckUsers(TestCase):
         self.list_users_response2 = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE2).read()
 
         self.list_users_response3 = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE3).read()
+        self.list_role_community = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
 
     def tearDown(self):
         if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
@@ -145,6 +150,8 @@ class TestCheckUsers(TestCase):
             data = self.list_role_assignment1
         elif LIST_USERS_RESPONSE_FILE2 in args[0]:
             data = self.list_users_response2
+        elif LIST_ROLES_COMMUNITY_RESPONSE_FILE in args[0]:
+            data = self.list_role_community
         else:
             data = NO_DATA
 

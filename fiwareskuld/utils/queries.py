@@ -163,9 +163,10 @@ class Queries(object):
         :return: the role-id of the user in the domain
         """
         keystone = self.osclients.get_keystoneclientv3()
+
         role = keystone.role_assignments.list(user=user, domain=domain)[0].role
         role = keystone.roles.list(id=role["id"])
-        return role
+        return role[0]
 
     def get_type_fiware_user(self, user):
         """Return the type of the user: trial, basic,
@@ -179,4 +180,4 @@ class Queries(object):
                  'bcefc16468f344829a739512b96624df': 'admin',
                  '24b85c710a1a4868935451a5ed9e4ecd': 'member'}
         role = self.get_role_user_domain(user)
-        return role["name"]
+        return role.name

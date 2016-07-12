@@ -33,7 +33,7 @@ import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
 import keystoneclient.session
-import keystoneclient.auth.identity.v3.token
+import keystoneclient.auth.identity.v3.tokens
 from swiftclient.client import Connection
 from collections import defaultdict
 

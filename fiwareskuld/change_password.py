@@ -93,7 +93,10 @@ class PasswordChanger(object):
         """
         # Does not work:
         #   return self.keystone.users.find(id=userid)
-        return self.users_by_id[userid]
+        try:
+            return self.users_by_id[userid]
+        except:
+            raise Exception(404, "{0} not found".format(userid))
 
     def get_user_byname(self, username):
         """

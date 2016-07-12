@@ -60,7 +60,7 @@ class CheckUsers(object):
             for user in no_basic_users:
                 try:
                     user_type = q.get_type_fiware_user(user)
-                except Exception:
+                except Exception as e:
                     user_type = 'unkown'
                 print(user + ' ' + user_type)
 
