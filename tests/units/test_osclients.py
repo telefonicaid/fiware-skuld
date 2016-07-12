@@ -80,7 +80,7 @@ class TestOSClients(TestCase):
         self.OS_USERNAME = 'user'
         self.OS_PASSWORD = 'password'
         self.OS_TENANT_NAME = 'user cloud'
-        self.OS_TENANT_ID = '00000000000000000000000000000001'
+        self.OS_TENANT_ID = 'user_trial1'
         self.OS_REGION_NAME = 'Spain2'
         self.OS_TRUST_ID = ''
 
