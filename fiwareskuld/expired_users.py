@@ -52,6 +52,13 @@ class ExpiredUsers:
         return set(e.user['id'] for e in k.role_assignments.list(
             role=role.id))
 
+    def get_role_user(self, user):
+        k = self.keystoneclient
+        user_r = k.role_assignments.list()
+        for us in user_r:
+            if us.user["id"] == user.id:
+                return k.roles.list(id=us.role["id"])[0].name
+
     def get_community_user_ids(self):
         """Get a set of community users; only the ids
         :return: a set of user ids, corresponding to community users.

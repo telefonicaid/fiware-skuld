@@ -139,6 +139,7 @@ def step_create_user(context, username, password, role):
     try:
         context.createusermanagement.create_user(username, password, role)
     except Exception as e:
+        print (e)
         context.message = e.message
         assert False, 'Error to create the user {0}'.format(e.message)
 
@@ -155,6 +156,7 @@ def step_create_expired_user(context, username, password, role):
             out_date = None
         context.createusermanagement.create_user(username, password, role, out_date)
     except Exception as e:
+        print (e)
         context.message = e.message
         assert False, 'Error to create the user {0}'.format(e.message)
 

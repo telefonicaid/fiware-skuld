@@ -27,6 +27,7 @@ import datetime
 from fiwareskuld.conf import settings
 from fiwareskuld.utils import osclients
 from fiwareskuld.expired_users import ExpiredUsers
+from os import environ
 
 
 class CreateUser(object):
@@ -66,15 +67,26 @@ class CreateUser(object):
         else:
             date_out = str(datetime.date.today())
 
-        if self.role_name == "community":
+        if role_name == "community":
             self.keystone.users.update(user, community_started_at=date_out, community_duration=duration)
-        elif self.role_name == "trial":
+        elif role_name == "trial":
             self.keystone.users.update(user, trial_started_at=date_out)
 
         self.add_domain_user_role(
             user=user,
             role=role.id,
             domain='default')
+
+    def get_user(self, user_name):
+        """
+        It gets the user for its name
+        :param user_name: the username
+        :return: the user
+        """
+        users = self.keystone.users.list(username=user_name)
+        if users and len(users) == 1:
+            return users[0]
+        return None
 
     def create_user(self, user_name, password, role_name, date_now=None):
         """
@@ -85,27 +97,36 @@ class CreateUser(object):
         :param date_now: the date to be created
         :return: the user
         """
-        self.user_name = user_name
-        self.password = password
-        self.tenant_name = user_name
-        self.role_name = role_name
-        users = self.keystone.users.list(username=self.user_name)
-        if len(users) > 0:
+        users = self.get_user(user_name)
+        if users:
             raise Exception(403, "User already exist")
+
+        self.register_user(user_name, password, role_name, date_now)
+
+    def register_user(self, user_name, password, role_name, date_now=None):
+        """
+        It register the user in the idm.
+        :param user_name: username
+        :param password: password
+        :param role_name: the role
+        :param date_now: the date to be created
+        :return: the user
+        """
         user = self.keystone.user_registration.users.register_user(
-                self.user_name,
+                user_name,
                 domain="default",
-                password=self.password,
-                username=self.user_name)
+                password=password,
+                username=user_name)
 
         self.keystone.user_registration.users.activate_user(
                 user=user.id,
                 activation_key=user.activation_key)
-        users = self.keystone.users.list(username=self.user_name)
 
-        self.update_domain_to_role(users[0], self.role_name, date_now)
-        self.update_quota(users[0], self.role_name)
-        return users[0]
+        user = self.get_user(user_name)
+        if user:
+            self.update_domain_to_role(user, role_name, date_now)
+            self.update_quota(user, role_name)
+        return user
 
     def update_user(self, user, date=None):
         """

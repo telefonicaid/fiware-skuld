@@ -26,6 +26,7 @@ from unittest import TestCase
 from datetime import datetime
 import requests_mock
 from fiwareskuld.expired_users import ExpiredUsers
+from fiwareskuld.create_users import CreateUser
 from mock import patch
 from test_openstackmap import MySessionMock
 from os import environ as environ
@@ -83,6 +84,15 @@ class TestExpiredUsers(TestCase):
         result = expiredusers.get_list_expired_trial_users()
         expectedresult = 'user_trial2'
         self.assertEqual(expectedresult, result[0].id)
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
+    def testGetRoleUser(self, m):
+        """testadmintoken check that we have an admin token"""
+        expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
+        createuser = CreateUser()
+        user = createuser.get_user("user_trial1")
+        result = expiredusers.get_role_user(user)
+        self.assertEqual("trial", result)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testCommunityUsersExpired(self, m):

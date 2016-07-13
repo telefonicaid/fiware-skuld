@@ -23,6 +23,7 @@
 
 
 import os
+import json
 from os import environ
 from unittest import TestCase
 from mock import patch, MagicMock
@@ -36,12 +37,14 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FI
     LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
     LIST_USERS_RESPONSE_FILE4, LIST_ROLES_TRIAL_RESPONSE_FILE, LIST_ROLES_COMMUNITY_RESPONSE_FILE, \
     LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE, \
-    GET_USER_RESPONSE_FILE2
+    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE
 
 from fiwareskuld.openstackmap import OpenStackMap
 
 OS_TENANT_ID = 'user_trial1'
 OS_TENANT_ID2 = 'user_trial2'
+OS_TENANT_ID3 = 'user_community1'
+OS_TENANT_ID4 = 'user_community2'
 
 
 class MySessionBaseMock(MagicMock):
@@ -154,7 +157,12 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/roles?name=community' or url == '/roles?id=community_id':
+        elif url == '/roles?name=basic':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_BASIC_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/roles?name=community':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
@@ -164,17 +172,39 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
+        elif url == '/roles?id=trial_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
         elif url == '/users' or url == '/users?name=user':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/users/' + OS_TENANT_ID:
+        elif url == '/users/' + OS_TENANT_ID or url == '/users?name={0}'.format(OS_TENANT_ID):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
+        elif url == '/users?username={0}'.format(OS_TENANT_ID)\
+                or url == '/users?username={0}'.format(OS_TENANT_ID2) \
+                or url == '/users?username={0}'.format(OS_TENANT_ID3)\
+                or url == '/users?username={0}'.format(OS_TENANT_ID4):
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE2).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/users?username=anynoexistinguser':
+            resp.status_code = OK
+            resp._content = "{\"users\": []}"
+
         elif url == '/projects':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_PROJECTS_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/users/{0}/projects'.format(OS_TENANT_ID):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_PROJECTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
@@ -183,15 +213,40 @@ class MySessionMock(MySessionBaseMock):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
+
         elif url == '/role_assignments?role.id=trial_id':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
+
+        elif url == '/projects/00000000000000000000000000000001':
+            resp.status_code = OK
+
         elif url == '/role_assignments?role.id=community_id':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
+        elif url == '/OS-REGISTRATION/users':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/OS-REGISTRATION/activate/users/{0}'.format(OS_TENANT_ID):
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID):
+            resp.status_code = OK
+
+        elif url == '/os-quota-sets/00000000000000000000000000000001?user_id={0}'.format(OS_TENANT_ID):
+            resp.status_code = OK
+            resp._content = json.dumps(kwargs["json"], ensure_ascii=False)
+
+        elif url == '/v2.0/quotas/00000000000000000000000000000001.json':
+            resp.status_code = OK
+            resp._content = json.dumps(kwargs["data"], ensure_ascii=False)
         return resp
 
 

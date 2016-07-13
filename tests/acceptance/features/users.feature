@@ -28,12 +28,3 @@ Feature: Get the list of users from the IdM.
       | qa2      | fake      | community  | 0          | 1              |
       | qa3      | admin     | basic      | 0          | 0              |
       | qa4      | admin     | community  | 0          | 1              |
-
-    Scenario Outline: 04: Get the list of expired users
-      Given a user with name "new", password "new" and role "admin"
-      When a user with name "new", password "new" and role "admin" is created
-      Then the component return an exception with the message "<message>"
-
-      Examples:
-      | tenantName  | username  | password  | message                                            |
-      | admin       | fake      | fake      | The request you have made requires authentication. |
