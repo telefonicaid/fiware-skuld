@@ -36,6 +36,10 @@ NOTIFY_BEFORE_TRIAL_EXPIRED = 7  # days
 NOTIFY_BEFORE_COMMUNITY_EXPIRED = 30  # days
 STOP_BEFORE_DELETE = 0  # days
 TRUSTID_VALIDITY = 36000  # seconds
+TRIAL_ROLE_ID = "trial_id"
+COMMUNITY_ROLE_ID = "community_id"
+BASIC_ROLE_ID = "basic_id"
+ADMIN_ROLE_ID = "admin_id"
 DONT_DELETE_DOMAINS = ([
     'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu', 'gatv.ssr.upm.es', 'thalesgroup.com',
     'atos.net', 'uth.gr', 'bth.se', 'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',

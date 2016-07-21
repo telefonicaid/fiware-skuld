@@ -233,15 +233,10 @@ def step_create_resources(context):
     try:
         image = context.user_resources.glance.get_images()[0].id
         for resource in context.table:
-            print("{0} {1} {2} {3}".format(resource[0], resource[1], resource[2], resource[3]))
-            print(context.user_manager.get_user_resources(resource[0]))
             for i in range(0, int(resource[1])):
                 context.user_manager.create_vm_for_user(resource[0], "{0}{1}".format(resource[3], i), image)
-                print(context.user_manager.get_user_resources(resource[0]))
             for i in range(0, int(resource[2])):
                 context.user_manager.create_secgroup_for_user(resource[0], "{0}{1}".format(resource[3], i))
-            print(resource[0])
-            print(context.user_manager.get_user_resources(resource[0]))
     except Exception as e:
         print(e)
         context.message = e.message
@@ -254,7 +249,7 @@ def step_create_sec_group(context, user):
     :param context: Context of the acceptance test execution.
     :return: Nothing.
     """
-    context.resources = context.user_resources.user_resources.get_resources_dict()
+    context.resources = context.user_manager.get_user_resources(user)
 
 
 @when(u'I request for deleting the VMs')
