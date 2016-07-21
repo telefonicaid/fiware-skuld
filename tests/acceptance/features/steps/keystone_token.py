@@ -251,17 +251,6 @@ def step_create_sec_group(context, user):
     """
     context.resources = context.user_manager.get_user_resources(user)
 
-
-@when(u'I request for deleting the VMs')
-def step_create_sec_group(context):
-    """
-    It delete the vms for the tenant.
-    :param context: Context of the acceptance test execution.
-    :return: Nothing.
-    """
-    context.user_resources.nova.delete_tenant_vms()
-
-
 @then(u'the component returns a list with "{number1}" security groups and "{number2}" vms for user "{user_id}"')
 def step_impl_get_red(context, number1, number2, user_id):
     resources = context.user_manager.get_user_resources(user_id)

@@ -225,29 +225,29 @@ class UserManager(object):
         for user in users_basic:
             self.delete_user(user)
 
-    def update_quota(self, user, role):
+    def update_quota(self, user, role_name):
         """ It updates the quota for the user according to role requirements.
         the user should be registrated in keystone.
         :param user: the user
         :param role: the role
         :return: nothing
         """
-        kargs = self.get_nova_quota(user, role)
+        kargs = self.get_nova_quota(user, role_name)
         self.nova_c.quotas.update(user.default_project_id, **kargs)
         self.nova_c.quotas.update(user.cloud_project_id, **kargs)
-        self.neutron_c.update_quota(user.cloud_project_id, self.get_neutron_quota(role))
+        self.neutron_c.update_quota(user.cloud_project_id, self.get_neutron_quota(role_name))
 
-    def get_neutron_quota(self, role):
+    def get_neutron_quota(self, role_name):
         """
         It gets the neutron quota parameters
-        :param role: the user role
+        :param role_name: the user role
         :return: the quota
         """
-        if role == 'community':
+        if role_name == 'community':
             return {"quota": {"subnet": 1, "network": 1, "floatingip": 1,
                               "security_group_rule": 20, "security_group": 20,
                               "router": 1, "port": 10}}
-        elif role == 'trial':
+        elif role_name == 'trial':
             return {"quota": {"subnet": 0, "network": 0, "floatingip": 1,
                               "security_group_rule": 10, "security_group": 10,
                               "router": 0, "port": 10}}
@@ -256,7 +256,7 @@ class UserManager(object):
                               "security_group_rule": 0, "security_group": 0,
                               "router": 0, "port": 0}}
 
-    def get_nova_quota(self, user, role):
+    def get_nova_quota(self, user, role_name):
         """
         It gets the nova quota parameters
         :param user: the user
@@ -264,10 +264,10 @@ class UserManager(object):
         :return: the quota
         """
 
-        if role == 'basic':
+        if role_name == 'basic':
             return {"user_id": user.id, "instances": 0, "ram": 0,
                     "cores": 0, "floating_ips": 0}
-        elif role == "trial":
+        elif role_name == "trial":
             return {"user_id": user.id, "instances": 3, "ram": 6000,
                     "cores": 5, "floating_ips": 1}
         else:
