@@ -55,13 +55,13 @@
         }
       },
       "role": {
-        "id": "community"
+        "id": "community_id"
       },
       "user": {
         "id": "fake2"
       },
       "links": {
-        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/06c02275d4b1400bb0318677d6568d52/roles/community"
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/06c02275d4b1400bb0318677d6568d52/roles/community_id"
       }
     },
     {

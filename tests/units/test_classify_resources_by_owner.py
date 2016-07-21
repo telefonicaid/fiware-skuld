@@ -35,6 +35,7 @@ COMMUNITY_ROLE_ID = "community_id"
 TRIAL_ROLE_ID = "trial_id"
 ADMIN_ROLE_ID = "admin_id"
 
+
 class _DictAttr(dict):
     """dictionary that allows access as d['key'] and d.key"""
     def __init__(self):

@@ -148,7 +148,6 @@ class TestCheckUsers(TestCase):
 
             self.assertTrue(mocked_open.called)
 
-
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_report_all_users_basic(self):
         from fiwareskuld.check_users import CheckUsers

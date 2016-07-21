@@ -273,15 +273,18 @@ class MySessionMock(MySessionBaseMock):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
+
         elif url == '/role_assignments?user.id=user_trial2&scope.domain.id=default':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
+
         elif url == '/role_assignments?user.id=user_trial1&scope.domain.id=default':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
         return resp
+
 
 class TestOpenstackMap(TestCase):
 
