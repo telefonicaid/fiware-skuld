@@ -251,6 +251,7 @@ def step_create_sec_group(context, user):
     """
     context.resources = context.user_manager.get_user_resources(user)
 
+
 @then(u'the component returns a list with "{number1}" security groups and "{number2}" vms for user "{user_id}"')
 def step_impl_get_red(context, number1, number2, user_id):
     resources = context.user_manager.get_user_resources(user_id)
