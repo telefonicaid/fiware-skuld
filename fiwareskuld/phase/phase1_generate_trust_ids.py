@@ -50,6 +50,7 @@ def generate_trust_ids(users_to_delete):
     osclients = OpenStackClients()
     users_trusted_ids = open('users_trusted_ids.txt', 'w')
     check_users = CheckUsers()
+    check_users.get_ids()
 
     # Use an alternative URL that allow direct access to the keystone admin
     # endpoint, because the registered one uses an internal IP address.
@@ -72,9 +73,9 @@ def generate_trust_ids(users_to_delete):
             continue
         try:
             count += 1
-            (username, trust_id) = trust_factory.create_trust_admin(
+            (username, trust_id, user_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            users_trusted_ids.write(username + ',' + trust_id + '\n')
+            users_trusted_ids.write(username + ',' + trust_id + ',' + user_id+'\n')
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
         except Exception, e:
@@ -85,6 +86,21 @@ def generate_trust_ids(users_to_delete):
 
 
 if __name__ == '__main__':
+    OS_AUTH_URL = 'http://130.206.120.23:5000/v2.0'
+    OS_USERNAME = 'idm'
+    OS_PASSWORD = 'idm'
+    OS_TENANT_NAME = 'idm'
+    OS_TENANT_ID = "e76a0d73b1c845a788b118fee6c622a3"
+    OS_REGION_NAME = 'Valladolid'
+    OS_TRUST_ID = ''
+
+    from os import environ
+    environ.setdefault('OS_AUTH_URL', OS_AUTH_URL)
+    environ.setdefault('OS_USERNAME', OS_USERNAME)
+    environ.setdefault('OS_PASSWORD', OS_PASSWORD)
+    environ.setdefault('OS_TENANT_NAME', OS_TENANT_NAME)
+    environ.setdefault('OS_TENANT_ID', OS_TENANT_ID)
+    environ.setdefault('OS_REGION_NAME', OS_REGION_NAME)
     logger = log.init_logs('phase1')
     if len(sys.argv) == 2:
         name = sys.argv[1]

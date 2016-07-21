@@ -26,7 +26,7 @@ from unittest import TestCase
 from datetime import datetime
 import requests_mock
 from fiwareskuld.expired_users import ExpiredUsers
-from fiwareskuld.create_users import CreateUser
+from fiwareskuld.users_management import UserManager
 from mock import patch
 from test_openstackmap import MySessionMock
 from os import environ as environ
@@ -59,7 +59,7 @@ class TestCreateUsers(TestCase):
     def testCreateTrialUser(self, m):
 
         """It tests the creation of a trial user"""
-        createusers = CreateUser()
+        createusers = UserManager()
         result = createusers.register_user("user_trial1", "anypassword", "trial")
         self.assertIsNotNone(result)
 
@@ -67,7 +67,7 @@ class TestCreateUsers(TestCase):
     def testCreateCommunityUser(self, m):
 
         """It tests the creation of a community user"""
-        createusers = CreateUser()
+        createusers = UserManager()
         result = createusers.register_user("user_community1", "anypassword", "community")
         self.assertIsNotNone(result)
 
@@ -75,7 +75,7 @@ class TestCreateUsers(TestCase):
     def testExistingUser(self, m):
 
         """It tests the creation of a community user"""
-        createusers = CreateUser()
+        createusers = UserManager()
         result = createusers.get_user("user_trial1")
         self.assertIsNotNone(result)
 
@@ -83,7 +83,7 @@ class TestCreateUsers(TestCase):
     def testNotExistingUser(self, m):
 
         """It tests the creation of a community user"""
-        createusers = CreateUser()
+        createusers = UserManager()
         result = createusers.get_user("anynoexistinguser")
         self.assertIsNone(result)
 
@@ -91,12 +91,12 @@ class TestCreateUsers(TestCase):
     def testDeleteCommunityUsers(self, m):
 
         """It tests the deletion of the community users"""
-        createusers = CreateUser()
+        createusers = UserManager()
         createusers.delete_community_users()
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testDeleteTrialUsers(self, m):
 
         """It tests the deletion of the trial users"""
-        createusers = CreateUser()
+        createusers = UserManager()
         createusers.delete_trial_users()

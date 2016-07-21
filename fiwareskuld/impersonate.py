@@ -26,7 +26,8 @@ import time
 
 import os
 from oslo_utils import timeutils
-from utils import osclients
+from fiwareskuld.utils import osclients
+from fiwareskuld.conf import settings
 
 
 __author__ = 'chema'

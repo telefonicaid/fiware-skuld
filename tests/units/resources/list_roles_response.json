@@ -7,9 +7,9 @@
    "roles":[  
       {  
          "is_default":true,
-         "id":"0bcb7fa6e85046cb9e89de123456789a",
+         "id":"basic_id",
          "links":{  
-            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/0bcb7fa6e85046cb9e89de123456789a"
+            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/basic_id"
          },
          "name":"basic"
       },
@@ -17,7 +17,7 @@
          "is_default":true,
          "id":"community_id",
          "links":{  
-            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/0bcb7fa6e85046cb9e89de123456789b"
+            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/community_id"
          },
          "name":"community"
       },
@@ -32,7 +32,7 @@
          "is_default":true,
          "id":"trial_id",
          "links":{  
-            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/0bcb7fa6e85046cb9e89de123456789d"
+            "self":"http://cloud.host.fi-ware.org:4731/v3/roles/trial_id"
          },
          "name":"trial"
       },

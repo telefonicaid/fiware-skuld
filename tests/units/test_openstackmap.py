@@ -37,7 +37,7 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FI
     LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
     LIST_USERS_RESPONSE_FILE4, LIST_ROLES_TRIAL_RESPONSE_FILE, LIST_ROLES_COMMUNITY_RESPONSE_FILE, \
     LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE, \
-    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE
+    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE
 
 from fiwareskuld.openstackmap import OpenStackMap
 
@@ -49,7 +49,12 @@ OS_TENANT_ID4 = 'user_community2'
 
 class MySessionBaseMock(MagicMock):
     # Mock of a keystone Session
-    def get_endpoint(self, auth, **kwargs):
+    def get_endpoint(self,  **kwargs):
+
+        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
+        return endpoint
+
+    def get_endpoint(self, auth=None, **kwargs):
 
         endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
         return endpoint
@@ -69,6 +74,10 @@ class MySessionBaseMock(MagicMock):
         d['catalog'].append(service2)
 
         return d
+
+    def get_token(self):
+        """return a token"""
+        return "a12baba1ddde00000000000000000001"
 
 
 class MySessionFakeMock(MySessionBaseMock):
@@ -209,13 +218,13 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/role_assignments':
+        elif url == '/role_assignments?scope.domain.id=default':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/role_assignments?role.id=trial_id':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+        elif url == '/role_assignments':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
@@ -224,6 +233,12 @@ class MySessionMock(MySessionBaseMock):
 
         elif url == '/role_assignments?role.id=community_id':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/role_assignments?role.id=trial_id' or url == '/role_assignments?user.id=user_trial1' \
+                or url == '/role_assignments?user.id=user_trial2':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
@@ -247,8 +262,26 @@ class MySessionMock(MySessionBaseMock):
         elif url == '/v2.0/quotas/00000000000000000000000000000001.json':
             resp.status_code = OK
             resp._content = json.dumps(kwargs["data"], ensure_ascii=False)
-        return resp
 
+        elif url == '/roles?name=basic':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_ID_BASIC_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/role_assignments?role.id=trial_id' or url == '/role_assignments?user.id=user_trial1' \
+                or url == '/role_assignments?user.id=user_trial2':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+        elif url == '/role_assignments?user.id=user_trial2&scope.domain.id=default':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+        elif url == '/role_assignments?user.id=user_trial1&scope.domain.id=default':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+        return resp
 
 class TestOpenstackMap(TestCase):
 
@@ -333,15 +366,6 @@ class TestOpenstackMap(TestCase):
 
         openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
         openstackmap.load_nova()
-        self.assertIsNotNone(openstackmap)
-
-    @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def test_load_cinder(self):
-        """test_load_cinder check that we could build a map from cinder resources using Direct_objects directive."""
-        environ.setdefault('KEYSTONE_ADMIN_ENDPOINT', self.OS_AUTH_URL)
-
-        openstackmap = OpenStackMap(auto_load=False, objects_strategy=OpenStackMap.DIRECT_OBJECTS)
-        openstackmap.load_cinder()
         self.assertIsNotNone(openstackmap)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)

@@ -23,7 +23,9 @@
 
 
 from fiwareskuld.expired_users import ExpiredUsers
-from fiwareskuld.create_users import CreateUser
+from fiwareskuld.conf import settings
+from fiwareskuld.users_management import UserManager
+from fiwareskuld.user_resources import UserResources
 from commons.configuration import TENANT_NAME, USERNAME, PASSWORD
 from commons.logger_utils import get_logger
 import datetime
@@ -46,30 +48,35 @@ def before_scenario(context, scenario):
     __logger__.info("##############################")
 
     context.expiredusers = ExpiredUsers(TENANT_NAME, USERNAME, PASSWORD)
-    context.createusermanagement = CreateUser()
+    context.user_manager = UserManager()
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
-    context.createusermanagement.delete_community_users()
-    context.createusermanagement.delete_trial_users()
-    context.createusermanagement.delete_basic_users()
+    context.user_manager.delete_community_users()
+    context.user_manager.delete_trial_users()
+    context.user_manager.delete_basic_users()
+    context.user_resources = []
     context.out_trial = str(datetime.date.today() -
-                            datetime.timedelta(days=30))
+                            datetime.timedelta(days=settings.TRIAL_MAX_NUMBER_OF_DAYS+1))
+    context.out_notified_trial = str(datetime.date.today() - datetime.timedelta(days=7))
     context.out_community = str(datetime.date.today() -
-                                datetime.timedelta(days=180))
+                                datetime.timedelta(days=settings.COMMUNITY_MAX_NUMBER_OF_DAYS+1))
+
+    context.out_notified_community = str(datetime.date.today() -
+                                         datetime.timedelta(days=settings.COMMUNITY_MAX_NUMBER_OF_DAYS - 30))
 
 
 def after_scenario(context, scenario):
     """
     HOOK: To be executed after each Scenario:
     """
+    context.user_manager.delete_community_users()
+    context.user_manager.delete_trial_users()
+    context.user_manager.delete_basic_users()
 
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("Ending execution of scenario")
-    context.createusermanagement.delete_community_users()
-    context.createusermanagement.delete_trial_users()
-    context.createusermanagement.delete_basic_users()
 
 
 def after_all(context):

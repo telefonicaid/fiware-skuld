@@ -490,8 +490,12 @@ class OpenStackClients(object):
         :return: a cinder client valid for a region.
         """
         self._require_module('cinder')
+        session = self.get_session()
+        token = session.get_token()
+        endpoint = session.get_endpoint(service_type='volume',
+                                        region_name=self.region)
         return self._modules_imported['cinder'].Client(
-            session=self.get_session(), region_name=self.region)
+             endpoint=endpoint, token=token)
 
     def get_cinderclientv1(self):
         """Get a cinder client asking for the 'volume' endpoint instead of the
@@ -515,9 +519,12 @@ class OpenStackClients(object):
         :return: a cinder client valid for a region.
         """
         self._require_module('cinder')
+        session = self.get_session()
+        token = session.get_token()
+        endpoint = session.get_endpoint(service_type='volume',
+                                        region_name=self.region)
         return self._modules_imported['cinder'].Client(
-            session=self.get_session(), region_name=self.region,
-            service_type='volume')
+             endpoint=endpoint, region_name=self.region, token=token)
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region
@@ -580,7 +587,6 @@ class OpenStackClients(object):
     def get_keystoneclientv3(self):
         """Get a v3 keystone client. See get_keystoneclient for more details.
         :return: a keystone client"""
-        session = self.get_session_v3()
         session = self.get_session_v3()
         return keystonev3.Client(session=session)
 

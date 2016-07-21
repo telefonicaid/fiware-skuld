@@ -132,6 +132,7 @@ class TestOSClients(TestCase):
 
         self.assertIsNotNone(osclients)
 
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_cinderclient(self):
         """test_get_cinderclient check that we could retrieve a Session client to work with cinder"""
         osclients = OpenStackClients(modules="cinder")
@@ -140,6 +141,7 @@ class TestOSClients(TestCase):
         # api_version = cinderClient.get_volume_api_version_from_endpoint() --> This should return "2" against a server
         self.assertIsInstance(cinderClient, cinderclient.v2.client.Client)
 
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_cinderclient_v1(self):
         """test_get_cinderclient_v1 check that we could retrieve a Session client to work with cinder using
         an older client (v1)."""

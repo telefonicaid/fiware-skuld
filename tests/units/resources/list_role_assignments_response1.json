@@ -39,13 +39,13 @@
         }
       },
       "role": {
-        "id": "0bcb7fa6e85046cb9e89ded5656b192b"
+        "id": "basic_id"
       },
       "user": {
-        "id": "fake2"
+        "id": "user_basic1"
       },
       "links": {
-        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/00000000000003228460960090160000/users/02e177877dca4bc59ef1a7cf55a86e31/roles/bcefc16468f344829a739512b96624df"
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/projects/00000000000003228460960090160000/users/user_basic1/roles/basic"
       }
     },
     {
@@ -61,7 +61,7 @@
         "id": "fake2"
       },
       "links": {
-        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/06c02275d4b1400bb0318677d6568d52/roles/community"
+        "assignment": "http://cloud.lab.fiware.org:4730/v3/domains/default/users/fake2/roles/community"
       }
     },
     {

@@ -27,8 +27,6 @@ import sys
 import argparse
 
 from fiwareskuld.openstackmap import OpenStackMap
-from fiwareskuld.conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
-    ADMIN_ROLE_ID
 from fiwareskuld.utils import log
 
 
@@ -125,6 +123,10 @@ class ClassifyResources(object):
 
             roles = self.map.roles_by_user[user.id]
             user_has_type = False
+            BASIC_ROLE_ID = "basic_id"
+            COMMUNITY_ROLE_ID = "community_id"
+            TRIAL_ROLE_ID = "trial_id"
+            ADMIN_ROLE_ID = "admin_id"
             for rol in roles:
                 if rol[0] == BASIC_ROLE_ID:
                     user_has_type = True

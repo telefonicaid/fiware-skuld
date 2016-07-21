@@ -35,18 +35,24 @@ class CheckUsers(object):
     are still basic users before deleting their resources"""
 
     def __init__(self):
-        """constructor, build the list of basic users included in
-        users_to_delete.txt"""
-        basic_type = settings.BASIC_ROLE_ID
+        """constructor"""
+        osclients = OpenStackClients()
+        self.keystone = osclients.get_keystoneclientv3()
+
+    def get_ids(self):
+        """
+        build the list of basic users included in users_to_delete.txt
+        :return:
+        """
         self.ids = set(
             line.strip() for line in open('users_to_delete.txt').readlines())
+        self.users_basic = self._get_basic_users()
 
-        osclients = OpenStackClients()
-
-        keystone = osclients.get_keystoneclientv3()
-        self.users_basic = set(
+    def _get_basic_users(self):
+        basic_type = self.keystone.roles.find(name="basic").id
+        return set(
             asig.user['id']
-            for asig in keystone.role_assignments.list(domain='default')
+            for asig in self.keystone.role_assignments.list(domain='default')
             if asig.role['id'] == basic_type and asig.user['id'] in self.ids)
 
     def report_not_basic_users(self):

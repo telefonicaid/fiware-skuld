@@ -121,6 +121,6 @@ class SpecialPortRemover(object):
             print('There were not any ports to delete')
 
 if __name__ == '__main__':
-    logger = utils.log.init_logs('phase2c_deletespecialports')
+    logger = log.init_logs('phase2c_deletespecialports')
     remover = SpecialPortRemover()
     remover.delete_special_ports()

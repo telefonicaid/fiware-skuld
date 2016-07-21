@@ -1,30 +1,32 @@
 # -*- coding: utf-8 -*-
 Feature: Get the list of users from the IdM.
 
-    Scenario:  01: Get the list of trial users
-      Given a user with name "trial1", password "trial" and role "trial"
-      Given a user with name "trial2", password "trial" and role "trial"
-      Given a user with name "basic1", password "trial" and role "basic"
-      When I request a list of trial users from the Keystone
-      Then the Keystone returns a list with "2" trial users
+  Scenario:  01: Get the list of trial users
+    Given I created several users with values:
+    | name     | password | role  |
+    | qatrial1 | new2     | trial |
+    | qatrial2 | new3     | trial |
+    | qabasic  | new3     | basic |
+    When I request a list of "trial" users
+    Then the component returns a list with "2" users
 
-    Scenario: 02: Get the list of community users
-      Given a user with name "community1", password "password" and role "community"
-      Given a user with name "community2", password "password" and role "community"
-      Given a user with name "basic1", password "password" and role "basic"
-      When I request a list of community users from the Keystone
-      Then the Keystone returns a list with "2" community users
+  Scenario: 02: Get the list of community users
+    Given I created several users with values:
+    | name         | password | role      |
+    | qacommunity1 | new2     | community |
+    | qacommunity2 | new3     | community |
+    | qabasic      | new3     | basic     |
+    When I request a list of "community" users
+    Then the component returns a list with "2" users
 
-    Scenario Outline: 03: Get list of several users
-      Given a user with name "<username>", password "<password>" and role "<role>"
-      When I request a list of trial users from the Keystone
-      Then the Keystone returns a list with "<listtrial>" trial users
-      When I request a list of community users from the Keystone
-      Then the Keystone returns a list with "<listcommunity>" community users
-
-      Examples:
-      | username | password  | role       | listtrial  |  listcommunity |
-      | qa1      | fake      | trial      | 1          | 0              |
-      | qa2      | fake      | community  | 0          | 1              |
-      | qa3      | admin     | basic      | 0          | 0              |
-      | qa4      | admin     | community  | 0          | 1              |
+  Scenario: 03: Get list of several users
+    Given I created several users with values:
+    | name         | password | role      |
+    | qatrial      | new2     | trial     |
+    | qacommunity1 | new3     | community |
+    | qabasic      | new3     | basic     |
+    | qacommunity2 | new3     | community |
+    When I request a list of "trial" users
+    Then the component returns a list with "1" users
+    When I request a list of "community" users from the Keystone
+    Then the component returns a list with "2" users

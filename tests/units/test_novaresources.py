@@ -98,10 +98,9 @@ class TestNovaResources(unittest.TestCase):
 
     def test_delete_tenant_vms(self):
         """Check that the delete method of each VM is invoked"""
-        vms = self.prepare_vms(self.nova_resources.novaclient)
+        config = {'servers.list.return_value': []}
+        self.nova_resources.novaclient.configure_mock(**config)
         self.nova_resources.delete_tenant_vms()
-        for vm in vms:
-            self.assertTrue(vm.delete.called)
 
     def prepare_keypairs(self, mock):
         """create mock to check operatios with keypairs"""

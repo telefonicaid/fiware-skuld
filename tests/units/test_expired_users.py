@@ -26,7 +26,7 @@ from unittest import TestCase
 from datetime import datetime
 import requests_mock
 from fiwareskuld.expired_users import ExpiredUsers
-from fiwareskuld.create_users import CreateUser
+from fiwareskuld.users_management import UserManager
 from mock import patch
 from test_openstackmap import MySessionMock
 from os import environ as environ
@@ -89,10 +89,10 @@ class TestExpiredUsers(TestCase):
     def testGetRoleUser(self, m):
         """testadmintoken check that we have an admin token"""
         expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
-        createuser = CreateUser()
-        user = createuser.get_user("user_trial1")
-        result = expiredusers.get_role_user(user)
-        self.assertEqual("trial", result)
+        user_manager = UserManager()
+        user = user_manager.get_user("user_trial1")
+        result = expiredusers.get_roles_user(user)
+        self.assertIn("trial", result)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testCommunityUsersExpired(self, m):
@@ -136,13 +136,10 @@ class TestExpiredUsers(TestCase):
         """
         expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
 
-        (yellow, red) = expiredusers.get_yellow_red_users()
+        (yellow, red) = expiredusers.get_yellow_red_trial_users()
 
-        expected_yellow_value = [u'0f4de1ea94d342e696f3f61320c15253']
-        expected_red_value = ['user_trial2']
-
-        self.assertEqual(yellow, [])
-        self.assertEqual(red, expected_red_value)
+        self.assertEqual(yellow[0].id, "user_trial1")
+        self.assertEqual(red[0].id, "user_trial2")
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_listusers(self, m):

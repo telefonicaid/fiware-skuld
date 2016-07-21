@@ -54,6 +54,7 @@ if 'OS_TRUST_ID' in env:
 if 'OS_PASSWORD' in env:
         del env['OS_PASSWORD']
 
+env["TRUSTEE_PASSWORD"] = "idm"
 
 if os.path.exists('users_trusted_ids.txt'):
     use_trust_ids = True

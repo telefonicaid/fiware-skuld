@@ -26,7 +26,9 @@ from unittest import TestCase
 from requests import Response
 from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1, \
     LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED2, LIST_USERS_TO_DELETE, LIST_USERS_RESPONSE_FILE2, \
-    LIST_USERS_RESPONSE_FILE3, NO_DATA, LIST_ROLES_COMMUNITY_RESPONSE_FILE
+    LIST_USERS_RESPONSE_FILE3, NO_DATA, LIST_ROLES_COMMUNITY_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE, \
+    LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_TRIAL_RESPONSE_FILE, \
+    LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE
 from httplib import OK
 from os import environ
 import os
@@ -34,53 +36,6 @@ from StringIO import StringIO
 from collections import defaultdict
 
 OS_TENANT_ID = '00000000000000000000000000000001'
-
-
-class MySessionMock(MagicMock):
-    # Mock of a keystone Session
-
-    def get_endpoint(self, **kwargs):
-
-        endpoint = "http://cloud.host.fi-ware.org:4731/v2.0"
-        return endpoint
-
-    def get_access(self, session):
-
-        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
-                                    u'interface': u'public', u'region': u'Spain2',
-                                    u'id': u'00000000000000000000000000000002'},
-                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
-                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
-                                    }
-                                   ],
-                    u'type': u'identity', u'id': u'00000000000000000000000000000045'}
-
-        d = defaultdict(list)
-        d['catalog'].append(service2)
-
-        return d
-
-    def get_token(self):
-        """return a token"""
-        return "a12baba1ddde00000000000000000001"
-
-    def request(self, url, method, **kwargs):
-
-        resp = Response()
-
-        if url == '/role_assignments?scope.domain.id=default':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1).read()
-            resp.status_code = OK
-            resp._content = json_data
-        elif url == '/role_assignments?user.id=fake3&scope.domain.id=default':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE2).read()
-            resp.status_code = OK
-            resp._content = json_data
-        elif url == '/roles?id=community_id':
-            json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
-            resp.status_code = OK
-            resp._content = json_data
-        return resp
 
 
 class ContextualStringIO(StringIO):
@@ -98,7 +53,8 @@ class ContextualStringIO(StringIO):
 
 
 class TestCheckUsers(TestCase):
-    mock_session = MySessionMock()
+    import test_openstackmap
+    mock_session = test_openstackmap.MySessionMock()
 
     def setUp(self):
         self.OS_AUTH_URL = 'http://cloud.host.fi-ware.org:4731/v2.0'
@@ -130,6 +86,11 @@ class TestCheckUsers(TestCase):
 
         self.list_users_response3 = open(UNIT_TEST_RESOURCES_FOLDER + LIST_USERS_RESPONSE_FILE3).read()
         self.list_role_community = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_COMMUNITY_RESPONSE_FILE).read()
+        self.list_role_basic = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_ID_BASIC_RESPONSE_FILE).read()
+        self.list_role = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE).read()
+        self.list_basic_assigment = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_BASIC_RESPONSE_FILE).read()
+        self.list_role_assigment = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
+        self.trial_roles = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
 
     def tearDown(self):
         if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
@@ -152,60 +113,32 @@ class TestCheckUsers(TestCase):
             data = self.list_users_response2
         elif LIST_ROLES_COMMUNITY_RESPONSE_FILE in args[0]:
             data = self.list_role_community
+        elif LIST_ROLES_ID_BASIC_RESPONSE_FILE in args[0]:
+            data = self.list_role_basic
+        elif LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE in args[0]:
+            data = self.list_role
+        elif LIST_ROLES_BASIC_RESPONSE_FILE in args[0]:
+            data = self.list_role_basic
+        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE in args[0]:
+            data = self.list_role_assigment
+        elif LIST_ROLES_TRIAL_RESPONSE_FILE in args[0]:
+            data = self.trial_roles
         else:
             data = NO_DATA
-
-        return ContextualStringIO(data)
-
-    def side_effect_function2(self, *args, **kwargs):
-        """
-        Get the corresponding resource data from the file, some users are unknow type
-        :param args:
-        :param kwargs: More arguments, in this case nothing important.
-        :return: ContextualStringIO simulating that it is read from file.
-        """
-
-        if LIST_USERS_TO_DELETE in args[0]:
-            data = self.list_user_to_delete
-        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 in args[0]:
-            data = self.list_role_assignment1
-        elif LIST_USERS_RESPONSE_FILE3 in args[0]:
-            data = self.list_users_response3
-        else:
-            data = NO_DATA
-
-        return ContextualStringIO(data)
-
-    def side_effect_function3(self, *args, **kwargs):
-        """
-        Get the corresponding resource data from the file, all the users are Basic.
-        :param args:
-        :param kwargs: More arguments, in this case nothing important.
-        :return: ContextualStringIO simulating that it is read from file.
-        """
-
-        if LIST_USERS_TO_DELETE in args[0]:
-            data = self.list_user_to_delete
-        elif LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED1 in args[0]:
-            data = self.list_role_assignment2
-        elif LIST_USERS_RESPONSE_FILE3 in args[0]:
-            data = self.list_users_response3
-        else:
-            data = NO_DATA
-
         return ContextualStringIO(data)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_check_user_init(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = {'fake1', 'fake2', 'fake3'}
-        expectedUserBasicSet = {u'fake1', u'fake2'}
+        expectedUserSet = {'user_basic1', 'user_trial1', 'fake'}
+        expectedUserBasicSet = {u'user_basic1'}
 
         with patch('__builtin__.open') as mocked_open:
             mocked_open.side_effect = self.side_effect_function
 
             check = CheckUsers()
+            check.get_ids()
 
             self.assertSetEqual(expectedUserSet, check.ids,
                                 "Unexpected content in users_to_delete file")
@@ -215,62 +148,19 @@ class TestCheckUsers(TestCase):
 
             self.assertTrue(mocked_open.called)
 
-    @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def test_report_not_basic_users(self):
-        from fiwareskuld.check_users import CheckUsers
-
-        expectedUserSet = {'fake3'}
-        expectedUserTypeSet = {'community'}
-
-        with patch('__builtin__.open') as mocked_open:
-            mocked_open.side_effect = self.side_effect_function
-
-            check = CheckUsers()
-
-            no_basic_users, no_basic_userstype = check.report_not_basic_users()
-
-            self.assertSetEqual(expectedUserSet, no_basic_users,
-                                "The expected set of no basic users is wrong")
-
-            self.assertSetEqual(expectedUserTypeSet, no_basic_userstype,
-                                "The expected set of type of no basic users is wrong")
-
-            self.assertTrue(mocked_open.called)
-
-    @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def test_report_invalid_users_type(self):
-        from fiwareskuld.check_users import CheckUsers
-
-        expectedUserSet = {'fake3'}
-        expectedUserTypeSet = {'unkown'}
-
-        with patch('__builtin__.open') as mocked_open:
-            mocked_open.side_effect = self.side_effect_function2
-
-            check = CheckUsers()
-
-            no_basic_users, no_basic_userstype = check.report_not_basic_users()
-
-            self.assertSetEqual(expectedUserSet, no_basic_users,
-                                "The expected set of no basic users is wrong")
-
-            self.assertSetEqual(expectedUserTypeSet, no_basic_userstype,
-                                "The expected set of type of no basic users is wrong")
-
-            self.assertTrue(mocked_open.called)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_report_all_users_basic(self):
         from fiwareskuld.check_users import CheckUsers
 
-        expectedUserSet = set()
-        expectedUserTypeSet = set()
+        expectedUserSet = {"user_trial1", "fake"}
+        expectedUserTypeSet = {"trial", "unkown"}
 
         with patch('__builtin__.open') as mocked_open:
-            mocked_open.side_effect = self.side_effect_function3
+            mocked_open.side_effect = self.side_effect_function
 
             check = CheckUsers()
-
+            check.get_ids()
             no_basic_users, no_basic_userstype = check.report_not_basic_users()
 
             self.assertSetEqual(expectedUserSet, no_basic_users,

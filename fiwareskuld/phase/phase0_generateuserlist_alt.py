@@ -27,11 +27,13 @@ import os.path
 
 from fiwareskuld.utils import osclients
 from fiwareskuld.conf import settings
-from fiwareskuld import utils
+from fiwareskuld.utils import log
+from fiwareskuld.utils import rotated_files
+from fiwareskuld.users_management import UserManager
 
 __author__ = 'chema'
 
-logger = utils.log.init_logs('phase0')
+logger = log.init_logs('phase0')
 
 
 class ExpiredUsers:
@@ -48,8 +50,9 @@ class ExpiredUsers:
         :return: a set of user ids, corresponding to trial users.
         """
         k = self.keystoneclient
+        role = k.roles.find(name="trial")
         return set(e.user['id'] for e in k.role_assignments.list(
-            role=settings.TRIAL_ROLE_ID))
+            role=role.id))
 
     def get_basic_users_ids(self):
         """Get a set of basic users; only the ids
@@ -120,7 +123,7 @@ class ExpiredUsers:
                 name = 'users_to_delete.txt'
                 phase3_name = 'users_to_delete_phase3.txt'
                 basic_users = self.get_basic_users_ids()
-                utils.rotated_files.rotate_files(
+                rotated_files.rotate_files(
                     name, settings.STOP_BEFORE_DELETE, phase3_name)
                 # Remove from list the users that are not basic
                 # (i.e.) users who has changed to community or again to trial
@@ -138,7 +141,7 @@ class ExpiredUsers:
         else:
             with open('users_to_delete.txt', 'w') as users_to_delete:
                 for user in delete_list:
-                    users_to_delete.write(user.id + ',' + user.name + '\n')
+                    users_to_delete.write(user.id + '\n')
 
     def _get_remaining_trial_time(self, user):
         """
@@ -150,14 +153,14 @@ class ExpiredUsers:
 
         trial_started_at = user['trial_started_at']
         trial_duration = user.get(
-            'trial_duration', settings.MAX_NUMBER_OF_DAYS)
+            'trial_duration', settings.TRIAL_MAX_NUMBER_OF_DAYS)
 
         formatter_string = "%Y-%m-%d"
 
-        datetime_object = datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.datetime.strptime(trial_started_at, formatter_string)
         date_object_old = datetime_object.date()
 
-        datetime_object = datetime.today()
+        datetime_object = datetime.datetime.today()
         date_object_new = datetime_object.date()
 
         difference = date_object_new - date_object_old
@@ -184,4 +187,4 @@ class ExpiredUsers:
 
 if __name__ == '__main__':
     expired = ExpiredUsers()
-    expired.save_lists(cron_daily=True)
+    expired.save_lists(cron_daily=False)
