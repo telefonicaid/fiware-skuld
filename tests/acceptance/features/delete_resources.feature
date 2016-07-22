@@ -27,7 +27,7 @@ Feature: Get the list of expired users from the IdM.
     When a set of resources for the user
     | user_id |vms  | security groups | name |
     | qatrial |2    | 1               | qa   |
-    Then the component return an exception with the message "Quota exceeded for cores,instances,ram: Requested 1, but already used 0 of 0 cores"
+    Then the component return an exception with the message "Maximum number of ports exceeded"
 
   Scenario: 04: Get resources created trial exceeded quotas
     Given I created several users with values:
@@ -49,11 +49,11 @@ Feature: Get the list of expired users from the IdM.
     When I request for showing resources for user "qatrial"
     Then the component returns a list with "0" security groups and "0" vms for user "qatrial"
 
-  Scenario: 03: Delete security groups
+  Scenario: 06: Delete security groups
     Given I created several users with values:
     | name    | password | role  |
     | qatrial | password | trial |
-    When a set of resources for user "qatrial"
+    When a set of resources for the user
     | user_id |vms  | security groups | name |
     | qatrial |0    | 2               | qa   |
     When I request for deleting the security groups for user "qatrial"

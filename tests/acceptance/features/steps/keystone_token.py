@@ -272,7 +272,7 @@ def step_message_for_wrong_data(context, message):
     :return: Nothing.
     """
     result = unicode(context.message)
-    assert result == message, message
+    assert message in result, message
 
 
 @when(u'I request for saving expired "{role}" users')
@@ -341,6 +341,25 @@ def step_check_has_role(context, user, role):
     assert roles[0] == role, \
         'Expected a a different roles: Expected {0} and found {1}'.format(role, roles[0])
 
+@when(u'I request for deleting the VMs for user "{user}"')
+def step_impl_delete_vms(context, user):
+    """
+    It checks the deletiong of vm for the uer
+    :param context: Context of the acceptance test execution.
+    :param user: the user
+    :return: Nothing.
+    """
+    context.user_manager.delete_vms_for_user(user)
+
+@when(u'I request for deleting the security groups for user "{user}"')
+def step_impl_delete_sec_groups(context, user):
+    """
+    It checks the deletiong of vm for the uer
+    :param context: Context of the acceptance test execution.
+    :param user: the user
+    :return: Nothing.
+    """
+    context.user_manager.delete_secgroups_for_user(user)
 
 def _get_ids(file):
     with open(file, 'r') as f:

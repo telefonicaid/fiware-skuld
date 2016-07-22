@@ -236,6 +236,7 @@ class UserManager(object):
         self.nova_c.quotas.update(user.default_project_id, **kargs)
         self.nova_c.quotas.update(user.cloud_project_id, **kargs)
         self.neutron_c.update_quota(user.cloud_project_id, self.get_neutron_quota(role_name))
+        self.neutron_c.update_quota(user.default_project_id, self.get_neutron_quota(role_name))
 
     def get_neutron_quota(self, role_name):
         """
@@ -344,6 +345,32 @@ class UserManager(object):
         user_resources = UserResources(
                 self.trustee, self.trust_password, trust_id=trust_id)
         user_resources.nova.create_nova_vm(vm_name, image)
+
+    def delete_vms_for_user(self, user_id):
+        """
+        It deletes the VM for the user, obtaining a trust id.
+        :param user_id: the user id.
+        :return: Nothing.
+        """
+
+        user = self.get_user(user_id)
+        (user_name, trust_id, user_id) = self.generate_trust_id(user)
+        user_resources = UserResources(
+                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources.nova.delete_tenant_vms()
+
+    def delete_secgroups_for_user(self, user_id):
+        """
+        It deletes the security groups for the user, obtaining a trust id.
+        :param user_id: the user id.
+        :return: Nothing.
+        """
+
+        user = self.get_user(user_id)
+        (user_name, trust_id, user_id) = self.generate_trust_id(user)
+        user_resources = UserResources(
+                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources.nova.delete_tenant_security_groups()
 
     def create_secgroup_for_user(self, user_id, sec_name):
         """
