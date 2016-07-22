@@ -76,21 +76,40 @@ class TestOSClients(TestCase):
 
     def setUp(self):
         """define environment"""
-        self.OS_AUTH_URL = 'http:///130.206.120.23:5000/v2.0'
-        self.OS_USERNAME = 'idm'
-        self.OS_PASSWORD = 'idm'
-        self.OS_TENANT_NAME = 'idm'
-        self.OS_TENANT_ID = 'user_trial1'
-        self.OS_REGION_NAME = 'Spain2'
-        self.OS_TRUST_ID = ''
+        self.OS_AUTH_URL = environ.get('OS_AUTH_URL')
+        if self.OS_AUTH_URL is None:
+            self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
+            environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
 
-        environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
-        environ.setdefault('OS_USERNAME', self.OS_USERNAME)
-        environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
-        environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
-        environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
-        environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
-        environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
+        self.OS_USERNAME = environ.get('OS_USERNAME')
+        if self.OS_USERNAME is None:
+            self.OS_USERNAME = 'user'
+            environ.setdefault('OS_USERNAME', self.OS_USERNAME)
+
+        self.OS_PASSWORD = environ.get('OS_PASSWORD')
+        if self.OS_PASSWORD is None:
+            self.OS_PASSWORD = 'password'
+            environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
+
+        self.OS_TENANT_NAME = environ.get('OS_TENANT_NAME')
+        if self.OS_TENANT_NAME is None:
+            self.OS_TENANT_NAME = 'tenant_name'
+            environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
+
+        self.OS_TENANT_ID = environ.get('OS_TENANT_ID')
+        if self.OS_TENANT_ID is None:
+            self.OS_TENANT_ID = 'tenant_id'
+            environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
+
+        self.OS_REGION_NAME = environ.get('OS_REGION_NAME')
+        if self.OS_REGION_NAME is None:
+            self.OS_REGION_NAME = 'Spain2'
+            environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
+
+        self.OS_TRUST_ID = environ.get('OS_TRUST_ID')
+        if self.OS_TRUST_ID is None:
+            self.OS_TRUST_ID = ''
+            environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
 
     def test_implement_client(self):
         """test_implement_client check that we could implement an empty client."""
