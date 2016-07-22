@@ -76,10 +76,10 @@ class TestOSClients(TestCase):
 
     def setUp(self):
         """define environment"""
-        self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
-        self.OS_USERNAME = 'user'
-        self.OS_PASSWORD = 'password'
-        self.OS_TENANT_NAME = 'user cloud'
+        self.OS_AUTH_URL = 'http:///130.206.120.23:5000/v2.0'
+        self.OS_USERNAME = 'idm'
+        self.OS_PASSWORD = 'idm'
+        self.OS_TENANT_NAME = 'idm'
         self.OS_TENANT_ID = 'user_trial1'
         self.OS_REGION_NAME = 'Spain2'
         self.OS_TRUST_ID = ''
