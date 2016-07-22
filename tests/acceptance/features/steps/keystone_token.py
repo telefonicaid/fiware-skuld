@@ -341,6 +341,7 @@ def step_check_has_role(context, user, role):
     assert roles[0] == role, \
         'Expected a a different roles: Expected {0} and found {1}'.format(role, roles[0])
 
+
 @when(u'I request for deleting the VMs for user "{user}"')
 def step_impl_delete_vms(context, user):
     """
@@ -350,6 +351,7 @@ def step_impl_delete_vms(context, user):
     :return: Nothing.
     """
     context.user_manager.delete_vms_for_user(user)
+
 
 @when(u'I request for deleting the security groups for user "{user}"')
 def step_impl_delete_sec_groups(context, user):
@@ -361,7 +363,12 @@ def step_impl_delete_sec_groups(context, user):
     """
     context.user_manager.delete_secgroups_for_user(user)
 
+
 def _get_ids(file):
+    """ Read the content of a file
+    :param file: The file to read the data
+    :return: Data splitted in separated lines.
+    """
     with open(file, 'r') as f:
         data = f.read()
     f.closed

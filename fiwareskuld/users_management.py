@@ -144,17 +144,19 @@ class UserManager(object):
         self.user_name = user_name
         self.password = password
         self.role_name = role_name
+
         user = self.keystone.user_registration.users.register_user(
-                user_name,
-                domain="default",
-                password=password,
-                username=user_name)
+            user_name,
+            domain="default",
+            password=password,
+            username=user_name)
 
         self.keystone.user_registration.users.activate_user(
-                user=user.id,
-                activation_key=user.activation_key)
+            user=user.id,
+            activation_key=user.activation_key)
 
         user = self.get_user(user_name)
+
         if user:
             self.update_domain_to_role(user, role_name, date_now)
             self.update_quota(user, role_name)
@@ -303,8 +305,8 @@ class UserManager(object):
         """
         trust_factory = TrustFactory(self.clients)
         try:
-            (self.user_name, self.trust_id, self.user_id) = trust_factory.create_trust_admin(
-                    user, self.trustee)
+            (self.user_name, self.trust_id, self.user_id) = \
+                trust_factory.create_trust_admin(user, self.trustee)
 
         except Exception, e:
             msg = 'Failed getting trust-id from trustor {0}. Reason: {1}'
@@ -339,11 +341,9 @@ class UserManager(object):
         :param image: the image
         :return: Nothing.
         """
-
         user = self.get_user(user_id)
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         user_resources.nova.create_nova_vm(vm_name, image)
 
     def delete_vms_for_user(self, user_id):
@@ -355,8 +355,7 @@ class UserManager(object):
 
         user = self.get_user(user_id)
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         user_resources.nova.delete_tenant_vms()
 
     def delete_secgroups_for_user(self, user_id):
@@ -368,8 +367,7 @@ class UserManager(object):
 
         user = self.get_user(user_id)
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         user_resources.nova.delete_tenant_security_groups()
 
     def create_secgroup_for_user(self, user_id, sec_name):
@@ -381,8 +379,7 @@ class UserManager(object):
         """
         user = self.get_user(user_id)
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         user_resources.nova.create_security_group(sec_name)
 
     def get_user_resources(self, user):
@@ -392,8 +389,7 @@ class UserManager(object):
         :return: A dict with the user resources.
         """
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
 
         return user_resources.get_resources_dict()
 
@@ -404,8 +400,7 @@ class UserManager(object):
         :return: nothing.
         """
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
 
         vms = user_resources.get_resources_dict()['vms']
         stopped = user_resources.stop_tenant_vms()
@@ -442,8 +437,7 @@ class UserManager(object):
         :return: nothing.
         """
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(
-                self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         report = {}
         user_resources.imagesinuse = self.detect_images_in_use
 

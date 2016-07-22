@@ -32,7 +32,7 @@ Feature: Get the list of expired users from the IdM.
       When I request a list of expired "trial" users
       Then the component returns a list with "1" expired users
 
-    Scenario: 03: no expired users
+    Scenario: 04: no expired users
       Given I created several users with values:
      | name | password | role | expired |
      | qatrial1 | new2 | trial | False |
@@ -46,7 +46,7 @@ Feature: Get the list of expired users from the IdM.
       When I request a list of expired "trial" users
       Then the component returns a list with "0" expired users
 
-    Scenario: 04: yellow red trial users
+    Scenario: 05: yellow red trial users
       Given I created several users with values:
       | name | password | role | expired |  notified |
       | qatrial1 | new2 | trial | False | True  |
@@ -58,7 +58,7 @@ Feature: Get the list of expired users from the IdM.
       Then the component returns a list with "2" yellow users
       Then the component returns a list with "3" red users
 
-    Scenario: 04: yellow red community users
+    Scenario: 06: yellow red community users
       Given I created several users with values:
       | name | password | role | expired |  notified |
       | qatrial1 | new2 | community | False | True  |

@@ -492,10 +492,8 @@ class OpenStackClients(object):
         self._require_module('cinder')
         session = self.get_session()
         token = session.get_token()
-        endpoint = session.get_endpoint(service_type='volume',
-                                        region_name=self.region)
-        return self._modules_imported['cinder'].Client(
-             endpoint=endpoint, token=token)
+        endpoint = session.get_endpoint(service_type='volume', region_name=self.region)
+        return self._modules_imported['cinder'].Client(endpoint=endpoint, token=token)
 
     def get_cinderclientv1(self):
         """Get a cinder client asking for the 'volume' endpoint instead of the
@@ -523,8 +521,8 @@ class OpenStackClients(object):
         token = session.get_token()
         endpoint = session.get_endpoint(service_type='volume',
                                         region_name=self.region)
-        return self._modules_imported['cinder'].Client(
-             endpoint=endpoint, region_name=self.region, token=token)
+        return self._modules_imported['cinder']\
+            .Client(endpoint=endpoint, region_name=self.region, token=token)
 
     def get_glanceclient(self):
         """Get a glance client. A client is different for each region

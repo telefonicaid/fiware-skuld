@@ -60,3 +60,9 @@ tests/acceptance_tests/testreport/
 # OpenStackMap resource folder
 scripts/userListPerRegion/tmp_cache/
 
+# Temporal execution files
+tests/acceptance/users_to_delete.txt
+tests/acceptance/users_to_notify.txt
+
+# Coverage results
+test_results/*
