@@ -82,8 +82,12 @@ class TestExpiredUsers(TestCase):
         """testadmintoken check that we have an admin token"""
         expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
         result = expiredusers.get_list_expired_trial_users()
-        expectedresult = 'user_trial2'
-        self.assertEqual(expectedresult, result[0].id)
+
+        expectedresult = ['user_trial1', 'user_trial2']
+
+        self.assertEqual(len(expectedresult), len(result))
+        for i in range(0, len(expectedresult) - 1):
+            self.assertEqual(expectedresult[i], result[i].id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testGetRoleUser(self, m):
@@ -138,8 +142,16 @@ class TestExpiredUsers(TestCase):
 
         (yellow, red) = expiredusers.get_yellow_red_trial_users()
 
-        self.assertEqual(yellow[0].id, "user_trial1")
-        self.assertEqual(red[0].id, "user_trial2")
+        expectedyellow = []
+        expectedred = ['user_trial1', 'user_trial2']
+
+        self.assertEqual(len(expectedyellow), len(yellow))
+        for i in range(0, len(expectedyellow) - 1):
+            self.assertEqual(expectedyellow[i], yellow[i].id)
+
+        self.assertEqual(len(expectedred), len(red))
+        for i in range(0, len(expectedred) - 1):
+            self.assertEqual(expectedred[i], red[i].id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_listusers(self, m):
