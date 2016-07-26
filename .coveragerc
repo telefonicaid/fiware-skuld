@@ -4,3 +4,4 @@ omit =
     conf/*
     */__init__.py
     */lib/*
+    */src/python-keystoneclient/*

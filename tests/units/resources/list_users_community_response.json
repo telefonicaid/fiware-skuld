@@ -1,0 +1,35 @@
+{  
+   "users":[
+      {
+         "username":"user",
+         "name":"user",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_community1"
+         },
+         "enabled":true,
+         "community_started_at": "2016-02-26",
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"user_community1"
+      },
+      {
+         "username":"user",
+         "name":"user",
+         "links":{
+            "self":"http://cloud.host.fi-ware.org:4731/v3/users/user_community2"
+         },
+         "enabled":true,
+         "community_started_at": "2016-02-26",
+         "domain_id":"default",
+         "default_project_id":"00000000000000000000000000000001",
+         "cloud_project_id":"00000000000000000000000000000001",
+         "id":"user_community2"
+      }
+   ],
+   "links":{  
+      "self":"http://cloud.host.fi-ware.org:4731/v3/users",
+      "previous":null,
+      "next":null
+   }
+}

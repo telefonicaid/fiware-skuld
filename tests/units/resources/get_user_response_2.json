@@ -1,5 +1,5 @@
 {  
-   "user":
+   "users": [
      {
          "username":"user_trial1",
          "name":"user_trial1",
@@ -11,9 +11,8 @@
          "domain_id":"default",
          "default_project_id":"00000000000000000000000000000001",
          "cloud_project_id":"00000000000000000000000000000001",
-         "id":"user_trial1",
-         "activation_key": "",
-         "uuid":"user_trial1"
+         "id":"user_trial1"
 
      }
+     ]
 }

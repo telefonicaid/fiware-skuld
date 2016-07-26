@@ -24,14 +24,14 @@
 #
 import logging
 import sys
-from os import environ as env
 
+from os import environ as env
 from fiwareskuld.impersonate import TrustFactory
-from conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
+from fiwareskuld.conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
 from fiwareskuld.utils.osclients import OpenStackClients
 from fiwareskuld.check_users import CheckUsers
-
 from fiwareskuld.utils import log
+
 
 __author__ = 'chema'
 
@@ -50,6 +50,7 @@ def generate_trust_ids(users_to_delete):
     osclients = OpenStackClients()
     users_trusted_ids = open('users_trusted_ids.txt', 'w')
     check_users = CheckUsers()
+    check_users.get_ids()
 
     # Use an alternative URL that allow direct access to the keystone admin
     # endpoint, because the registered one uses an internal IP address.
@@ -72,9 +73,9 @@ def generate_trust_ids(users_to_delete):
             continue
         try:
             count += 1
-            (username, trust_id) = trust_factory.create_trust_admin(
+            (username, trust_id, user_id) = trust_factory.create_trust_admin(
                 user, trustee)
-            users_trusted_ids.write(username + ',' + trust_id + '\n')
+            users_trusted_ids.write(username + ',' + trust_id + ',' + user_id+'\n')
             msg = 'Generated trustid for user {0} ({1}/{2})'
             logger.info(msg.format(user, count, total))
         except Exception, e:

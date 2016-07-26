@@ -26,8 +26,8 @@
 import time
 import logging
 
+from fiwareskuld.conf import settings
 import impersonate
-from conf import settings
 from utils.osclients import OpenStackClients
 from nova_resources import NovaResources
 from glance_resources import GlanceResources
@@ -92,7 +92,6 @@ class UserResources(object):
         session = self.clients.get_session()
         self.user_name = username
         self.nova = NovaResources(self.clients)
-        self.cinder = CinderResources(self.clients)
         self.glance = GlanceResources(self.clients)
 
         try:
@@ -101,6 +100,13 @@ class UserResources(object):
             # The region does not support Neutron
             # It would be better to check the endpoint
             self.neutron = None
+
+        try:
+            self.cinder = CinderResources(self.clients)
+        except Exception:
+            # The region does not support Neutron
+            # It would be better to check the endpoint
+            self.cinder = None
 
         try:
             self.blueprints = BluePrintResources(self.clients)
@@ -180,7 +186,8 @@ class UserResources(object):
         # Snapshots must be deleted before the volumes, because a snapshot
         # depends of a volume.
         try:
-            self.cinder.delete_tenant_volume_snapshots()
+            if self.swift:
+                self.cinder.delete_tenant_volume_snapshots()
         except Exception, e:
             msg = 'Deletion of volume snaphosts failed. Reason: '
             self.logger.error(msg + str(e))
@@ -188,13 +195,15 @@ class UserResources(object):
         # Blueprint instances must be deleted before VMs, instances before
         # templates
         try:
-            self.blueprints.delete_tenant_blueprints()
+            if self.blueprints:
+                self.blueprints.delete_tenant_blueprints()
         except Exception, e:
             msg = 'Deletion of blueprints failed. Reason: '
             self.logger.error(msg + str(e))
 
         try:
-            self.cinder.delete_tenant_backup_volumes()
+            if self.cinder:
+                self.cinder.delete_tenant_backup_volumes()
         except Exception, e:
             msg = 'Deletion of backup volumes failed. Reason: '
             self.logger.error(msg + str(e))
@@ -212,12 +221,13 @@ class UserResources(object):
         # instances.
 
         count = 0
-        while self.blueprints.get_tenant_blueprints() and count < 120:
-            time.sleep(1)
-            count += 1
+        if self.blueprints:
+            while self.blueprints.get_tenant_blueprints() and count < 120:
+                time.sleep(1)
+                count += 1
 
-        if count >= 120:
-            self.logger.warning('Waiting for blueprint more than 120 seconds')
+            if count >= 120:
+                self.logger.warning('Waiting for blueprint more than 120 seconds')
 
         try:
             self.nova.delete_tenant_vms()
@@ -227,7 +237,8 @@ class UserResources(object):
 
         # Blueprint instances must be deleted after blueprint templates
         try:
-            self.blueprints.delete_tenant_templates()
+            if self.blueprints:
+                self.blueprints.delete_tenant_templates()
         except Exception, e:
             msg = 'Deletion of blueprint templates failed. Reason: '
             self.logger.error(msg + str(e))
@@ -254,7 +265,7 @@ class UserResources(object):
 
         # Before deleting volumes, snapshot volumes must be deleted
         count = 0
-        while self.cinder.get_tenant_volume_snapshots() and count < 120:
+        while self.cinder and self.cinder.get_tenant_volume_snapshots() and count < 120:
             time.sleep(1)
             count += 1
 
@@ -262,7 +273,8 @@ class UserResources(object):
             self.logger.warning('Waiting for volume snapshots > 120 seconds')
 
         try:
-            self.cinder.delete_tenant_volumes()
+            if self.cinder:
+                self.cinder.delete_tenant_volumes()
         except Exception, e:
             msg = 'Deletion of volumes failed. Reason: '
             self.logger.error(msg + str(e))
@@ -343,10 +355,11 @@ class UserResources(object):
         resources['security_groups'] = set(self.nova.get_tenant_security_groups())
 
         resources['images'] = self.glance.get_tenant_images()
-        resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
 
-        resources['volumes'] = set(self.cinder.get_tenant_volumes())
-        resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
+        if self.cinder:
+            resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
+            resources['volumes'] = set(self.cinder.get_tenant_volumes())
+            resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
 
         if self.neutron:
             resources['floatingips'] = set(self.neutron.get_tenant_floatingips())

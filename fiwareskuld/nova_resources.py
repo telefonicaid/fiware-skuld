@@ -22,7 +22,7 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-__author__ = 'chema'
+import time
 
 
 class NovaResources(object):
@@ -47,10 +47,23 @@ class NovaResources(object):
         :return: a list of VMs UUID, with user_id and status
         """
         vms = list()
+        print self.tenant_id
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
             vms.append((vm.id, vm.user_id, vm.status))
         return vms
+
+    def exits_vm(self, vm_in):
+        """
+        It checks if the vm exists.
+        :param vm_in: the VM to check
+        :return: True/False
+        """
+        vms = self.novaclient.servers.list()
+        for vm in vms:
+            if vm.id == vm_in.id:
+                return True
+        return False
 
     def stop_tenant_vms(self):
         """stop all the tenant's which are in ACTIVE state.
@@ -69,6 +82,16 @@ class NovaResources(object):
         for vm in self.novaclient.servers.list():
             assert(vm.tenant_id == self.tenant_id)
             vm.delete()
+            self.wait_for_vm_deleted(vm)
+
+    def wait_for_vm_deleted(self, vm):
+        """
+        It waits for having the concrete vm deleted.
+        :param vm: the vm
+        :return: Nothing.
+        """
+        while(self.exits_vm(vm)):
+            time.sleep(5)
 
     def get_user_keypairs(self):
         """return a list with the user's keypairs
@@ -117,3 +140,27 @@ class NovaResources(object):
                     or secgroup.tenant_id != self.tenant_id:
                 continue
             secgroup.delete()
+
+    def create_security_group(self, sec_name):
+        """
+        It creates a security group.
+        :param sec_name: the security group name
+        :return: Nothing.
+        """
+        self.novaclient.security_groups.create(sec_name, "dd")
+
+    def create_nova_vm(self, vm_name, id_image):
+        """
+        It creates a vm.
+        :param vm_name: the VM name.
+        :param id_image: the image id
+        :return: Nothing
+        """
+        self.novaclient.servers.create(vm_name, id_image, 1)
+
+    def get_flavors(self):
+        """return a list with the flavors """
+        flavors = list()
+        for flavor in self.novaclient.flavors.list():
+            flavors.append(flavor.id)
+        return flavors

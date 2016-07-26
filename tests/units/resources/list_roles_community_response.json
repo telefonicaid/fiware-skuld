@@ -1,0 +1,15 @@
+{
+	"links": {
+		"self": "http://cloud.host.fi-ware.org:4731/v3/roles",
+		"previous": null,
+		"next": null
+	},
+	"roles": [{
+		"is_default": true,
+		"id": "community_id",
+		"links": {
+			"self": "http://cloud.host.fi-ware.org:4731/v3/roles/community_id"
+		},
+		"name": "community"
+	}]
+}

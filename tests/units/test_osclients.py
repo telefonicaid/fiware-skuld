@@ -33,7 +33,7 @@ import novaclient.v2.client
 import glanceclient.v1.client
 import keystoneclient.v2_0.client
 import keystoneclient.session
-import keystoneclient.auth.identity.v3.token
+
 from swiftclient.client import Connection
 from collections import defaultdict
 
@@ -76,21 +76,40 @@ class TestOSClients(TestCase):
 
     def setUp(self):
         """define environment"""
-        self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
-        self.OS_USERNAME = 'user'
-        self.OS_PASSWORD = 'password'
-        self.OS_TENANT_NAME = 'user cloud'
-        self.OS_TENANT_ID = '00000000000000000000000000000001'
-        self.OS_REGION_NAME = 'Spain2'
-        self.OS_TRUST_ID = ''
+        self.OS_AUTH_URL = environ.get('OS_AUTH_URL')
+        if self.OS_AUTH_URL is None:
+            self.OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
+            environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
 
-        environ.setdefault('OS_AUTH_URL', self.OS_AUTH_URL)
-        environ.setdefault('OS_USERNAME', self.OS_USERNAME)
-        environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
-        environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
-        environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
-        environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
-        environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
+        self.OS_USERNAME = environ.get('OS_USERNAME')
+        if self.OS_USERNAME is None:
+            self.OS_USERNAME = 'user'
+            environ.setdefault('OS_USERNAME', self.OS_USERNAME)
+
+        self.OS_PASSWORD = environ.get('OS_PASSWORD')
+        if self.OS_PASSWORD is None:
+            self.OS_PASSWORD = 'password'
+            environ.setdefault('OS_PASSWORD', self.OS_PASSWORD)
+
+        self.OS_TENANT_NAME = environ.get('OS_TENANT_NAME')
+        if self.OS_TENANT_NAME is None:
+            self.OS_TENANT_NAME = 'tenant_name'
+            environ.setdefault('OS_TENANT_NAME', self.OS_TENANT_NAME)
+
+        self.OS_TENANT_ID = environ.get('OS_TENANT_ID')
+        if self.OS_TENANT_ID is None:
+            self.OS_TENANT_ID = 'tenant_id'
+            environ.setdefault('OS_TENANT_ID', self.OS_TENANT_ID)
+
+        self.OS_REGION_NAME = environ.get('OS_REGION_NAME')
+        if self.OS_REGION_NAME is None:
+            self.OS_REGION_NAME = 'Spain2'
+            environ.setdefault('OS_REGION_NAME', self.OS_REGION_NAME)
+
+        self.OS_TRUST_ID = environ.get('OS_TRUST_ID')
+        if self.OS_TRUST_ID is None:
+            self.OS_TRUST_ID = ''
+            environ.setdefault('OS_TRUST_ID', self.OS_TRUST_ID)
 
     def test_implement_client(self):
         """test_implement_client check that we could implement an empty client."""
@@ -132,6 +151,7 @@ class TestOSClients(TestCase):
 
         self.assertIsNotNone(osclients)
 
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_cinderclient(self):
         """test_get_cinderclient check that we could retrieve a Session client to work with cinder"""
         osclients = OpenStackClients(modules="cinder")
@@ -140,6 +160,7 @@ class TestOSClients(TestCase):
         # api_version = cinderClient.get_volume_api_version_from_endpoint() --> This should return "2" against a server
         self.assertIsInstance(cinderClient, cinderclient.v2.client.Client)
 
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
     def test_get_cinderclient_v1(self):
         """test_get_cinderclient_v1 check that we could retrieve a Session client to work with cinder using
         an older client (v1)."""
@@ -271,7 +292,7 @@ class TestOSClients(TestCase):
         username = "new_user"
         password = "new_password"
         tenant_name = "new_user cloud"
-        tenant_id = "00000000000000000000000000000002"
+        tenant_id = "user_trial1"
         trust_id = "randomid0000000000000000000000001"
 
         # FIRST CHECK: Credentials from ENV
@@ -411,7 +432,7 @@ class TestOSClients(TestCase):
         osclients.set_token('faketoken')
         session = osclients.get_session()
         self.assertIsInstance(session, keystoneclient.session.Session)
-        self.assertTrue(type(session.auth) == keystoneclient.auth.identity.v3.token.Token)
+        self.assertTrue(type(session.auth) == keystoneclient.auth.identity.v3.Token)
 
 
 class TestOSClientsOverrideEndpoint(TestCase):

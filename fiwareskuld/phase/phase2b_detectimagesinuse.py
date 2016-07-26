@@ -24,7 +24,7 @@
 #
 import cPickle as pickle
 
-from fiwareskuld.queries import Queries
+from fiwareskuld.utils.queries import Queries
 from fiwareskuld.utils import log
 
 __author__ = 'chema'

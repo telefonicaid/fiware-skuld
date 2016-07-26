@@ -22,118 +22,150 @@
 # contact with opensource@tid.es
 
 
-import json
-import requests
-from datetime import datetime
-from conf import settings
+import datetime
+import os
+
+from fiwareskuld.conf import settings
 from fiwareskuld.utils.log import logger
+from fiwareskuld.utils import osclients
+from fiwareskuld.utils import rotated_files
 
 
 class ExpiredUsers:
     def __init__(self, tenant=None, username=None, password=None):
-        """ Initialize the class with the appropriate parameters.
-        """
-        self.TRIAL_ROLE_ID = settings.TRIAL_ROLE_ID
-        self.BASIC_ROLE_ID = settings.BASIC_ROLE_ID
-        self.KEYSTONE_ENDPOINT = settings.KEYSTONE_ENDPOINT
-        self.v20 = "v2.0/"
-        self.v30 = "v3/"
-        self.token = None
-        self.listUsers = []
-        self.MAX_NUMBER_OF_DAYS = settings.MAX_NUMBER_OF_DAYS
-        self.finalList = []
-        self.yellowList = []
+        """Constructor. Create a keystone client"""
         self.__tenant = tenant
         self.__username = username
         self.__password = password
+        clients = osclients.OpenStackClients()
+        clients.override_endpoint(
+            'identity', clients.region, 'admin', settings.KEYSTONE_ENDPOINT)
+        self.TRIAL_MAX_NUMBER_OF_DAYS = settings.TRIAL_MAX_NUMBER_OF_DAYS
+        self.COMMUNITY_MAX_NUMBER_OF_DAYS = settings.COMMUNITY_MAX_NUMBER_OF_DAYS
+        self.keystoneclient = clients.get_keystoneclientv3()
+        self.protected = set()
 
-    def get_admin_token(self):
+    def get_trial_user_ids(self):
+        """Get a set of trial users; only the ids
+        :return: a set of user ids, corresponding to trial users.
         """
-        Return the admin token for a administrator user, this value is
-        maintained in the internal attribute "token" of the class.
-        :return: The admin token to be used in the X-Auth-Token header
+        k = self.keystoneclient
+        role = k.roles.find(name="trial")
+        return set(e.user['id'] for e in k.role_assignments.list(
+            role=role.id))
+
+    def get_roles_user(self, user):
+        return self.get_roles_user_id(user.id)
+
+    def get_roles_user_id(self, user_id):
+
+        user_r = self.keystoneclient.role_assignments.list(user=user_id)
+        roles = []
+        for us in user_r:
+            roles.append(self.get_role_name_by_id(us.role["id"]))
+        return roles
+
+    def get_role_name_by_id(self, role_id):
+        roles = self.keystoneclient.roles.list()
+        for role in roles:
+            if role_id == role.id:
+                return role.name
+
+    def get_community_user_ids(self):
+        """Get a set of community users; only the ids
+        :return: a set of user ids, corresponding to community users.
         """
+        k = self.keystoneclient
+        role = k.roles.find(name="community")
+        return set(e.user['id'] for e in k.role_assignments.list(
+            role=role.id))
 
-        self.__check_credentials()
-
-        payload = "{\"auth\":{\"tenantName\":\"%s\"," \
-                  "\"passwordCredentials\":{\"username\":\"%s\",\"password\":\"%s\"}}}" \
-                  % (self.__tenant, self.__username, self.__password)
-        headers = {'content-type': 'application/json'}
-        url = self.KEYSTONE_ENDPOINT + self.v20 + "tokens"
-        r = requests.post(url=url, data=payload, headers=headers)
-
-        rjson = json.loads(r.text)
-
-        if r.status_code == 200:
-
-            self.token = rjson['access']['token']['id']
-
-            logger.info("Admin token requested: %s", self.token)
-        else:
-            raise Exception(rjson['error']['message'])
-
-        return self.token
-
-    def get_list_trial_users(self):
+    def get_basic_users_ids(self):
+        """Get a set of basic users; only the ids
+        :return: a set of user ids, corresponding to basic users.
         """
-        Return the list of users which have the Trial Role defined. This value is
-        maintained in the internal attribute "listUsers" of the class.
-        :return: Lists of users id who have Trial role
+        k = self.keystoneclient
+        role = k.roles.find(name="basic")
+        return set(e.user['id'] for e in k.role_assignments.list(
+            role=role.id))
+
+    def get_basic_users(self):
+        """Get the list of basic users; the full objects are included.
+        :return: a list of basic users
         """
-        self.__check_token()
+        user_ids = self.get_basic_users_ids()
+        return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
 
-        url = self.KEYSTONE_ENDPOINT + self.v30 + "role_assignments?role.id=" + self.TRIAL_ROLE_ID
-        headers = {'X-Auth-Token': self.token}
-        r = requests.get(url=url, headers=headers)
+    def get_trial_users(self):
+        """Get the list of trial users; the full objects are included.
+        :return: a list of trial users
+        """
+        user_ids = self.get_trial_user_ids()
+        return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
 
-        role_assignments = json.loads(r.text)['role_assignments']
+    def get_community_users(self):
+        """Get the list of community users; the full objects are included.
+        :return: a list of community users
+        """
+        user_ids = self.get_community_user_ids()
 
-        # Extract the list of user_ids
-        for item in role_assignments:
-            self.listUsers.append(item['user']['id'])
+        d = list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
+        return d
 
-        logger.info("Number of Trial users detected: %d", len(self.listUsers))
+    def get_users(self):
+        """Get the list of users; the full objects are included.
+        :return: a list of users
+        """
+        return self.keystoneclient.users.list()
 
-        return self.listUsers
-
-    def get_yellow_red_users(self):
+    def get_yellow_red_trial_users(self):
 
         # Get the security token
-        self.get_admin_token()
 
         # Get the list of Trial users
-        self.get_list_trial_users()
+        users = self.get_trial_users()
+        return self._get_red_yellow(users)
 
-        self.__check_token()
-
-        url = self.KEYSTONE_ENDPOINT + self.v30 + "users/"
-        headers = {'X-Auth-Token': self.token}
-
+    def _get_red_yellow(self, users):
+        finalList = []
+        yellowList = []
         # Extract the list of user_ids
-        for user_id in self.listUsers:
-            finalurl = url + user_id
-            r = requests.get(url=finalurl, headers=headers)
+        for user in users:
+            notify = 0
+            role = self.get_role_trial_or_community(user)
+            if not role:
+                continue
+            if role == "trial":
+                notify = settings.NOTIFY_BEFORE_TRIAL_EXPIRED
+            elif role == "community":
+                notify = settings.NOTIFY_BEFORE_COMMUNITY_EXPIRED
 
-            user = json.loads(r.text)['user']
-            remaining = self.get_trial_remaining_time(user)
+            remaining = self.get_remaining_time(user)
 
             if remaining < 0:
                 # It means that the user trial period has expired
-                self.finalList.append(user_id)
-            elif remaining <= settings.NOTIFY_BEFORE_EXPIRED:
+                finalList.append(user)
+            elif remaining <= notify:
                 # It means that the user trial period is going to expire in
                 # a week or less.
-                self.yellowList.append(user_id)
+                yellowList.append(user)
 
         logger.info("Number of expired Trial Users found: %d",
-                    len(self.finalList))
+                    len(finalList))
         logger.info("Number of Trial Users to expire in the following days: %d",
-                    len(self.yellowList))
+                    len(yellowList))
 
-        return self.yellowList, self.finalList
+        return yellowList, finalList
 
-    def get_list_expired_users(self):
+    def get_yellow_red_community_users(self):
+
+        # Get the security token
+
+        # Get the list of Trial users
+        users = self.get_community_users()
+        return self._get_red_yellow(users)
+
+    def get_list_expired_trial_users(self):
         """
         For each users id that have the Trial role, we need to check
         if the time from their creation (trial_created_at) have
@@ -141,32 +173,54 @@ class ExpiredUsers:
         "finalList" of the class.
         :return: Lists of Users id who have Trial role and expired
         """
-
-        self.__check_token()
-
-        url = self.KEYSTONE_ENDPOINT + self.v30 + "users/"
-        headers = {'X-Auth-Token': self.token}
+        users = self.get_trial_users()
+        finalList = []
 
         # Extract the list of user_ids
-        for user_id in self.listUsers:
-            finalurl = url + user_id
-            r = requests.get(url=finalurl, headers=headers)
-
-            user = json.loads(r.text)['user']
-            trial_started_at = user['trial_started_at']
-            trial_duration = user.get(
-                'trial_duration', self.MAX_NUMBER_OF_DAYS)
-
+        for user in users:
+            if not user.trial_started_at:
+                continue
+            trial_started_at = user.trial_started_at
+            if hasattr(user, 'trial_duration'):
+                trial_duration = user.trial_duration
+            else:
+                trial_duration = self.TRIAL_MAX_NUMBER_OF_DAYS
             if self.check_time(trial_started_at, trial_duration):
                 # If true means that the user trial period has expired
-                self.finalList.append(user_id)
+                finalList.append(user)
 
-        logger.info("Number of expired users found: %d", len(self.finalList))
+        logger.info("Number of expired users found: %d", len(finalList))
 
-        return self.finalList
+        return finalList
 
-    def check_time(self, trial_started_at,
-                   trial_duration=settings.MAX_NUMBER_OF_DAYS):
+    def get_list_expired_community_users(self):
+        """
+        For each users id that have the Trial role, we need to check
+        if the time from their creation (trial_created_at) have
+        expired. This value is maintained in the internal attribute
+        "finalList" of the class.
+        :return: Lists of Users id who have Trial role and expired
+        """
+        users = self.get_community_users()
+        finalList = []
+
+        # Extract the list of user_ids
+        for user in users:
+            community_started_at = user.community_started_at
+            if hasattr(user, 'community_duration'):
+                community_duration = user.community_duration
+            else:
+                community_duration = self.COMMUNITY_MAX_NUMBER_OF_DAYS
+
+            if self.check_time(community_started_at, community_duration):
+                # If true means that the user trial period has expired
+                finalList.append(user.id)
+
+        logger.info("Number of expired users found: %d", len(finalList))
+
+        return finalList
+
+    def check_time(self, started_at, duration):
         """
         Check the time of the trial user in order to see if it is expired.
         :param trial_started_at: the date in which the trial user was created
@@ -176,23 +230,37 @@ class ExpiredUsers:
         """
 
         formatter_string = "%Y-%m-%d"
-
-        datetime_object = datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.datetime.strptime(started_at, formatter_string)
         date_object_old = datetime_object.date()
 
-        datetime_object = datetime.today()
+        datetime_object = datetime.datetime.today()
         date_object_new = datetime_object.date()
 
         difference = date_object_new - date_object_old
 
-        if difference.days > trial_duration:
+        if difference.days > duration:
             result = True
         else:
             result = False
 
         return result
 
-    def get_trial_remaining_time(self, user):
+    def get_role_trial_or_community(self, user):
+        """
+        It checks if the user has a role trial or
+        community and in this case, it returns it.
+        :param user: the user to check it
+        :return: the role name
+        """
+        role = None
+        roles = self.get_roles_user(user)
+        if "trial" in roles:
+            role = "trial"
+        elif "community" in roles:
+            role = "community"
+        return role
+
+    def get_remaining_time(self, user):
         """
         Check the time of the trial user; return the remaining days.
         The number will be negative when the account is expired.
@@ -200,76 +268,127 @@ class ExpiredUsers:
         :return: remaining days (may be negative)
         """
 
-        trial_started_at = user['trial_started_at']
-        trial_duration = user.get(
-            'trial_duration', self.MAX_NUMBER_OF_DAYS)
+        started_at = 0
+        duration = 180
+        role = self.get_role_trial_or_community(user)
+        if not role:
+            return duration
+
+        if role == "trial":
+            started_at = user.trial_started_at
+            if hasattr(user, 'trial_duration'):
+                duration = user.trial_duration
+            else:
+                duration = self.TRIAL_MAX_NUMBER_OF_DAYS
+        elif role == "community":
+            started_at = user.community_started_at
+            if hasattr(user, 'community_duration'):
+                duration = user.community_duration
+            else:
+                duration = self.COMMUNITY_MAX_NUMBER_OF_DAYS
 
         formatter_string = "%Y-%m-%d"
 
-        datetime_object = datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.datetime.strptime(started_at, formatter_string)
         date_object_old = datetime_object.date()
 
-        datetime_object = datetime.today()
+        datetime_object = datetime.datetime.today()
         date_object_new = datetime_object.date()
 
         difference = date_object_new - date_object_old
 
-        return trial_duration - difference.days
+        return duration - difference.days
 
-    def __check_token(self):
-        """Check if the token is not blank"""
-        if self.token == "":
-            # We need to have a admin token in order to proceed.
-            raise ValueError("Error, you need to have an admin token. Execute the get_admin_token() method previously.")
+    def save_trial_lists(self, cron_daily=False):
+        """Create files users_to_delete.txt and users_to_notify.txt with the
+        users expired and users that will expire in a week or less.
 
-    def __check_credentials(self):
-        """Check if we have the credentials of the admin user"""
-        if self.__tenant is None or self.__username is None or self.__password is None:
-            # We need to have a admin token in order to proceed.
-            raise ValueError("Error, you need to define the credentials of the admin user. "
-                             "Please, execute the setCredentials() method previously.")
+        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
+        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
+        the phase2). To create the file users_to_delete_phase3.txt, the files
+        users_to_delete.txt are rotated in each daily execution; when the file
+        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
+        to users_to_delete_phase3.txt.
 
-    def getadmintoken(self):
+        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
+        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
+
+        :param cron_daily: this code is invoked from a cron daily script.
+          if implies the creation of file users_to_delete_phase3.txt
+        :return: nothing
         """
-        Get the current admin token
-        :return: The Keystone admin token
-        """
-        return self.token
+        (notify_list, delete_list) = self.get_yellow_red_trial_users()
+        self.save_list(notify_list, delete_list, cron_daily)
 
-    def gerlisttrialusers(self):
-        """
-        Get the list of trial users
-        :return: List of Trial users.
-        """
-        return self.listUsers
+    def save_community_lists(self, cron_daily=False):
+        """Create files users_to_delete.txt and users_to_notify.txt with the
+        users expired and users that will expire in a week or less.
 
-    def getlistusers(self):
+        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
+        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
+        the phase2). To create the file users_to_delete_phase3.txt, the files
+        users_to_delete.txt are rotated in each daily execution; when the file
+        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
+        to users_to_delete_phase3.txt.
+
+        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
+        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
+
+        :param cron_daily: this code is invoked from a cron daily script.
+          if implies the creation of file users_to_delete_phase3.txt
+        :return: nothing
         """
-        Global method that call the rest of internal one in order to recover the information of
-        the expired users.
-        :return: List of Expired Users id who have Trial role and expired, example:
-                    ['0f4de1ea94d342e696f3f61320c15253', '24396976a1b84eafa5347c3f9818a66a']
+        (notify_list, delete_list) = self.get_yellow_red_community_users()
+        self.save_list(notify_list, delete_list, cron_daily)
+
+    def save_list(self, notify_list, delete_list, cron_daily):
+        """Create files users_to_delete.txt and users_to_notify.txt with the
+        users expired and users that will expire in a week or less.
+
+        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
+        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
+        the phase2). To create the file users_to_delete_phase3.txt, the files
+        users_to_delete.txt are rotated in each daily execution; when the file
+        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
+        to users_to_delete_phase3.txt.
+
+        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
+        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
+
+        :param cron_daily: this code is invoked from a cron daily script.
+          if implies the creation of file users_to_delete_phase3.txt
+        :return: nothing
         """
-        # Get the security token
-        self.get_admin_token()
+        with open('users_to_notify.txt', 'w') as users_to_notify:
+            for user in notify_list:
+                users_to_notify.write(user.id + "\n")
 
-        # Get the list of Trial users
-        self.get_list_trial_users()
+        if cron_daily:
+            if settings.STOP_BEFORE_DELETE == 0:
+                name = 'users_to_delete_phase3.txt'
+                with open(name, 'w') as users_to_delete_p3:
+                    for user in delete_list:
+                        users_to_delete_p3.write(user.id + ',' + user.name + '\n')
+            else:
+                name = 'users_to_delete.txt'
+                phase3_name = 'users_to_delete_phase3.txt'
+                basic_users = self.get_basic_users_ids()
+                rotated_files.rotate_files(
+                    name, settings.STOP_BEFORE_DELETE, phase3_name)
+                # Remove from list the users that are not basic
+                # (i.e.) users who has changed to community or again to trial
+                if os.path.exists(phase3_name):
+                    with open(phase3_name, 'r') as phase3:
+                        filtered = list(u for u in phase3 if u in basic_users)
+                    with open(phase3_name, 'w') as phase3:
+                        for user in filtered:
+                            phase3.write(user.id + ',' + user.name + '\n')
 
-        # Get the list of expired trial users
-        listusers = self.get_list_expired_users()
+                with open(name, 'w') as users_to_delete:
+                    for user in delete_list:
+                        users_to_delete.write(user.id + '\n')
 
-        return listusers
-
-    def set_keystone_endpoint(self, serviceendpoint):
-        """ Set the service endpoint corresponding to the Keystone Service
-        :param serviceendpoint: The Keystone service endpoint
-        :return: None
-        """
-        self.KEYSTONE_ENDPOINT = serviceendpoint
-
-    def get_keystone_endpoint(self):
-        """ Get the Keystone service endpoint.
-        :return: The Keystone service endpoint
-        """
-        return self.KEYSTONE_ENDPOINT
+        else:
+            with open('users_to_delete.txt', 'w') as users_to_delete:
+                for user in delete_list:
+                    users_to_delete.write(user.id + ',' + user.name + '\n')

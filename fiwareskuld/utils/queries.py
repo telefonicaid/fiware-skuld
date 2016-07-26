@@ -146,7 +146,7 @@ class Queries(object):
                             if 'orphan_image' in image.properties)
         return orphan_images - images_in_use
 
-    def get_role_user_domain(self, user, domain='default'):
+    def get_role_user_domain_id(self, user, domain='default'):
         """Return the role of the specified user in the domain
         :param user: the user id
         :param domain: the domain
@@ -155,6 +155,18 @@ class Queries(object):
         keystone = self.osclients.get_keystoneclientv3()
         role = keystone.role_assignments.list(user=user, domain=domain)[0].role
         return role['id']
+
+    def get_role_user_domain(self, user, domain='default'):
+        """Return the role of the specified user in the domain
+        :param user: the user id
+        :param domain: the domain
+        :return: the role-id of the user in the domain
+        """
+        keystone = self.osclients.get_keystoneclientv3()
+
+        role = keystone.role_assignments.list(user=user, domain=domain)[0].role
+        role = keystone.roles.list(id=role["id"])
+        return role[0]
 
     def get_type_fiware_user(self, user):
         """Return the type of the user: trial, basic,
@@ -167,5 +179,5 @@ class Queries(object):
                  '23a17930700f44bfa527818bd41765ef': 'community',
                  'bcefc16468f344829a739512b96624df': 'admin',
                  '24b85c710a1a4868935451a5ed9e4ecd': 'member'}
-        role_id = self.get_role_user_domain(user)
-        return users[role_id]
+        role = self.get_role_user_domain(user)
+        return role.name

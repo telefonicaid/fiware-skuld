@@ -22,17 +22,18 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-import os
 import time
 
+import os
 from oslo_utils import timeutils
+from fiwareskuld.utils import osclients
+from fiwareskuld.conf import settings
 
-from utils import osclients
 
 __author__ = 'chema'
 
 try:
-    from conf.settings import TRUSTID_VALIDITY
+    from fiwareskuld.conf.settings import TRUSTID_VALIDITY
 except ImportError:
     TRUSTID_VALIDITY = 36000
 

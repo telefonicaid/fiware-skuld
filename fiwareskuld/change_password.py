@@ -93,7 +93,10 @@ class PasswordChanger(object):
         """
         # Does not work:
         #   return self.keystone.users.find(id=userid)
-        return self.users_by_id[userid]
+        try:
+            return self.users_by_id[userid]
+        except:
+            raise Exception(404, "{0} not found".format(userid))
 
     def get_user_byname(self, username):
         """
@@ -119,6 +122,19 @@ class PasswordChanger(object):
             cred = (userobj.name, password, userobj.default_project_id)
             list_creds.append(cred)
         return list_creds
+
+    def get_user_cred(self, user):
+        """This method from a list of user ids, reset the password and returns
+        a list with the username, new password, and tenant. This information is
+        enough to authenticate as the user
+
+        :param list_user_ids: a list of user ids
+        :return: a list of tuples, with (username, password, tenant_id)
+        """
+        userobj = self.get_user_byid(user.id)
+        password = self.reset_password(userobj)
+        cred = (userobj.name, password, userobj.default_project_id)
+        return cred
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Change a user's password")

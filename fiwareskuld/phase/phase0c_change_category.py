@@ -23,15 +23,15 @@
 # contact with opensource@tid.es
 #
 import logging
-import warnings
 
+import warnings
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from requests.packages.urllib3.exceptions import InsecurePlatformWarning
-
 from fiwareskuld.utils import queries
 from fiwareskuld.utils import log
-from conf.settings import TRIAL_ROLE_ID, BASIC_ROLE_ID, HORIZON_ENDPOINT
+from fiwareskuld.conf.settings import TRIAL_ROLE_ID, BASIC_ROLE_ID, HORIZON_ENDPOINT
+
 __author__ = 'chema'
 
 logger = log.init_logs('phase0c')

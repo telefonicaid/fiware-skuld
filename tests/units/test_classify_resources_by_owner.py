@@ -23,13 +23,17 @@
 # contact with opensource@tid.es
 #
 import unittest
-from mock import MagicMock, patch, call, ANY
 
+from mock import patch
 from fiwareskuld.scripts.classify_resources_by_owners import ClassifyResources, hidden_set
-from conf.settings import TRIAL_ROLE_ID, COMMUNITY_ROLE_ID, BASIC_ROLE_ID,\
-    ADMIN_ROLE_ID
+
 
 __author__ = 'chema'
+
+BASIC_ROLE_ID = "basic_id"
+COMMUNITY_ROLE_ID = "community_id"
+TRIAL_ROLE_ID = "trial_id"
+ADMIN_ROLE_ID = "admin_id"
 
 
 class _DictAttr(dict):
@@ -140,6 +144,7 @@ class TestClassifyResources(unittest.TestCase):
         projects['1000'] = 1000
 
         # create roles for users 1..8 (user9 and user10 will be unknown)
+
         roles = {
             '1': [(BASIC_ROLE_ID, 0)], '2': [(BASIC_ROLE_ID, 0)],
             '3': [(COMMUNITY_ROLE_ID, 0)], '4': [(COMMUNITY_ROLE_ID, 0)],

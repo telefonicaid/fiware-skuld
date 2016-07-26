@@ -26,17 +26,20 @@
 __author__ = 'fla'
 
 LOGGING_PATH = u'/var/log/fiware-skuld'
-TRIAL_ROLE_ID = "7698be72802342cdb2a78f89aa55d8ac"
-BASIC_ROLE_ID = "0bcb7fa6e85046cb9e89ded5656b192b"
-COMMUNITY_ROLE_ID = "23a17930700f44bfa527818bd41765ef"
-ADMIN_ROLE_ID = "bcefc16468f344829a739512b96624df"
 KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4730/"
 HORIZON_ENDPOINT = "https://130.206.84.7/"
-TRUSTEE = "change_me@fake.value.org"
-MAX_NUMBER_OF_DAYS = 14  # days
-NOTIFY_BEFORE_EXPIRED = 7  # days
+TRUSTEE = "idm"
+TRUSTEE_PASSWORD = ""
+TRIAL_MAX_NUMBER_OF_DAYS = 14  # days
+COMMUNITY_MAX_NUMBER_OF_DAYS = 100  # days
+NOTIFY_BEFORE_TRIAL_EXPIRED = 7  # days
+NOTIFY_BEFORE_COMMUNITY_EXPIRED = 30  # days
 STOP_BEFORE_DELETE = 0  # days
 TRUSTID_VALIDITY = 36000  # seconds
+TRIAL_ROLE_ID = "trial_id"
+COMMUNITY_ROLE_ID = "community_id"
+BASIC_ROLE_ID = "basic_id"
+ADMIN_ROLE_ID = "admin_id"
 DONT_DELETE_DOMAINS = ([
     'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu', 'gatv.ssr.upm.es', 'thalesgroup.com',
     'atos.net', 'uth.gr', 'bth.se', 'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',

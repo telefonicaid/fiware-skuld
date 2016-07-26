@@ -6,21 +6,26 @@
 # __author__ = fla
 
 
-pbr>=1.6
+pbr>=0.11.1,<=1.8.1
 
-python-glanceclient>=1.2.0 # Apache-2.0
-python-keystoneclient==1.8.0
-python-openstackclient>=2.1.0 # Apache-2.0
-python-neutronclient==3.1.1
-python-swiftclient==2.7.0
-python-cinderclient==1.2.1
+python-openstackclient==1.9.0
+python-neutronclient==4.2.0
+python-swiftclient==3.0.0
+python-glanceclient==2.0.0
 python-novaclient==3.3.0
+-e git+https://github.com/hmunfru/python-keystoneclient.git#egg=python-keystoneclient
+python-cinderclient==1.2.1
 
-oslo.serialization>=1.10.0 # Apache-2.0
-oslo.utils>=3.5.0 # Apache-2.0
-oslo.log>=1.14.0 # Apache-2.0
-oslo.i18n>=2.1.0 # Apache-2.0
+iso8601>=0.1.11
+oslo.config==3.11.0
+oslo.context==2.5.0
+oslo.i18n==3.7.0
+oslo.log==3.10.0
+oslo.serialization==2.9.0
+oslo.utils==3.13.0
 
 requests!=2.9.0,>=2.8.1 # Apache-2.0
 
 docopt==0.6.1
+
+

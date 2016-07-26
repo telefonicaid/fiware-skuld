@@ -36,13 +36,13 @@ class TestChangePassword(TestCase):
     mock_session2 = MySessionMock()
     mock_session3 = MySessionFakeMock()
     mock_session4 = MySessionFakeMock2()
-    mock_user_name = 'user'
+    mock_user_name = 'user_trial1'
 
     OS_AUTH_URL = 'http://cloud.lab.fi-ware.org:4731/v2.0'
     OS_USERNAME = 'user'
     OS_PASSWORD = 'password'
     OS_TENANT_NAME = 'user cloud'
-    OS_TENANT_ID = OS_TENANT_ID
+    OS_TENANT_ID = "user_trial1"
     OS_REGION_NAME = 'Spain2'
     OS_TRUST_ID = ''
     OS_KEYSTONE_ADMIN_ENDPOINT = 'http://cloud.lab.fiware.org:4730'
@@ -70,14 +70,14 @@ class TestChangePassword(TestCase):
             cls.get_users_response = open('./tests/units/resources/get_user_response.json').read()
             cls.list_users_response2 = open('./tests/units/resources/list_users_response4.json').read()
 
-    @patch('fiwareskuld.utils.osclients.session', mock_session2)
+    @patch('fiwareskuld.utils.osclients.session', mock_session4)
     def test_get_user_by_name(self):
         """test_get_user_by_name check that we could get a user by name."""
         passwordchanger = change_password.PasswordChanger()
         user = passwordchanger.get_user_byname(TestChangePassword.mock_user_name)
         self.assertEqual(TestChangePassword.mock_user_name, user.name)
 
-    @patch('fiwareskuld.utils.osclients.session', mock_session2)
+    @patch('fiwareskuld.utils.osclients.session', mock_session3)
     def test_get_user_by_id(self):
         """test_get_user_by_id check that we could get a user by id."""
         passwordchanger = change_password.PasswordChanger()
@@ -110,7 +110,7 @@ class TestChangePassword(TestCase):
         expected_user_id = '00000000000000000000000000000001'
 
         self.assertTrue(passwordchanger.keystone is not None)
-        self.assertEqual(passwordchanger.users_by_id[expected_user_id].cloud_project_id, expected_user_id)
+        self.assertEqual(passwordchanger.users_by_id["user_trial1"].cloud_project_id, expected_user_id)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session3)
     def test_changepassword_exceptions(self):
@@ -121,7 +121,7 @@ class TestChangePassword(TestCase):
             mocked_open.side_effect = self.side_effect_function
 
             passwordchanger = change_password.PasswordChanger()
-            user = passwordchanger.get_user_byid(OS_TENANT_ID)
+            user = passwordchanger.get_user_byid("user_trial1")
 
             try:
                 passwordchanger.change_password(user, 'foo')

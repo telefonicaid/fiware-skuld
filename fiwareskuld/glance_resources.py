@@ -58,6 +58,13 @@ class GlanceResources(object):
             images.append(image.id)
         return images
 
+    def get_images(self):
+        """ return a list of images ids
+
+        :return: a list of image ids
+        """
+        return self.glance.images.findall()
+
     def get_tenant_images_tuple(self):
         """ return a tuple with two list of images: the private images and the
         shared images. It is safe to delete the private images after killing

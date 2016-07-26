@@ -44,5 +44,5 @@ try:
         users_credentials.write(','.join(cred) + '\n')
 
     users_credentials.close()
-except Exception:
+except Exception as e:
     logger.error('The users_to_delete.txt file must exists')

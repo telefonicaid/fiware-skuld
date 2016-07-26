@@ -22,10 +22,10 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
+from fiwareskuld.conf import settings
 from os import environ as env
 
 from fiwareskuld.expired_users import ExpiredUsers
-from conf import settings
 from fiwareskuld.utils.osclients import OpenStackClients
 from fiwareskuld import utils
 

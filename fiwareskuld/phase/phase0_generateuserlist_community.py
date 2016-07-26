@@ -30,13 +30,14 @@ from fiwareskuld.conf import settings
 from fiwareskuld.utils import log
 from fiwareskuld.utils import rotated_files
 from fiwareskuld.users_management import UserManager
+from fiwareskuld.conf import settings
 
 __author__ = 'chema'
 
 logger = log.init_logs('phase0')
 
 
-class ExpiredUsers:
+class CommunityExpiredUsers:
     def __init__(self):
         """Constructor. Create a keystone client"""
         clients = osclients.OpenStackClients()
@@ -45,12 +46,12 @@ class ExpiredUsers:
         self.keystoneclient = clients.get_keystoneclientv3()
         self.protected = set()
 
-    def get_trial_user_ids(self):
+    def get_community_user_ids(self):
         """Get a set of trial users; only the ids
         :return: a set of user ids, corresponding to trial users.
         """
         k = self.keystoneclient
-        role = k.roles.find(name="trial")
+        role = k.roles.find(name="community")
         return set(e.user['id'] for e in k.role_assignments.list(
             role=role.id))
 
@@ -62,11 +63,11 @@ class ExpiredUsers:
         return set(e.user['id'] for e in k.role_assignments.list(
             role=settings.BASIC_ROLE_ID))
 
-    def get_trial_users(self):
+    def get_community_users(self):
         """Get the list of trial users; the full objects are included.
         :return: a list of trial users
         """
-        user_ids = self.get_trial_user_ids()
+        user_ids = self.get_community_user_ids()
         return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
 
     def get_yellow_red_users(self):
@@ -78,14 +79,14 @@ class ExpiredUsers:
         red_users = list()
         yellow_users = list()
 
-        for user in self.get_trial_users():
-            remaining = self._get_remaining_trial_time(user.to_dict())
+        for user in self.get_community_users():
+            remaining = self._get_remaining_community_time(user.to_dict())
             if self._is_user_protected(user):
                 self.protected.add(user)
                 continue
             if remaining < 0:
                 red_users.append(user)
-            elif remaining <= settings.NOTIFY_BEFORE_EXPIRED:
+            elif remaining <= settings.NOTIFY_BEFORE_COMMUNITY_EXPIRED:
                 yellow_users.append(user)
 
         return yellow_users, red_users
@@ -109,19 +110,19 @@ class ExpiredUsers:
         :return: nothing
         """
         (notify_list, delete_list) = self.get_yellow_red_users()
-        with open('users_to_notify.txt', 'w') as users_to_notify:
+        with open('community_users_to_notify.txt', 'w') as users_to_notify:
             for user in notify_list:
                 users_to_notify.write(user.id + "\n")
 
         if cron_daily:
             if settings.STOP_BEFORE_DELETE == 0:
-                name = 'users_to_delete_phase3.txt'
+                name = 'community_users_to_delete_phase3.txt'
                 with open(name, 'w') as users_to_delete_p3:
                     for user in delete_list:
                         users_to_delete_p3.write(user.id + ',' + user.name + '\n')
             else:
-                name = 'users_to_delete.txt'
-                phase3_name = 'users_to_delete_phase3.txt'
+                name = 'community_users_to_delete.txt'
+                phase3_name = 'community_users_to_delete_phase3.txt'
                 basic_users = self.get_basic_users_ids()
                 rotated_files.rotate_files(
                     name, settings.STOP_BEFORE_DELETE, phase3_name)
@@ -139,11 +140,11 @@ class ExpiredUsers:
                         users_to_delete.write(user.id + '\n')
 
         else:
-            with open('users_to_delete.txt', 'w') as users_to_delete:
+            with open('community_users_to_delete.txt', 'w') as users_to_delete:
                 for user in delete_list:
                     users_to_delete.write(user.id + '\n')
 
-    def _get_remaining_trial_time(self, user):
+    def _get_remaining_community_time(self, user):
         """
         Check the time of the trial user; return the remaining days.
         The number will be negative when the account is expired.
@@ -151,13 +152,13 @@ class ExpiredUsers:
         :return: remaining days (may be negative)
         """
 
-        trial_started_at = user['trial_started_at']
-        trial_duration = user.get(
-            'trial_duration', settings.TRIAL_MAX_NUMBER_OF_DAYS)
+        community_started_at = user['community_started_at']
+        community_duration = user.get(
+            'community_duration', settings.COMMUNITY_MAX_NUMBER_OF_DAYS)
 
         formatter_string = "%Y-%m-%d"
 
-        datetime_object = datetime.datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.datetime.strptime(community_started_at, formatter_string)
         date_object_old = datetime_object.date()
 
         datetime_object = datetime.datetime.today()
@@ -165,7 +166,7 @@ class ExpiredUsers:
 
         difference = date_object_new - date_object_old
 
-        return trial_duration - difference.days
+        return community_duration - difference.days
 
     def _is_user_protected(self, user):
         """
@@ -186,5 +187,5 @@ class ExpiredUsers:
 
 
 if __name__ == '__main__':
-    expired = ExpiredUsers()
+    expired = CommunityExpiredUsers()
     expired.save_lists(cron_daily=False)

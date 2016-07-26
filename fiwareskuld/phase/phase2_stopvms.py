@@ -22,14 +22,15 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from os import environ as env
-import os
 import cPickle as pickle
 import datetime
 
+from os import environ as env
+import os
 from fiwareskuld.user_resources import UserResources
-import conf.settings
+import fiwareskuld.conf.settings
 from fiwareskuld.utils import log
+
 
 __author__ = 'chema'
 
@@ -53,6 +54,7 @@ if 'OS_TRUST_ID' in env:
 if 'OS_PASSWORD' in env:
         del env['OS_PASSWORD']
 
+env["TRUSTEE_PASSWORD"] = "idm"
 
 if os.path.exists('users_trusted_ids.txt'):
     use_trust_ids = True
@@ -60,8 +62,8 @@ if os.path.exists('users_trusted_ids.txt'):
     users_trusted_ids = open('users_trusted_ids.txt')
     if 'TRUSTEE_PASSWORD' in env:
         password = env['TRUSTEE_PASSWORD']
-    elif 'TRUSTEE_PASSWORD' in dir(conf.settings):
-        password = conf.settings.TRUSTEE_PASSWORD
+    elif 'TRUSTEE_PASSWORD' in dir(fiwareskuld.conf.settings):
+        password = fiwareskuld.conf.settings.TRUSTEE_PASSWORD
     else:
         msg = 'TRUSTEE_PASSWORD must be defined, either in settings or environ'
         raise Exception(msg)
@@ -69,7 +71,7 @@ if os.path.exists('users_trusted_ids.txt'):
     if 'TRUSTEE_USER' in env:
         trustee = env['TRUSTEE_USER']
     else:
-        trustee = conf.settings.TRUSTEE
+        trustee = fiwareskuld.conf.settings.TRUSTEE
 
     lines = users_trusted_ids.readlines()
     user_count = 0
