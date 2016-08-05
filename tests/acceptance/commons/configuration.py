@@ -25,9 +25,9 @@
 __author__ = 'fla'
 
 
-KEYSTONE_URL = 'http://cloud.lab.fiware.org:4730/'
+KEYSTONE_URL = 'http://{KEYSTONE_IP}:5000/'
 FAKE_TENANT_NAME = 'afake'
-TENANT_NAME = ''
-USERNAME = ''
-PASSWORD = ''
+TENANT_NAME = '{ADM_TENANT_NAME}'
+USERNAME = '{ADM_USERNAME}'
+PASSWORD = '{ADM_PASSWORD}'
 TOKEN_LENGTH = 32

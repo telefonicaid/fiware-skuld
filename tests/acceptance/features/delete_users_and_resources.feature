@@ -37,6 +37,8 @@ Feature: Get the list of expired users from the IdM.
     Then the component returns a list with "1" security groups and "2" vms for user "qatrial"
     Then the component returns a list with "1" security groups and "3" vms for user "qatrial2"
     Then the component returns a list with "2" security groups and "2" vms for user "qatrial3"
+    When I request a list of expired "trial" users
+    Then the component returns a list with "3" expired users
     When I request for deleting expired "trial" users
     Then the user "qatrial" has role "basic"
     Then the user "qatrial2" has role "basic"
