@@ -11,6 +11,7 @@ WORKDIR /opt/fiware-skuld/
 COPY settings.py conf/settings.py
 WORKDIR /opt/fiware-skuld/tests/acceptance/
 RUN pip install -r requirements.txt
+RUN pip install -e git+https://github.com/hmunfru/python-keystoneclient.git#egg=python-keystoneclient
 RUN mkdir testreport
 COPY configuration.py commons/configuration.py
 COPY start.sh .
