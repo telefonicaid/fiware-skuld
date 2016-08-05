@@ -47,14 +47,15 @@ def before_scenario(context, scenario):
     __logger__.info("##############################")
     __logger__.info("##############################")
 
+    if "admin" in TENANT_NAME:
+        raise Exception("admin user cannot be used")
+
     context.expiredusers = ExpiredUsers(TENANT_NAME, USERNAME, PASSWORD)
     context.user_manager = UserManager()
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
-    context.user_manager.delete_community_users()
-    context.user_manager.delete_trial_users()
-    context.user_manager.delete_basic_users()
+
     context.user_resources = []
     context.out_trial = str(datetime.date.today() -
                             datetime.timedelta(days=settings.TRIAL_MAX_NUMBER_OF_DAYS+1))
@@ -70,9 +71,9 @@ def after_scenario(context, scenario):
     """
     HOOK: To be executed after each Scenario:
     """
-    context.user_manager.delete_community_users()
-    context.user_manager.delete_trial_users()
-    context.user_manager.delete_basic_users()
+    context.user_manager.delete_qa_community_users()
+    context.user_manager.delete_qa_trial_users()
+    context.user_manager.delete_qa_basic_users()
 
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
