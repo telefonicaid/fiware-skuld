@@ -104,7 +104,8 @@ class TestExpiredUsers(TestCase):
         expiredusers = ExpiredUsers('any tenant id', 'any username', 'any password')
         result = expiredusers.get_list_expired_community_users()
         expectedresult = ['user_community1', 'user_community2']
-        self.assertEqual(result, expectedresult)
+        self.assertEqual(result[0].id, expectedresult[0])
+        self.assertEqual(result[1].id, expectedresult[1])
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testcheckTime1(self, m):

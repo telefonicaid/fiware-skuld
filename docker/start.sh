@@ -10,5 +10,4 @@ export OS_PASSWORD=$ADM_PASSWORD
 export OS_TENANT_NAME=$ADM_TENANT_NAME
 export  OS_AUTH_URL=http://$KEYSTONE_IP:5000/v2.0
 export PYTHONPATH=../..
-sleep 120000
 behave features/ --tags ~@skip --junit --junit-directory testreport

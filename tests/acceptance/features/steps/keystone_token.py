@@ -128,9 +128,12 @@ def step_request_role_users_list(context, role):
     """
     if role == "trial":
         context.list_user = context.expiredusers.get_trial_users()
+        context.initial_number_users = context.initial_trial_users
     elif role == "community":
+        context.initial_number_users = context.initial_community_users
         context.list_user = context.expiredusers.get_community_users()
     else:
+        context.initial_number_users = 0
         context.list_user = context.expiredusers.get_users()
 
 
@@ -143,8 +146,12 @@ def step_check_list_trial_users_returned(context, users):
     :return: Nothing.
     """
     assert context.list_user is not None, 'Expected a valid list users'
-    assert len(context.list_user) == int(users), \
-        'Expected a list of users with {0} length and found {1}'.format(users, len(context.list_user))
+    print(len(context.list_user))
+    print(context.initial_number_users)
+    list_users = len(context.list_user) - context.initial_number_users
+    print(list_users)
+    assert list_users == int(users), \
+        'Expected a list of users with {0} length and found {1}'.format(users, list_users)
 
 
 @when(u'I request a list of expired "{role}" users')
@@ -159,7 +166,7 @@ def step_request_list_trial_expired_users(context, role):
     elif role == "community":
         context.expiredusers.expired_users = context.expiredusers.get_list_expired_community_users()
     else:
-        context.expiredusers = None
+        context.expiredusers.expired_users = None
 
 
 @then(u'the component returns a list with "{number}" expired users')
@@ -170,14 +177,24 @@ def step_get_list_community_expired_users(context, number):
     :return: Nothing.
     """
     try:
-        result = context.expiredusers.expired_users
+        result = _remove_not_qa_users(context.expiredusers.expired_users)
         logger.debug('\n      Number of expired community users found: {}\n\n'.format(len(result)))
         assert result is not None, 'Expected a valid list expired users'
         assert len(result) == int(number), \
             'Expected a list of users with {0} length and found {1}'.format(number, len(result))
 
     except ValueError:
-        assert False, 'Cannot recover the list of community users'
+        assert False, 'Cannot recover the list of users'
+
+
+def _remove_not_qa_users(users):
+    user_removed = []
+
+    for user in users:
+        print(user)
+        if "qa" in user.username:
+            user_removed.append(user)
+    return user_removed
 
 
 @when(u'I request a list of expired yellow-red "{role}" users')
@@ -216,7 +233,8 @@ def step_impl_get_red(context, number):
     :param role: the number to be compared
     :return: Nothing.
     """
-    assert int(number) == len(context.red), 'Expected to find a yellow list ' \
+    print(context.red)
+    assert int(number) == len(context.red), 'Expected to find a red list ' \
                                             'of {0} length: found {1}'.format(int(number), len(context.red))
 
 

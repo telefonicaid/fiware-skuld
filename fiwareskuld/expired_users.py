@@ -214,7 +214,7 @@ class ExpiredUsers:
 
             if self.check_time(community_started_at, community_duration):
                 # If true means that the user trial period has expired
-                finalList.append(user.id)
+                finalList.append(user)
 
         logger.info("Number of expired users found: %d", len(finalList))
 

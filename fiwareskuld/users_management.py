@@ -36,7 +36,7 @@ from os import environ
 from fiwareskuld.utils.queries import Queries
 from fiwareskuld.utils import log
 
-logger = log.init_logs('phase1')
+logger = log.init_logs('user_management')
 
 
 class UserManager(object):
@@ -127,7 +127,7 @@ class UserManager(object):
         """
         users = self.get_user(user_name)
         if users:
-            raise Exception(403, "User already exist")
+            raise Exception(403, "User {0} already exist".format(user_name))
 
         user = self.register_user(user_name, password, role_name, date_now)
         return user
@@ -200,13 +200,13 @@ class UserManager(object):
         else:
             raise Exception(404, "User {0} not found".format(user_id))
 
-    def delete_trial_users(self):
+    def _delete_trial_users(self):
         """
         It deletes the trial users.
         :return:
         """
         users_trial = self.exp.get_trial_users()
-        self._delete_users(self, users_trial)
+        self._delete_users(users_trial)
 
     def delete_qa_trial_users(self):
         """
@@ -219,23 +219,29 @@ class UserManager(object):
     def _delete_users(self, users):
         for user in users:
             if not self._check_user_to_be_deleted(user):
-                return
+                continue
             logger.info("Deleting user {0}".format(user.username))
             self.delete_user(user)
 
     def _delete_qa_users(self, users):
         for user in users:
+
+            if "qa" not in user.username:
+                continue
             if not self._check_user_to_be_deleted(user):
-                return
+                continue
+            print("deleting")
+            print(user)
             logger.info("Deleting qa user {0}".format(user.username))
             self.delete_user(user)
 
     def _check_user_to_be_deleted(self, user):
 
         resources = self.get_user_resources(user)
-
-        if len(resources["vms"]) > 0:
-            return False
+        if resources:
+            if len(resources["vms"]) > 0:
+                return False
+        return True
 
     def _delete_community_users(self):
         """
@@ -243,7 +249,7 @@ class UserManager(object):
         :return:
         """
         users_community = self.exp.get_community_users()
-        self._delete_users(self, users_community)
+        self._delete_users(users_community)
 
     def delete_qa_community_users(self):
         """
@@ -267,7 +273,7 @@ class UserManager(object):
         :return:
         """
         users_basic = self.exp.get_basic_users()
-        self._delete_users(self, users_basic)
+        self._delete_users(users_basic)
 
     def update_quota(self, user, role_name):
         """ It updates the quota for the user according to role requirements.
@@ -346,15 +352,19 @@ class UserManager(object):
         :return: this function does not return anything. It creates a file.
         """
         trust_factory = TrustFactory(self.clients)
+        user_name = None
+        trust_id = None
+        user_id = None
         try:
-            (self.user_name, self.trust_id, self.user_id) = \
+            (user_name, trust_id, user_id) = \
                 trust_factory.create_trust_admin(user, self.trustee)
 
         except Exception, e:
             msg = 'Failed getting trust-id from trustor {0}. Reason: {1}'
             logger.error(msg.format(user, str(e)))
+            print(e)
 
-        return (self.user_name, self.trust_id, self.user_id)
+        return (user_name, trust_id, user_id)
 
     def change_password(self, user):
         """
@@ -431,6 +441,8 @@ class UserManager(object):
         :return: A dict with the user resources.
         """
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
+        if not trust_id:
+            return None
         user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
 
         return user_resources.get_resources_dict()

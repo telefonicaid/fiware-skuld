@@ -29,6 +29,7 @@ from fiwareskuld.user_resources import UserResources
 from commons.configuration import TENANT_NAME, USERNAME, PASSWORD
 from commons.logger_utils import get_logger
 import datetime
+from os import environ as env
 
 __author__ = 'fla'
 __copyright__ = "Copyright 2015"
@@ -47,14 +48,23 @@ def before_scenario(context, scenario):
     __logger__.info("##############################")
     __logger__.info("##############################")
 
-    if "admin" in TENANT_NAME:
-        raise Exception("admin user cannot be used")
-
+    #  CHECKING
     context.expiredusers = ExpiredUsers(TENANT_NAME, USERNAME, PASSWORD)
     context.user_manager = UserManager()
     context.expiredusers.finalList = []
     context.expiredusers.listUsers = []
     context.expiredusers.token = None
+
+    if "admin" in TENANT_NAME:
+        raise Exception("admin tenant_name cannot be used")
+
+    if env['OS_AUTH_URL'] and "cloud.lab.fiware.org" in env['OS_AUTH_URL']:
+        raise Exception("FIWARE Lab cannot be used")
+
+    if "cloud.lab.fiware.org" in settings.KEYSTONE_ENDPOINT:
+        raise Exception("FIWARE Lab cannot be used")
+
+    users = context.expiredusers.get_users()
 
     context.user_resources = []
     context.out_trial = str(datetime.date.today() -
@@ -65,6 +75,17 @@ def before_scenario(context, scenario):
 
     context.out_notified_community = str(datetime.date.today() -
                                          datetime.timedelta(days=settings.COMMUNITY_MAX_NUMBER_OF_DAYS - 30))
+
+    context.user_manager.delete_qa_community_users()
+    context.user_manager.delete_qa_trial_users()
+    context.user_manager.delete_qa_basic_users()
+
+    if len(users) > 20:
+        raise Exception("FIWARE Lab cannot be used found {0} users and expecting just {1} users".format(len(users), 20))
+
+    context.initial_trial_users = 4
+    context.initial_community_users = 4
+    context.initial_basic_users = 4
 
 
 def after_scenario(context, scenario):

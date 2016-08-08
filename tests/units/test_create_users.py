@@ -92,11 +92,11 @@ class TestCreateUsers(TestCase):
 
         """It tests the deletion of the community users"""
         createusers = UserManager()
-        createusers.delete_community_users()
+        createusers._delete_community_users()
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testDeleteTrialUsers(self, m):
 
         """It tests the deletion of the trial users"""
         createusers = UserManager()
-        createusers.delete_trial_users()
+        createusers._delete_trial_users()

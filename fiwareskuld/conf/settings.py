@@ -44,4 +44,3 @@ DONT_DELETE_DOMAINS = ([
     'create-net.org', 'telefonica.com', 'man.poznan.pl', 'wigner.mta.hu', 'gatv.ssr.upm.es', 'thalesgroup.com',
     'atos.net', 'uth.gr', 'bth.se', 'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',
     'it-innovation.soton.ac.uk', 'cesnet.cz', 'rt.cesnet.cz', 'rt3.cesnet.cz', 'fokus.fraunhofer.de'])
-
