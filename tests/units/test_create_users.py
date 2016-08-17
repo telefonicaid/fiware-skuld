@@ -86,17 +86,3 @@ class TestCreateUsers(TestCase):
         createusers = UserManager()
         result = createusers.get_user("anynoexistinguser")
         self.assertIsNone(result)
-
-    @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def testDeleteCommunityUsers(self, m):
-
-        """It tests the deletion of the community users"""
-        createusers = UserManager()
-        createusers._delete_community_users()
-
-    @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def testDeleteTrialUsers(self, m):
-
-        """It tests the deletion of the trial users"""
-        createusers = UserManager()
-        createusers._delete_trial_users()
