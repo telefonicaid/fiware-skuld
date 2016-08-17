@@ -426,7 +426,7 @@ class UserManager(object):
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
         user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         report = {}
-        user_resources.imagesinuse = self.detect_images_in_use
+        user_resources.imagesinuse = self.detect_images_in_use()
 
         logger.info('user ' + user.username + ' has id ' + user_id)
         resources_before = user_resources.get_resources_dict()

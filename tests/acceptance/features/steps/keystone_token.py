@@ -190,7 +190,7 @@ def step_get_list_community_expired_users(context, number):
     :return: Nothing.
     """
     try:
-        result = _remove_not_qa_users(context.expiredusers.expired_users)
+        result = _filter(context.expiredusers.expired_users)
         logger.debug('\n      Number of expired community users found: {}\n\n'.format(len(result)))
         assert result is not None, 'Expected a valid list expired users'
         assert len(result) == int(number), \
@@ -198,16 +198,6 @@ def step_get_list_community_expired_users(context, number):
 
     except ValueError:
         assert False, 'Cannot recover the list of users'
-
-
-def _remove_not_qa_users(users):
-    user_removed = []
-
-    for user in users:
-        print(user)
-        if "qa" in user.username:
-            user_removed.append(user)
-    return user_removed
 
 
 @when(u'I request a list of expired yellow-red "{role}" users')
