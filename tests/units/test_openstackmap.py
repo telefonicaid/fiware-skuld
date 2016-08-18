@@ -262,7 +262,8 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID):
+        elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID) or \
+                url == '/domains/default/users/{0}/roles/basic_id'.format(OS_TENANT_ID):
             resp.status_code = OK
 
         elif url == "OS-TRUST/trusts_for_admin":
