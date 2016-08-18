@@ -9,6 +9,11 @@ Feature: Get the list of users from the IdM.
     | qabasic  | new3     | basic |
     When I request a list of "trial" users
     Then the component returns a list with "2" users
+    Then I delete a set of users:
+    | name     |
+    | qatrial1 |
+    | qatrial2 |
+    | qabasic  |
 
   Scenario: 02: Get the list of community users
     Given I created several users with values:
@@ -18,6 +23,11 @@ Feature: Get the list of users from the IdM.
     | qabasic      | new3     | basic     |
     When I request a list of "community" users
     Then the component returns a list with "2" users
+    Then I delete a set of users:
+    | name         |
+    | qacommunity1 |
+    | qacommunity2 |
+    | qabasic      |
 
   Scenario: 03: Get list of several users
     Given I created several users with values:
@@ -30,3 +40,9 @@ Feature: Get the list of users from the IdM.
     Then the component returns a list with "1" users
     When I request a list of "community" users from the Keystone
     Then the component returns a list with "2" users
+    Then I delete a set of users:
+    | name         |
+    | qatrial      |
+    | qacommunity1 |
+    | qabasic      |
+    | qacommunity2 |

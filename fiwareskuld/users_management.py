@@ -200,41 +200,6 @@ class UserManager(object):
         else:
             raise Exception(404, "User {0} not found".format(user_id))
 
-    def _delete_trial_users(self):
-        """
-        It deletes the trial users.
-        :return:
-        """
-        users_trial = self.exp.get_trial_users()
-        self._delete_users(users_trial)
-
-    def delete_qa_trial_users(self):
-        """
-        It deletes the trial users.
-        :return:
-        """
-        users_trial = self.exp.get_trial_users()
-        self._delete_qa_users(users_trial)
-
-    def _delete_users(self, users):
-        for user in users:
-            if not self._check_user_to_be_deleted(user):
-                continue
-            logger.info("Deleting user {0}".format(user.username))
-            self.delete_user(user)
-
-    def _delete_qa_users(self, users):
-        for user in users:
-
-            if "qa" not in user.username:
-                continue
-            if not self._check_user_to_be_deleted(user):
-                continue
-            print("deleting")
-            print(user)
-            logger.info("Deleting qa user {0}".format(user.username))
-            self.delete_user(user)
-
     def _check_user_to_be_deleted(self, user):
 
         resources = self.get_user_resources(user)
@@ -242,38 +207,6 @@ class UserManager(object):
             if len(resources["vms"]) > 0:
                 return False
         return True
-
-    def _delete_community_users(self):
-        """
-        It deletes the community users.
-        :return:
-        """
-        users_community = self.exp.get_community_users()
-        self._delete_users(users_community)
-
-    def delete_qa_community_users(self):
-        """
-        It deletes the community users.
-        :return:
-        """
-        users_community = self.exp.get_community_users()
-        self._delete_qa_users(users_community)
-
-    def delete_qa_basic_users(self):
-        """
-        It deletes the basic users.
-        :return:
-        """
-        users_basic = self.exp.get_basic_users()
-        self._delete_qa_users(users_basic)
-
-    def _delete_basic_users(self):
-        """
-        It deletes the basic users.
-        :return:
-        """
-        users_basic = self.exp.get_basic_users()
-        self._delete_users(users_basic)
 
     def update_quota(self, user, role_name):
         """ It updates the quota for the user according to role requirements.
@@ -493,7 +426,7 @@ class UserManager(object):
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
         user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
         report = {}
-        user_resources.imagesinuse = self.detect_images_in_use
+        user_resources.imagesinuse = self.detect_images_in_use()
 
         logger.info('user ' + user.username + ' has id ' + user_id)
         resources_before = user_resources.get_resources_dict()

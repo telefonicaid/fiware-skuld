@@ -115,6 +115,20 @@ def step_create_user(context):
         context.user_resources = UserResources(user[0], user[1], None, user[0])
 
 
+@then(u'I delete a set of users')
+def step_create_user(context):
+    """
+    It creates a set of users according to the data
+    introduced in the text
+    :param context: Context of the acceptance test execution, with a table with the following data
+    # | name | password | role | expired | notified
+    :return: nothing
+    """
+
+    for user in context.table:
+        context.user_manager.delete_user_id(user[0])
+
+
 @when(u'I request a list of "{role}" users from the Keystone')
 @when(u'I request a list of "{role}" users')
 @given(u'a list of "{role}" users from the Keystone')
@@ -128,7 +142,8 @@ def step_request_role_users_list(context, role):
     """
     if role == "trial":
         context.list_user = context.expiredusers.get_trial_users()
-        context.initial_number_users = context.initial_trial_users
+        print(context.list_user)
+        context.initial_number_users = 0
     elif role == "community":
         context.initial_number_users = context.initial_community_users
         context.list_user = context.expiredusers.get_community_users()
@@ -146,10 +161,8 @@ def step_check_list_trial_users_returned(context, users):
     :return: Nothing.
     """
     assert context.list_user is not None, 'Expected a valid list users'
-    print(len(context.list_user))
-    print(context.initial_number_users)
+    print(context.list_user)
     list_users = len(context.list_user) - context.initial_number_users
-    print(list_users)
     assert list_users == int(users), \
         'Expected a list of users with {0} length and found {1}'.format(users, list_users)
 
@@ -177,7 +190,7 @@ def step_get_list_community_expired_users(context, number):
     :return: Nothing.
     """
     try:
-        result = _remove_not_qa_users(context.expiredusers.expired_users)
+        result = _filter(context.expiredusers.expired_users)
         logger.debug('\n      Number of expired community users found: {}\n\n'.format(len(result)))
         assert result is not None, 'Expected a valid list expired users'
         assert len(result) == int(number), \
@@ -185,16 +198,6 @@ def step_get_list_community_expired_users(context, number):
 
     except ValueError:
         assert False, 'Cannot recover the list of users'
-
-
-def _remove_not_qa_users(users):
-    user_removed = []
-
-    for user in users:
-        print(user)
-        if "qa" in user.username:
-            user_removed.append(user)
-    return user_removed
 
 
 @when(u'I request a list of expired yellow-red "{role}" users')
@@ -233,9 +236,9 @@ def step_impl_get_red(context, number):
     :param role: the number to be compared
     :return: Nothing.
     """
-    print(context.red)
-    assert int(number) == len(context.red), 'Expected to find a red list ' \
-                                            'of {0} length: found {1}'.format(int(number), len(context.red))
+    red = _filter(context.red)
+    assert int(number) == len(red), 'Expected to find a red list ' \
+                                    'of {0} length: found {1}'.format(int(number), len(red))
 
 
 @given(u'a set of resources for the user')
@@ -317,14 +320,29 @@ def step_get_expired_users_from_file(context, number_notify, number_delete):
     :return: Nothing.
     """
 
-    notify_ids = _get_ids("users_to_notify.txt")
-    delete_ids = _get_ids("users_to_delete.txt")
+    notify_ids = _filter(_get_ids("users_to_notify.txt"))
+    delete_ids = _filter(_get_ids("users_to_delete.txt"))
+
     assert len(notify_ids) == int(number_notify), \
         'Expected a list of notified users with {0} length and found {1}'.format(int(number_notify),
                                                                                  len(notify_ids))
     assert len(delete_ids) == int(number_delete), \
         'Expected a list of deleted users with {0} length and found {1}'.format(int(number_delete),
                                                                                 len(delete_ids))
+
+
+def _filter(users):
+    new = []
+    print(users)
+    for user in users:
+        if hasattr(user, 'name'):
+            if "trial_username" in user.name or "community_username" in user.name:
+                continue
+        else:
+            if "trial_username" in user or "community_username" in user:
+                continue
+        new.append(user)
+    return new
 
 
 @when(u'I request for deleting expired "{role}" users')

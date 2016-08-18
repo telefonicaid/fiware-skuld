@@ -23,11 +23,10 @@
 
 
 from unittest import TestCase
-from datetime import datetime
 import requests_mock
-from fiwareskuld.expired_users import ExpiredUsers
 from fiwareskuld.users_management import UserManager
 from mock import patch
+
 from test_openstackmap import MySessionMock
 from os import environ as environ
 
@@ -82,21 +81,40 @@ class TestCreateUsers(TestCase):
     @patch('fiwareskuld.utils.osclients.session', mock_session)
     def testNotExistingUser(self, m):
 
-        """It tests the creation of a community user"""
+        """It tests the creation of a none existing user"""
         createusers = UserManager()
         result = createusers.get_user("anynoexistinguser")
         self.assertIsNone(result)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def testDeleteCommunityUsers(self, m):
+    def testDeleteUser(self, m):
 
-        """It tests the deletion of the community users"""
+        """It tests the deletiong of a user"""
         createusers = UserManager()
-        createusers._delete_community_users()
+        user = createusers.get_user("user_trial1")
+        result = createusers.delete_user(user)
+        self.assertIsNone(result)
 
     @patch('fiwareskuld.utils.osclients.session', mock_session)
-    def testDeleteTrialUsers(self, m):
+    def testDeleteUserId(self, m):
 
-        """It tests the deletion of the trial users"""
+        """It tests the deletion of a user by its id"""
         createusers = UserManager()
-        createusers._delete_trial_users()
+        result = createusers.delete_user_id("user_trial1")
+        self.assertIsNone(result)
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
+    def testGenerateTrustId(self, m):
+        """It tests the generation of a trustid"""
+        createusers = UserManager()
+        name, trustid, id = createusers.generate_trust_id("user_trial1")
+        self.assertEquals(trustid, "trustid")
+
+    @patch('fiwareskuld.utils.osclients.session', mock_session)
+    def testChangeToBasicUser(self, m):
+
+        """It tests changing to basic user"""
+        createusers = UserManager()
+        user = createusers.get_user("user_trial1")
+        result = createusers.change_to_basic_user_keystone(user)
+        self.assertIsNone(result)

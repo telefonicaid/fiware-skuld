@@ -37,7 +37,7 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FI
     LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
     LIST_USERS_RESPONSE_FILE4, LIST_ROLES_TRIAL_RESPONSE_FILE, LIST_ROLES_COMMUNITY_RESPONSE_FILE, \
     LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE, \
-    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE
+    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE, GET_TRUST_RESPONSE_FILE
 
 from fiwareskuld.openstackmap import OpenStackMap
 
@@ -61,7 +61,7 @@ class MySessionBaseMock(MagicMock):
 
     def get_access(self, session):
 
-        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
+        service1 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
                                     u'interface': u'public', u'region': u'Spain2',
                                     u'id': u'00000000000000000000000000000002'},
                                    {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
@@ -69,8 +69,17 @@ class MySessionBaseMock(MagicMock):
                                     }
                                    ],
                     u'type': u'identity', u'id': u'00000000000000000000000000000045'}
+        service2 = {u'endpoints': [{u'url': u'http://83.26.10.2:4730/v3/',
+                                    u'interface': u'public', u'region': u'Spain2',
+                                    u'id': u'00000000000000000000000000000002'},
+                                   {u'url': u'http://172.0.0.1:4731/v3/', u'interface': u'administator',
+                                    u'region': u'Spain2', u'id': u'00000000000000000000000000000001'
+                                    }
+                                   ],
+                    u'type': u'compute', u'id': u'00000000000000000000000000000045'}
 
         d = defaultdict(list)
+        d['catalog'].append(service1)
         d['catalog'].append(service2)
 
         return d
@@ -199,7 +208,8 @@ class MySessionMock(MySessionBaseMock):
         elif url == '/users?username={0}'.format(OS_TENANT_ID)\
                 or url == '/users?username={0}'.format(OS_TENANT_ID2) \
                 or url == '/users?username={0}'.format(OS_TENANT_ID3)\
-                or url == '/users?username={0}'.format(OS_TENANT_ID4):
+                or url == '/users?username={0}'.format(OS_TENANT_ID4) \
+                or url == '/users?name=idm':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE2).read()
             resp.status_code = OK
             resp._content = json_data
@@ -252,8 +262,14 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID):
+        elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID) or \
+                url == '/domains/default/users/{0}/roles/basic_id'.format(OS_TENANT_ID):
             resp.status_code = OK
+
+        elif url == "OS-TRUST/trusts_for_admin":
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_TRUST_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
 
         elif url == '/os-quota-sets/00000000000000000000000000000001?user_id={0}'.format(OS_TENANT_ID):
             resp.status_code = OK

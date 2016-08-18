@@ -76,10 +76,6 @@ def before_scenario(context, scenario):
     context.out_notified_community = str(datetime.date.today() -
                                          datetime.timedelta(days=settings.COMMUNITY_MAX_NUMBER_OF_DAYS - 30))
 
-    context.user_manager.delete_qa_community_users()
-    context.user_manager.delete_qa_trial_users()
-    context.user_manager.delete_qa_basic_users()
-
     if len(users) > 20:
         raise Exception("FIWARE Lab cannot be used found {0} users and expecting just {1} users".format(len(users), 20))
 
@@ -92,10 +88,6 @@ def after_scenario(context, scenario):
     """
     HOOK: To be executed after each Scenario:
     """
-    context.user_manager.delete_qa_community_users()
-    context.user_manager.delete_qa_trial_users()
-    context.user_manager.delete_qa_basic_users()
-
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
     __logger__.info("Ending execution of scenario")
