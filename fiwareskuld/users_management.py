@@ -70,6 +70,9 @@ class UserManager(object):
         else:
             self.trustee = settings.TRUSTEE
 
+        self.trustee = "admin"
+        self.trust_password = "zMCGfpTLTAMF2L2c"
+
     def add_domain_user_role(self, user, role, domain):
         """ It adds a role to a user.
         :param user: the user
@@ -107,11 +110,22 @@ class UserManager(object):
 
     def get_user(self, user_name):
         """
-        It gets the user for its name
+        It gets the user for its username
         :param user_name: the username
         :return: the user
         """
         users = self.keystone.users.list(username=user_name)
+        if users and len(users) == 1:
+            return users[0]
+        return None
+
+    def get_user_by_name(self, name):
+        """
+        It gets the user for its name
+        :param user_name: the username
+        :return: the user
+        """
+        users = self.keystone.users.list(name=name)
         if users and len(users) == 1:
             return users[0]
         return None
@@ -288,6 +302,7 @@ class UserManager(object):
         user_name = None
         trust_id = None
         user_id = None
+
         try:
             (user_name, trust_id, user_id) = \
                 trust_factory.create_trust_admin(user, self.trustee)
@@ -376,6 +391,7 @@ class UserManager(object):
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
         if not trust_id:
             return None
+
         user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
 
         return user_resources.get_resources_dict()

@@ -67,7 +67,6 @@ class UserResources(object):
         resources must be deleted
         :return: nothing
         """
-
         self.logger = logging.getLogger(__name__)
         self.clients = OpenStackClients()
 
@@ -357,9 +356,12 @@ class UserResources(object):
         resources['images'] = self.glance.get_tenant_images()
 
         if self.cinder:
-            resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
-            resources['volumes'] = set(self.cinder.get_tenant_volumes())
-            resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
+            try:
+                resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
+                resources['volumes'] = set(self.cinder.get_tenant_volumes())
+                resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
+            except Exception as e:
+                print(e)
 
         if self.neutron:
             resources['floatingips'] = set(self.neutron.get_tenant_floatingips())

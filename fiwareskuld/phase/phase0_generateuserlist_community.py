@@ -22,14 +22,14 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from datetime import datetime
+import datetime
 import os.path
 
 from fiwareskuld.utils import osclients
-from fiwareskuld.conf import settings
 from fiwareskuld.utils import log
 from fiwareskuld.utils import rotated_files
 from fiwareskuld.users_management import UserManager
+from fiwareskuld.expired_users import ExpiredUsers
 from fiwareskuld.conf import settings
 
 __author__ = 'chema'
@@ -45,51 +45,18 @@ class CommunityExpiredUsers:
             'identity', clients.region, 'admin', settings.KEYSTONE_ENDPOINT)
         self.keystoneclient = clients.get_keystoneclientv3()
         self.protected = set()
+        self.expired = ExpiredUsers()
 
-    def get_community_user_ids(self):
-        """Get a set of trial users; only the ids
-        :return: a set of user ids, corresponding to trial users.
+    def get_protected_expired_users(self):
         """
-        k = self.keystoneclient
-        role = k.roles.find(name="community")
-        return set(e.user['id'] for e in k.role_assignments.list(
-            role=role.id))
-
-    def get_basic_users_ids(self):
-        """Get a set of basic users; only the ids
-        :return: a set of user ids, corresponding to trial users.
+        It obtains the protected users whose accounts
+        have been expired
+        :return: the protected users.
         """
-        k = self.keystoneclient
-        return set(e.user['id'] for e in k.role_assignments.list(
-            role=settings.BASIC_ROLE_ID))
-
-    def get_community_users(self):
-        """Get the list of trial users; the full objects are included.
-        :return: a list of trial users
-        """
-        user_ids = self.get_community_user_ids()
-        return list(user for user in self.keystoneclient.users.list() if user.id in user_ids)
-
-    def get_yellow_red_users(self):
-        """Get a pair of lists
-        * trail user accounts that are next to expire (i.e. less than
-        NOTIFY_BEFORE_EXPIRE days): yellow users
-        * trail user accounts that are already expired: red users
-        :return: a tuple with two lists: users next to expire and expired"""
-        red_users = list()
-        yellow_users = list()
-
-        for user in self.get_community_users():
-            remaining = self._get_remaining_community_time(user.to_dict())
-            if self._is_user_protected(user):
-                self.protected.add(user)
-                continue
-            if remaining < 0:
-                red_users.append(user)
-            elif remaining <= settings.NOTIFY_BEFORE_COMMUNITY_EXPIRED:
-                yellow_users.append(user)
-
-        return yellow_users, red_users
+        expired = ExpiredUsers()
+        users = expired.get_list_protected_expired_community_users()
+        for i in users:
+            print i.name + " " + i.community_started_at
 
     def save_lists(self, cron_daily=False):
         """Create files users_to_delete.txt and users_to_notify.txt with the
@@ -109,7 +76,7 @@ class CommunityExpiredUsers:
           if implies the creation of file users_to_delete_phase3.txt
         :return: nothing
         """
-        (notify_list, delete_list) = self.get_yellow_red_users()
+        (notify_list, delete_list) = self.expired.get_yellow_red_community_users()
         with open('community_users_to_notify.txt', 'w') as users_to_notify:
             for user in notify_list:
                 users_to_notify.write(user.id + "\n")
@@ -123,7 +90,7 @@ class CommunityExpiredUsers:
             else:
                 name = 'community_users_to_delete.txt'
                 phase3_name = 'community_users_to_delete_phase3.txt'
-                basic_users = self.get_basic_users_ids()
+                basic_users = self.expired.get_basic_users_ids()
                 rotated_files.rotate_files(
                     name, settings.STOP_BEFORE_DELETE, phase3_name)
                 # Remove from list the users that are not basic
@@ -140,52 +107,42 @@ class CommunityExpiredUsers:
                         users_to_delete.write(user.id + '\n')
 
         else:
+            user_manager = UserManager()
             with open('community_users_to_delete.txt', 'w') as users_to_delete:
                 for user in delete_list:
                     users_to_delete.write(user.id + '\n')
 
-    def _get_remaining_community_time(self, user):
-        """
-        Check the time of the trial user; return the remaining days.
-        The number will be negative when the account is expired.
-        :param user: the trial user data obtained from keystone API server
-        :return: remaining days (may be negative)
-        """
-
-        community_started_at = user['community_started_at']
-        community_duration = user.get(
-            'community_duration', settings.COMMUNITY_MAX_NUMBER_OF_DAYS)
-
-        formatter_string = "%Y-%m-%d"
-
-        datetime_object = datetime.datetime.strptime(community_started_at, formatter_string)
-        date_object_old = datetime_object.date()
-
-        datetime_object = datetime.datetime.today()
-        date_object_new = datetime_object.date()
-
-        difference = date_object_new - date_object_old
-
-        return community_duration - difference.days
-
-    def _is_user_protected(self, user):
-        """
-        Return true if the user must not be deleted, because their address has a
-        domain in setting.DONT_DELETE_DOMAINS, and print a warning.
-        :param user: user to check
-        :return: true if the user must not be deleted
-        """
-        domain = user.name.partition('@')[2]
-        if domain != '' and domain in settings.DONT_DELETE_DOMAINS:
-            logger.warning(
-                'User with name %(name)s should not be deleted because the '
-                'domain',
-                {'name': user.name})
-            return True
-        else:
-            return False
+            with open('community_users_to_delete_resources.txt', 'w') as users_to_delete:
+                for user in delete_list:
+                    try:
+                        resources = user_manager.get_user_resources(user)
+                        users_to_delete.write("{0} {1} {2} VMS: {3}, networks: {4}, images: {5}\n".
+                                              format(user.name, user.community_started_at, user.id,
+                                                     str(len(resources["vms"])), str(len(resources["networks"])),
+                                                     str(len(resources["images"]))))
+                    except:
+                        users_to_delete.write("{0} {1} {2} \n".format(user.name, user.community_started_at, user.id))
 
 
 if __name__ == '__main__':
+    OS_AUTH_URL = 'http://130.206.114.220:5000/v2.0'
+    OS_USERNAME = 'idm'
+    OS_PASSWORD = 'idm'
+    OS_TENANT_NAME = 'idm'
+    OS_TENANT_ID = 'e76a0d73b1c845a788b118fee6c622a3'
+    OS_REGION_NAME = 'Valladolid'
+    OS_TRUST_ID = ''
+
+    from os import environ
+
+    environ.setdefault('OS_AUTH_URL', OS_AUTH_URL)
+    environ.setdefault('OS_USERNAME', OS_USERNAME)
+    environ.setdefault('OS_PASSWORD', OS_PASSWORD)
+    environ.setdefault('OS_TENANT_NAME', OS_TENANT_NAME)
+    environ.setdefault('OS_REGION_NAME', OS_REGION_NAME)
+    environ.setdefault('OS_OS_TENANT_ID', OS_TENANT_ID)
+    environ.setdefault('OS_TRUST_ID', OS_TRUST_ID)
+
     expired = CommunityExpiredUsers()
+    expired.get_protected_expired_users()
     expired.save_lists(cron_daily=False)

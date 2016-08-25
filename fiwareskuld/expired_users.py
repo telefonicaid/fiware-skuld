@@ -211,7 +211,6 @@ class ExpiredUsers:
                 community_duration = user.community_duration
             else:
                 community_duration = self.COMMUNITY_MAX_NUMBER_OF_DAYS
-
             if self.check_time(community_started_at, community_duration):
                 # If true means that the user trial period has expired
                 finalList.append(user)
@@ -219,6 +218,42 @@ class ExpiredUsers:
         logger.info("Number of expired users found: %d", len(finalList))
 
         return finalList
+
+    def get_list_protected_expired_community_users(self):
+        users = self.get_list_expired_community_users()
+        protected_users = []
+        for user in users:
+            if self._is_user_protected(user):
+                protected_users.append(user)
+        return protected_users
+
+    def _is_user_protected(self, user):
+        """
+        Return true if the user must not be deleted, because their address has a
+        domain in setting.DONT_DELETE_DOMAINS, and print a warning.
+        :param user: user to check
+        :return: true if the user must not be deleted
+        """
+        domain = user.name.partition('@')[2]
+        if domain != '' and domain in settings.DONT_DELETE_DOMAINS:
+            logger.warning(
+                'User with name %(name)s should not be deleted because the '
+                'domain',
+                {'name': user.name})
+            return True
+        else:
+            return False
+
+    def get_domain_community_expired(self):
+        users = self.get_list_expired_community_users()
+        expired_users = []
+        for user in users:
+            if not self._is_user_protected(user):
+                domain = user.name.split('@')[1]
+                if domain not in expired_users:
+                    expired_users.append(domain)
+
+        return expired_users
 
     def check_time(self, started_at, duration):
         """
@@ -230,13 +265,13 @@ class ExpiredUsers:
         """
 
         formatter_string = "%Y-%m-%d"
-        datetime_object = datetime.datetime.strptime(started_at, formatter_string)
-        date_object_old = datetime_object.date()
+        start_at = datetime.datetime.strptime(started_at, formatter_string)
+        date_start_at = start_at.date()
 
-        datetime_object = datetime.datetime.today()
-        date_object_new = datetime_object.date()
+        today = datetime.datetime.today()
+        date_today = today.date()
 
-        difference = date_object_new - date_object_old
+        difference = date_today - date_start_at
 
         if difference.days > duration:
             result = True
