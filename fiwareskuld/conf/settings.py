@@ -26,7 +26,7 @@
 __author__ = 'fla'
 
 LOGGING_PATH = u'/var/log/fiware-skuld'
-KEYSTONE_ENDPOINT = "http://cloud.lab.fiware.org:4731/"
+KEYSTONE_ENDPOINT = "http:/{KEYSTONE_IP}:5000/"
 HORIZON_ENDPOINT = "https://{HORIZON_ENDPOINT}/"
 TRUSTEE = "idm"
 TRUSTEE_PASSWORD = ""
@@ -45,4 +45,4 @@ DONT_DELETE_DOMAINS = ([
     'atos.net', 'uth.gr', 'bth.se', 'iminds.be', 'intec.ugent.be', 'neuropublic.gr', 'zhaw.ch', 'tid.es',
     'it-innovation.soton.ac.uk', 'cesnet.cz', 'rt.cesnet.cz', 'rt3.cesnet.cz', 'fokus.fraunhofer.de',
     'ec.europa.eu', 'okfn.org', 'conwet.com', 'bitergia.com', 'eng.it', 'upm.es', 'telecomitalia.it',
-    'neclab.eu', 'cyberlightning.com'])
+    'neclab.eu', 'cyberlightning.com', 'orange.com'])

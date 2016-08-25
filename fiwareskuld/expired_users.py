@@ -220,6 +220,10 @@ class ExpiredUsers:
         return finalList
 
     def get_list_protected_expired_community_users(self):
+        """
+        It obtains the list of protected users, which have expired
+        :return: the list.
+        """
         users = self.get_list_expired_community_users()
         protected_users = []
         for user in users:
@@ -245,6 +249,10 @@ class ExpiredUsers:
             return False
 
     def get_domain_community_expired(self):
+        """
+        It obtains the list of domain of expired users.
+        :return: the domain list
+        """
         users = self.get_list_expired_community_users()
         expired_users = []
         for user in users:

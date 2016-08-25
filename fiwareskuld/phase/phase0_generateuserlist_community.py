@@ -144,5 +144,8 @@ if __name__ == '__main__':
     environ.setdefault('OS_TRUST_ID', OS_TRUST_ID)
 
     expired = CommunityExpiredUsers()
+    user = UserManager()
+    user.get_user("hmunfru@hotmail.com")
+
     expired.get_protected_expired_users()
     expired.save_lists(cron_daily=False)
