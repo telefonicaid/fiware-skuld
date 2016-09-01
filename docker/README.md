@@ -7,7 +7,7 @@ There are several options to use Skuld very easily using docker. These are (in o
 
 You do not need to do all of them, to check if your Skuld instance run properly. You do need to have docker in your machine. See the [documentation](https://docs.docker.com/installation/) on how to do this. Additionally, you can use the proper FIWARE Lab docker functionality to deploy dockers image there. See the [documentation](https://docs.docker.com/installation/).
 
-Docker allows you to deploy an Skuld container in a few minutes. This method requires that you have installed docker or can deploy container into the FIWARE Lab (see previous details about it). Consider this method if you want to try Skuld and do not want to bother about losing data. Follow these steps:
+Docker allows you to deploy a Skuld container in a few minutes. This method requires that you have installed docker or can deploy container into the FIWARE Lab (see previous details about it). Consider this method if you want to try Skuld and do not want to bother about losing data. Follow these steps:
 
 1. Download [Skuld' source code](https://github.com/telefonicaid/fiware-skuld) from GitHub (`git clone https://github.com/telefonicaid/fiware-skuld.git`)
 2. `cd fiware-skuld/docker`
