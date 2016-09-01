@@ -5,10 +5,7 @@ There are several options to use Skuld very easily using docker. These are (in o
 - _"Check the unit tests associated to the component"_. See Section **1. Run Unit Test of Skuld**.
 - _"Check the acceptance tests are running properly"_ or _"I want to check that my Skuld instance run properly"_ . See Section **2. Run Acceptance tests**.
 
-You do not need to do all of them, just use the first one if you want to have a fully operational Skuld instance and maybe third one to check if your Skuld instance run properly.
-
-You do need to have docker in your machine. See the [documentation](https://docs.docker.com/installation/) on how to do this. Additionally, you can use the proper FIWARE Lab docker functionality to deploy dockers image there. See the [documentation](https://docs.docker.com/installation/).
-
+You do not need to do all of them, to check if your Skuld instance run properly. You do need to have docker in your machine. See the [documentation](https://docs.docker.com/installation/) on how to do this. Additionally, you can use the proper FIWARE Lab docker functionality to deploy dockers image there. See the [documentation](https://docs.docker.com/installation/).
 
 Docker allows you to deploy an Skuld container in a few minutes. This method requires that you have installed docker or can deploy container into the FIWARE Lab (see previous details about it). Consider this method if you want to try Skuld and do not want to bother about losing data. Follow these steps:
 
@@ -56,7 +53,7 @@ Now is time to execute the container. This time, we take advantage of the docker
 
 Please keep in mind that if you do not change the name of the image it will automatically create a new one for unit tests and change the previous one to tag none.
 
-> TIP: you can launch a FIWARE Lab testbed container to execute the Skuld E2E test. Just follow the indications in [FIWARE Testbed Deploy](https://hub.docker.com/r/fiware/testbed-deploy/). It will launch a virtual machine in which a reproduction of the FIWARE Lab is installed. 
+> TIP: you can launch a FIWARE Lab testbed container to execute the Skuld E2E test. Just follow the indications in [FIWARE Testbed Deploy](https://hub.docker.com/r/fiware/testbed-deploy/). It will launch a virtual machine in which a reproduction of the FIWARE Lab is installed.
 
 ----
 ## 4. Other info
