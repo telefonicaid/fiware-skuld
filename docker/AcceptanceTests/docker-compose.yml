@@ -1,5 +1,5 @@
 fiwareskuld:
-  image: fiware-skuld
+  image: fiware-skuld-acceptance
   environment: 
    - ADM_PASSWORD
    - ADM_USERNAME
