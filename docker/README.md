@@ -15,7 +15,7 @@ Docker allows you to deploy a Skuld container in a few minutes. This method requ
 ----
 ## 1. Run Unit Test of Skuld
 
-Taking into account that you download the repository from GitHub, this method will launch a container running Skuld, and execute the unit tests associated to the component. You should move to the UnitTests folder `./UnitTests`. Just create a new docker image executind `docker build -t fiware-skuld-unittests -f Dockerfile .`. Please keep in mind that if you do not change the name of the image it will automatically create a new one for unit tests and change the previous one to tag none.
+Taking into account that you download the repository from GitHub, this method will launch a container running Skuld, and execute the unit tests associated to the component. You should move to the UnitTests folder `cd UnitTests`. Just create a new docker image executing `docker build -t fiware-skuld-unittests -f Dockerfile .`. Please keep in mind that if you do not change the name of the image it will automatically create a new one for unit tests and change the previous one to tag none.
 
 To see that the image is created run `docker images` and you see something like this:
 
@@ -43,7 +43,7 @@ Taking into account that you download the repository from GitHub. This method wi
     export OS_USER_DOMAIN_NAME=<OpenStack user domain name>
     export OS_PROJECT_DOMAIN_NAME=<OpenStack project domain name>	
 
-Take it, You should move to the AcceptanceTests folder `./AcceptanceTests`. Just create a new docker image executing `docker build -t fiware-skuld-acceptance .`. To see that the image is created run `docker images` and you see something like this:
+Take it, You should move to the AcceptanceTests folder `cd AcceptanceTests`. Just create a new docker image executing `docker build -t fiware-skuld-acceptance .`. To see that the image is created run `docker images` and you see something like this:
 
     REPOSITORY                 TAG                 IMAGE ID            CREATED             SIZE
     fiware-skuld-acceptance   latest              eadbe0b2e186        About an hour ago   579.3 MB
