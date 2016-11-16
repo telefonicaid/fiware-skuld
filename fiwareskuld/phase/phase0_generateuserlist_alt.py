@@ -35,6 +35,7 @@ __author__ = 'chema'
 
 logger = log.init_logs('phase0')
 
+
 class ExpiredUsers:
     def __init__(self):
         """Constructor. Create a keystone client"""

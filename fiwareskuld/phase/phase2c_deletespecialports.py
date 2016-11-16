@@ -28,7 +28,6 @@ import logging
 from fiwareskuld.special_ports import SpecialPortRemover
 from fiwareskuld.utils import log
 
-import os
 
 class SpecialPortsRemover(object):
     """Class to delete ports associated to routers not owned by the port
@@ -57,7 +56,6 @@ class SpecialPortsRemover(object):
                 continue
             list_users.append(user_id)
         return list_users
-
 
     def delete_special_ports_community(self):
         """

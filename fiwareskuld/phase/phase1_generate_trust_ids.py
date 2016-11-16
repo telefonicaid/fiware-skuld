@@ -29,13 +29,12 @@ from os import environ as env
 from fiwareskuld.impersonate import TrustFactory
 from fiwareskuld.conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
 from fiwareskuld.utils.osclients import OpenStackClients
-#from fiwareskuld.check_users import CheckUsers
 from fiwareskuld.users_management import UserManager
 from fiwareskuld.utils import log
 
 
 __author__ = 'chema'
-import os
+
 
 def generate_trust_ids(users_to_delete):
     """
@@ -48,20 +47,16 @@ def generate_trust_ids(users_to_delete):
     """
     global logger
 
-
     users_trusted_ids = open('users_trusted_ids.txt', 'w')
 
     user_manager = UserManager()
 
-
     # Use an alternative URL that allow direct access to the keystone admin
     # endpoint, because the registered one uses an internal IP address.
-
 
     lines = users_to_delete.readlines()
     total = len(lines)
     count = 0
-
 
     for user in lines:
         user = user.strip()

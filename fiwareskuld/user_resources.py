@@ -90,7 +90,7 @@ class UserResources(object):
         self.clients.override_endpoint(
             'identity', region, 'admin', settings.KEYSTONE_ENDPOINT)
 
-        #self.user_id = self.clients.get_session().get_user_id()
+        self.user_id = self.clients.get_session().get_user_id()
         session = self.clients.get_session()
         self.user_name = username
         self.nova = NovaResources(self.clients)
@@ -131,7 +131,6 @@ class UserResources(object):
         # Regions the user has access
         self.regions_available = set()
         self.regions_available.update(self.clients.get_regions('compute'))
-
 
     def change_region(self, region):
         """
@@ -367,7 +366,7 @@ class UserResources(object):
         vms_regions = {}
         for region in self.get_regions_user():
             self.change_region(region)
-            vms_regions[region] =  set(self.nova.get_tenant_vms())
+            vms_regions[region] = set(self.nova.get_tenant_vms())
         return vms_regions
 
     def get_resources_dict(self):
@@ -394,7 +393,6 @@ class UserResources(object):
                 resources['routers'] = set(self.neutron.get_tenant_routers())
                 resources['subnets'] = set(self.neutron.get_tenant_subnets())
                 resources['ports'] = set(self.neutron.get_tenant_ports())
-
 
             if self.cinder:
                 resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())

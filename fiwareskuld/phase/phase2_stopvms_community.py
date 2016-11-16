@@ -24,10 +24,9 @@
 #
 import cPickle as pickle
 import datetime
-import os
 from fiwareskuld.utils import log
 from fiwareskuld.users_management import UserManager
-
+import os
 
 __author__ = 'chema'
 
@@ -35,8 +34,6 @@ logger = log.init_logs('phase2')
 
 dict_vms = dict()
 failed_users = set()
-
-import os
 
 if os.path.exists('community_users_to_delete.txt'):
     users_to_delete = open('community_users_to_delete.txt')

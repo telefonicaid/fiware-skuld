@@ -37,6 +37,7 @@ __author__ = 'henar'
 
 logger = log.init_logs('phase0')
 
+
 class CommunityUsers:
     def __init__(self):
         """Constructor. Create a keystone client"""
@@ -55,14 +56,13 @@ class CommunityUsers:
 
         with open('community_users_regions.txt', 'w') as users_to_delete:
             for user in community_users:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " " )
+                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
                 regions = user_manager.get_regions(user)
                 if regions:
                     users_to_delete.write(user_manager.get_regions(user))
                 else:
                     users_to_delete.write("Projects is not enabled")
                 users_to_delete.write("\n")
-
 
     def generate_community_users_resources(self):
         users = ExpiredUsers('', '', '')
@@ -78,13 +78,12 @@ class CommunityUsers:
 
         self._get_community_resources(community_users, 'expired_community_users_regions_resources.txt')
 
-
     def _get_community_resources(self, users, file):
         user_manager = UserManager()
 
         with open(file, 'w') as users_to_delete:
             for user in users:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " " )
+                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
                 regions = user_manager.get_regions(user)
                 if regions and "PiraeusUHannoverSpain2Karlsk" in regions:
                     users_to_delete.write("Projects is not enabled\n")
@@ -98,7 +97,8 @@ class CommunityUsers:
                             continue
                         if resources[resource]:
                             if "vms" in resources[resource]:
-                                users_to_delete.write("Region " + resource+ " vms: " + str(len(resources[resource]["vms"])) + " ")
+                                users_to_delete.write("Region " + resource + " vms: " +
+                                                      str(len(resources[resource]["vms"])) + " ")
                             else:
                                 users_to_delete.write("Region " + resource + " problems to obtain vms")
                         else:

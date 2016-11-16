@@ -398,7 +398,6 @@ class UserManager(object):
                 region_resources[region] = user_resources.get_resources_dict()
         return region_resources
 
-
     def get_user_resources(self, user):
         """
         It obtains the resources for the user.
@@ -419,8 +418,6 @@ class UserManager(object):
         :return: nothing.
         """
         user_resources = self._get_user_resources(user)
-
-        #region a region
         vms = user_resources.get_vms_in_dict()
         stopped = user_resources.stop_tenant_vms()
 
@@ -437,7 +434,6 @@ class UserManager(object):
         """
         user_resources = self._get_user_resources(user)
 
-        #region a region
         regions = user_resources.get_regions_user()
         vms_regions = {}
         for region in regions:

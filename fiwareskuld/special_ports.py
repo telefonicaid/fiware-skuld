@@ -4,6 +4,7 @@ import logging
 from fiwareskuld.openstackmap import OpenStackMap
 from fiwareskuld.utils import log
 
+
 class SpecialPortRemover(object):
     """Class to delete ports associated to routers not owned by the port
     owner. To delete these ports, an admin credential is needed"""
