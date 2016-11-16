@@ -240,6 +240,7 @@ class MySessionMock(MySessionBaseMock):
 
         elif url == '/projects/00000000000000000000000000000001':
             resp.status_code = OK
+            resp._content = "{}"
 
         elif url == '/role_assignments?role.id=community_id':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE).read()
@@ -257,14 +258,17 @@ class MySessionMock(MySessionBaseMock):
             resp.status_code = OK
             resp._content = json_data
 
-        elif url == '/OS-REGISTRATION/activate/users/{0}'.format(OS_TENANT_ID):
+        elif url == '/OS-REGISTRATION/activate/users/{0}'.format(OS_TENANT_ID) or \
+            url == '/OS-REGISTRATION/activate//users/{0}'.format(OS_TENANT_ID):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 
         elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID) or \
-                url == '/domains/default/users/{0}/roles/basic_id'.format(OS_TENANT_ID):
+                url == '/domains/default/users/{0}/roles/basic_id'.format(OS_TENANT_ID) or \
+                url == '/domains/default/users/{0}/roles/community_id'.format(OS_TENANT_ID) :
             resp.status_code = OK
+            resp._content = {}
 
         elif url == "OS-TRUST/trusts_for_admin":
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_TRUST_RESPONSE_FILE).read()
