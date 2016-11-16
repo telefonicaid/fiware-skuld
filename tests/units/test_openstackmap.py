@@ -259,7 +259,7 @@ class MySessionMock(MySessionBaseMock):
             resp._content = json_data
 
         elif url == '/OS-REGISTRATION/activate/users/{0}'.format(OS_TENANT_ID) or \
-            url == '/OS-REGISTRATION/activate//users/{0}'.format(OS_TENANT_ID):
+                url == '/OS-REGISTRATION/activate//users/{0}'.format(OS_TENANT_ID):
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + GET_USER_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
