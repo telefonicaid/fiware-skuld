@@ -266,7 +266,7 @@ class MySessionMock(MySessionBaseMock):
 
         elif url == '/domains/default/users/{0}/roles/trial_id'.format(OS_TENANT_ID) or \
                 url == '/domains/default/users/{0}/roles/basic_id'.format(OS_TENANT_ID) or \
-                url == '/domains/default/users/{0}/roles/community_id'.format(OS_TENANT_ID) :
+                url == '/domains/default/users/{0}/roles/community_id'.format(OS_TENANT_ID):
             resp.status_code = OK
             resp._content = {}
 
