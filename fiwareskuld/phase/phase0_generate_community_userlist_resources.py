@@ -33,8 +33,6 @@ from fiwareskuld.utils import rotated_files
 from fiwareskuld.users_management import UserManager
 from fiwareskuld.conf import settings
 
-__author__ = 'henar'
-
 logger = log.init_logs('phase0')
 
 
@@ -59,12 +57,16 @@ class CommunityUsers:
                 users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
                 regions = user_manager.get_regions(user)
                 if regions:
-                    users_to_delete.write(user_manager.get_regions(user))
+                    users_to_delete.write(regions)
                 else:
                     users_to_delete.write("Projects is not enabled")
                 users_to_delete.write("\n")
 
     def generate_community_users_resources(self):
+        """
+        It generate a file with the community expired users.
+        :return: nothing
+        """
         users = ExpiredUsers('', '', '')
 
         community_users = users.get_community_users()
@@ -72,6 +74,10 @@ class CommunityUsers:
         self._get_community_resources(community_users, 'community_users_regions_resources.txt')
 
     def generate_expired_community_users_resources(self):
+        """
+        It generate a file with the community expired users resources.
+        :return: nothing
+        """
         users = ExpiredUsers('', '', '')
 
         community_users = users.get_list_expired_community_users()
@@ -85,7 +91,7 @@ class CommunityUsers:
             for user in users:
                 users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
                 regions = user_manager.get_regions(user)
-                if regions and "PiraeusUHannoverSpain2Karlsk" in regions:
+                if regions and "PiraeusU,Hannover,Spain2,Karlsk" in regions:
                     users_to_delete.write("Projects is not enabled\n")
                     continue
                 resources = user_manager.get_user_resources_regions(user)
@@ -105,34 +111,8 @@ class CommunityUsers:
                             users_to_delete.write("Projects is not enabled")
                 users_to_delete.write("\n")
 
-    def save_lists(self, cron_daily=False):
-        """Create files users_to_delete.txt and users_to_notify.txt with the
-        users expired and users that will expire in a week or less.
-
-        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
-        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
-        the phase2). To create the file users_to_delete_phase3.txt, the files
-        users_to_delete.txt are rotated in each daily execution; when the file
-        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
-        to users_to_delete_phase3.txt.
-
-        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
-        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
-
-        :param cron_daily: this code is invoked from a cron daily script.
-          if implies the creation of file users_to_delete_phase3.txt
-        :return: nothing
-        """
-        expiredusers = ExpiredUsers('', '', '')
-
-        delete_list = expiredusers.get_community_users()
-        with open('expired_community_users.txt', 'w') as users_to_delete:
-            for user in delete_list:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + "\n ")
-
 
 if __name__ == '__main__':
     users = CommunityUsers()
     users.generate_community_users_regions()
     users.generate_community_users_resources()
-    users.save_lists(cron_daily=False)

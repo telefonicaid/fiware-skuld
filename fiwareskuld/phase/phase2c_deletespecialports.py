@@ -61,23 +61,24 @@ class SpecialPortsRemover(object):
         """
         delete the users' ports that are interfaces in routers of a
         different tenant; these ports can not be deleted without an admin
-        credential.
+        credential for community users.
         :return: nothing
         """
         users_id = self.get_users_from_file("community_users_to_delete.txt")
         self.special_port.delete_special_ports(users_id)
 
-    def delete_specialports(self):
+    def delete_special_ports_trial(self):
         """
         delete the users' ports that are interfaces in routers of a
         different tenant; these ports can not be deleted without an admin
-        credential.
+        credential for trial users.
         :return: nothing
         """
-        users_id = self.get_users_from_file("users_to_delete.txt")
+        users_id = self.get_users_from_file("trial_users_to_delete.txt")
         self.special_port.delete_special_ports(users_id)
 
 if __name__ == '__main__':
     logger = log.init_logs('phase2c_deletespecialports')
     remover = SpecialPortsRemover()
     remover.delete_special_ports_community()
+    remover.delete_special_ports_trial()

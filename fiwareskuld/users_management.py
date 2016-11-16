@@ -364,6 +364,11 @@ class UserManager(object):
         user_resources.nova.create_security_group(sec_name)
 
     def _get_user_resources(self, user):
+        """
+        It obtains the UserResources object for the user.
+        :param user: the user
+        :return: UserResources
+        """
         user_resources = None
         (user_name, trust_id, user_id) = self.generate_trust_id(user)
         if trust_id:
@@ -374,6 +379,11 @@ class UserManager(object):
         return user_resources
 
     def get_regions(self, user):
+        """
+        It obtains the regions for the user
+        :param user: the user
+        :return: a string with the regions.
+        """
         regions_str = ""
         user_resources = self._get_user_resources(user)
         if user_resources:

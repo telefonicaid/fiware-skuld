@@ -25,10 +25,6 @@
 import logging
 import sys
 
-from os import environ as env
-from fiwareskuld.impersonate import TrustFactory
-from fiwareskuld.conf.settings import TRUSTEE, KEYSTONE_ENDPOINT
-from fiwareskuld.utils.osclients import OpenStackClients
 from fiwareskuld.users_management import UserManager
 from fiwareskuld.utils import log
 

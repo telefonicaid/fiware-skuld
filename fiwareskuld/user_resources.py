@@ -345,13 +345,11 @@ class UserResources(object):
             self.detect_images_in_use()
 
     def get_regions_user(self):
-        regions = []
-        endpoints = self.clients.get_keystoneclientv3().endpoints.list()
-
-        for endpoint in endpoints:
-            if endpoint.region not in regions:
-                regions.append(endpoint.region)
-        return regions
+        """
+        It obtains the regions for the user
+        :return: a string with the regions.
+        """
+        return self.regions_available
 
     def get_vms_in_dict(self):
         """return a dictionary of sets with the ids of the user's resources
