@@ -35,7 +35,6 @@ __author__ = 'chema'
 
 logger = log.init_logs('phase0')
 
-
 class ExpiredUsers:
     def __init__(self):
         """Constructor. Create a keystone client"""
@@ -85,7 +84,7 @@ class ExpiredUsers:
                 continue
             if remaining < 0:
                 red_users.append(user)
-            elif remaining <= settings.NOTIFY_BEFORE_EXPIRED:
+            elif remaining <= settings.NOTIFY_BEFORE_TRIAL_EXPIRED:
                 yellow_users.append(user)
 
         return yellow_users, red_users
@@ -157,10 +156,10 @@ class ExpiredUsers:
 
         formatter_string = "%Y-%m-%d"
 
-        datetime_object = datetime.datetime.strptime(trial_started_at, formatter_string)
+        datetime_object = datetime.strptime(trial_started_at, formatter_string)
         date_object_old = datetime_object.date()
 
-        datetime_object = datetime.datetime.today()
+        datetime_object = datetime.today()
         date_object_new = datetime_object.date()
 
         difference = date_object_new - date_object_old

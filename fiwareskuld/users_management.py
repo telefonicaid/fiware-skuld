@@ -327,8 +327,7 @@ class UserManager(object):
         :return: Nothing.
         """
         user = self.get_user(user_id)
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = self._get_user_resources(user)
         user_resources.nova.create_nova_vm(vm_name, image)
 
     def delete_vms_for_user(self, user_id):
@@ -339,8 +338,7 @@ class UserManager(object):
         """
 
         user = self.get_user(user_id)
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = self._get_user_resources(user)
         user_resources.nova.delete_tenant_vms()
 
     def delete_secgroups_for_user(self, user_id):
@@ -351,8 +349,7 @@ class UserManager(object):
         """
 
         user = self.get_user(user_id)
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = self._get_user_resources(user)
         user_resources.nova.delete_tenant_security_groups()
 
     def create_secgroup_for_user(self, user_id, sec_name):
@@ -363,9 +360,44 @@ class UserManager(object):
         :return: Nothing.
         """
         user = self.get_user(user_id)
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = self._get_user_resources(user)
         user_resources.nova.create_security_group(sec_name)
+
+    def _get_user_resources(self, user):
+        user_resources = None
+        (user_name, trust_id, user_id) = self.generate_trust_id(user)
+        if trust_id:
+            try:
+                user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+            except:
+                print "Problems with user {0}. Projects is not enabled".format(user.name)
+        return user_resources
+
+    def get_regions(self, user):
+        regions_str = ""
+        user_resources = self._get_user_resources(user)
+        if user_resources:
+            for region in user_resources.regions_available:
+                regions_str = regions_str + "," + region
+            return regions_str
+        return None
+
+    def get_user_resources_regions(self, user):
+        """
+        It obtains the resources for the user.
+        :param user: the user.
+        :return: A dict with the user resources.
+        """
+        user_resources = self._get_user_resources(user)
+
+        region_resources = {}
+        if not user_resources:
+            return region_resources
+        for region in user_resources.regions_available:
+                user_resources.change_region(region)
+                region_resources[region] = user_resources.get_resources_dict()
+        return region_resources
+
 
     def get_user_resources(self, user):
         """
@@ -373,12 +405,12 @@ class UserManager(object):
         :param user: the user.
         :return: A dict with the user resources.
         """
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        if not trust_id:
-            return None
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
-
+        user_resources = self._get_user_resources(user)
         return user_resources.get_resources_dict()
+
+    def get_image(self, user):
+        user_resources = self._get_user_resources(user)
+        return user_resources.glance.get_images()[0].id
 
     def stop_vms(self, user):
         """
@@ -386,15 +418,37 @@ class UserManager(object):
         :param user: the user
         :return: nothing.
         """
-        (user_name, trust_id, user_id) = self.generate_trust_id(user)
-        user_resources = UserResources(self.trustee, self.trust_password, trust_id=trust_id)
+        user_resources = self._get_user_resources(user)
 
-        vms = user_resources.get_resources_dict()['vms']
+        #region a region
+        vms = user_resources.get_vms_in_dict()
         stopped = user_resources.stop_tenant_vms()
 
         logger.info('Stopped {0} (total {1})'.format(stopped, len(vms)))
         logger.info('Unshare public images of user ' + user.id)
         user_resources.unshare_images()
+        return vms
+
+    def stop_vms_in_regions(self, user):
+        """
+        It stops the vm for the user
+        :param user: the user
+        :return: nothing.
+        """
+        user_resources = self._get_user_resources(user)
+
+        #region a region
+        regions = user_resources.get_regions_user()
+        vms_regions = {}
+        for region in regions:
+            user_resources.change_region(region)
+            vms = user_resources.get_vms_in_dict()
+            vms_regions[region] = vms
+            stopped = user_resources.stop_tenant_vms()
+            logger.info('Stopped {0} (total {1}) in Region {2}'.format(stopped, len(vms), region))
+            user_resources.unshare_images()
+            logger.info('Unshare public images of user ' + user)
+        return vms_regions
 
     def detect_images_in_use(self):
         """

@@ -36,7 +36,16 @@ from fiwareskuld.conf import settings
 __author__ = 'chema'
 
 logger = log.init_logs('phase0')
+import os
+os.environ["OS_AUTH_URL"] = "http://130.206.114.220:5000/v3"
+os.environ["OS_USERNAME"] = "idm"
+os.environ["OS_PASSWORD"] = "idm"
+os.environ["OS_TENANT_NAME"] = "idm"
 
+#os.environ["OS_AUTH_URL"] = "http://cloud.lab.fiware.org:4731/v3"
+#os.environ["OS_USERNAME"] = "admin"
+#os.environ["OS_PASSWORD"] = "zMCGfpTLTAMF2L2c"
+#os.environ["OS_TENANT_NAME"] = "admin"
 
 class CommunityExpiredUsers:
     def __init__(self):

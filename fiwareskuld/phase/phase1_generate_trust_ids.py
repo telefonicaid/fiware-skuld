@@ -35,7 +35,7 @@ from fiwareskuld.utils import log
 
 
 __author__ = 'chema'
-
+import os
 
 def generate_trust_ids(users_to_delete):
     """
