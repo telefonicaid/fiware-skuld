@@ -93,7 +93,6 @@ class TestCheckUsers(TestCase):
         self.trial_roles = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
         self.trial_role = open(UNIT_TEST_RESOURCES_FOLDER + ROLE_TRIAL_RESPONSE_FILE).read()
 
-
     def tearDown(self):
         if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
             del os.environ['KEYSTONE_ADMIN_ENDPOINT']
