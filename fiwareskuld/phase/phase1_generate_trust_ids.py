@@ -28,7 +28,6 @@ import sys
 from fiwareskuld.users_management import UserManager
 from fiwareskuld.utils import log
 
-
 __author__ = 'chema'
 
 

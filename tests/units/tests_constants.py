@@ -42,6 +42,7 @@ GET_USER_RESPONSE_FILE2 = 'get_user_response_2.json'
 LIST_PROJECTS_RESPONSE_FILE = 'list_projects_response.json'
 LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE = 'list_role_assignments_response.json'
 LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE = 'list_role_assignments_trial_response.json'
+ROLE_TRIAL_RESPONSE_FILE = "role_trial_response.json"
 LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE = 'list_role_assignments_community_response.json'
 LIST_ROLES_BASIC_ASSIGMENT_RESPONSE_FILE = 'list_role_assignments_basic_response.json'
 LIST_ROLES_BASIC_RESPONSE_FILE = 'list_roles_basic_response.json'

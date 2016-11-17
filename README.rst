@@ -192,21 +192,26 @@ be set:
 * TRUSTEE_PASSWORD = The password of the account use to impersonate the users.
   This parameter may be omitted: if TRUSTEE_PASSWORD environment variable
   exits, it replaces this parameter.
-* MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
-  Default is 14 days. It is very important that this parameter has the right
-  value, otherwise accounts could be deleted prematurely.
+* MAX_NUMBER_OF_DAYS =
 * LOGGING_PATH. Default value, ``/var/log/fiware-skuld``, requires
   permission to write on ``/var/log``
-* TRIAL_ROLE_ID. Probably this value does not have to be changed when using
-  FiwareLab. It is the ID of the trial account type.
-* BASIC_ROLE_ID. Probably this value does not have to be changed when using
-  FiwareLab. It is the ID of the ordinary account type (without cloud resources
-  access)
 * KEYSTONE_ENDPOINT. The Keystone endpoint.
 * HORIZON_ENDPOINT. The Horizon endpoint.
 * DONT_DELETE_DOMAINS = A set with e-mail domains. The resources of the users
   with ids in these domains must not be freed, even if the accounts are trial
   and expired.
+* TRIAL_MAX_NUMBER_OF_DAYS = The number of day after the trial account is expired.
+  Default is 14 days. It is very important that this parameter has the right
+  value, otherwise accounts could be deleted prematurely.
+* COMMUNITY_MAX_NUMBER_OF_DAYS = The number of day after the community account is expired.
+  Default is 100 days. It is very important that this parameter has the right
+  value, otherwise accounts could be deleted prematurely.
+* NOTIFY_BEFORE_TRIAL_EXPIRED = The number of day to notify the trial users that he/she
+  is going to be expired.  Default is 7 days.
+* NOTIFY_BEFORE_COMMUNITY_EXPIRED = The number of day to notify the community users that he/she
+  is going to be expired.  Default is 30 days.
+
+
 
 The TRUSTEE parameter has a fake value that must be changed unless you use the
 method to impersonate users that implies changing the passwords. See below for
@@ -234,21 +239,28 @@ user need full control, here is a description of the process.
 The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
-    trial users and the users to notify because their resources are expiring in
-    the next days (e.g. 7 days or less). The output of the script are the files
-    ``users_to_delete.txt`` and  ``users_to_notify.txt``.
-    This script requires the admin credential.
+    trial and community users and the users to notify because their resources are
+    expiring in the next days (e.g. 7 days or less). The output of the script are
+    the files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
+    for trial users and ``community_users_to_delete.txt`` and
+    ``community_users_to_notify.txt``. This script requires the admin credential.
+ -phase0: ``phase0_generate_community_userlist_resources.py``. This script generate
+    the list of community users together with the regions where they have access in
+    the file ``community_users_regions.txt``, also it provides the regions for the
+    expired community users in the file `expired_community_users_regions.txt``.
 
 -phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
      user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``users_to_notify.txt``). The purpose of this scripts is to give
+     the file ``trial_users_to_notify.txt`` or ``community_users_to_notify.txt``).
+     The purpose of this scripts is to give
      some time to users to react before their resources are deleted. This script
      requires the admin credential.
 
--phase0c: ``phase0c_change_category.py``. Change the type of user from trial to
-      basic. This script requires the admin credential. It reads the file
-      ``users_to_delete.txt``. Users of type basic cannot access the cloud
-      portal anymore (however, the resources created are still available).
+-phase0c: ``phase0c_change_category.py``. Change the type of user from trial or
+      community to basic. This script requires the admin credential. It reads the file
+      ``trial_users_to_delete.txt`` or ``community_users_to_delete.txt`. Users of
+      type basic cannot access the cloud portal anymore (however, the resources
+      created are still available).
       Please, note that this script must no be executed for each region, but
       only once.
 

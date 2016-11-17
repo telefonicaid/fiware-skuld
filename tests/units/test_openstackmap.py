@@ -37,7 +37,8 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_SERVERS_RESPONSE_FI
     LIST_PROJECTS_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, GET_USER_RESPONSE_FILE, \
     LIST_USERS_RESPONSE_FILE4, LIST_ROLES_TRIAL_RESPONSE_FILE, LIST_ROLES_COMMUNITY_RESPONSE_FILE, \
     LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLE_ASSIGNMENTS_COMMUNITY_RESPONSE_FILE, \
-    GET_USER_RESPONSE_FILE2, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE, GET_TRUST_RESPONSE_FILE
+    GET_USER_RESPONSE_FILE2, ROLE_TRIAL_RESPONSE_FILE, LIST_ROLES_BASIC_RESPONSE_FILE, \
+    LIST_ROLES_ID_BASIC_RESPONSE_FILE, GET_TRUST_RESPONSE_FILE
 
 from fiwareskuld.openstackmap import OpenStackMap
 
@@ -192,6 +193,11 @@ class MySessionMock(MySessionBaseMock):
 
         elif url == '/roles?id=trial_id':
             json_data = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
+            resp.status_code = OK
+            resp._content = json_data
+
+        elif url == '/roles/trial_id':
+            json_data = open(UNIT_TEST_RESOURCES_FOLDER + ROLE_TRIAL_RESPONSE_FILE).read()
             resp.status_code = OK
             resp._content = json_data
 

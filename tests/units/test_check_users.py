@@ -28,7 +28,7 @@ from tests_constants import UNIT_TEST_RESOURCES_FOLDER, LIST_ROLE_ASSIGNMENTS_RE
     LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE_EXTENDED2, LIST_USERS_TO_DELETE, LIST_USERS_RESPONSE_FILE2, \
     LIST_USERS_RESPONSE_FILE3, NO_DATA, LIST_ROLES_COMMUNITY_RESPONSE_FILE, LIST_ROLES_ID_BASIC_RESPONSE_FILE, \
     LIST_ROLE_ASSIGNMENTS_TRIAL_RESPONSE_FILE, LIST_ROLES_BASIC_RESPONSE_FILE, LIST_ROLES_TRIAL_RESPONSE_FILE, \
-    LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE
+    LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE, ROLE_TRIAL_RESPONSE_FILE
 from httplib import OK
 from os import environ
 import os
@@ -91,6 +91,8 @@ class TestCheckUsers(TestCase):
         self.list_basic_assigment = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_BASIC_RESPONSE_FILE).read()
         self.list_role_assigment = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLE_ASSIGNMENTS_RESPONSE_FILE).read()
         self.trial_roles = open(UNIT_TEST_RESOURCES_FOLDER + LIST_ROLES_TRIAL_RESPONSE_FILE).read()
+        self.trial_role = open(UNIT_TEST_RESOURCES_FOLDER + ROLE_TRIAL_RESPONSE_FILE).read()
+
 
     def tearDown(self):
         if 'KEYSTONE_ADMIN_ENDPOINT' in os.environ:
@@ -123,6 +125,8 @@ class TestCheckUsers(TestCase):
             data = self.list_role_assigment
         elif LIST_ROLES_TRIAL_RESPONSE_FILE in args[0]:
             data = self.trial_roles
+        elif ROLE_TRIAL_RESPONSE_FILE in args[0]:
+            data = self.trial_role
         else:
             data = NO_DATA
         return ContextualStringIO(data)

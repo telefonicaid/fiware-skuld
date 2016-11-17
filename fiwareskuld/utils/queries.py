@@ -168,16 +168,13 @@ class Queries(object):
         role = keystone.roles.list(id=role["id"])
         return role[0]
 
-    def get_type_fiware_user(self, user):
+    def get_type_fiware_user(self, user, domain='default'):
         """Return the type of the user: trial, basic,
 
         :param user: the user id
         :return: a string describing the type of user
         """
-        users = {'0bcb7fa6e85046cb9e89ded5656b192b': 'basic',
-                 '7698be72802342cdb2a78f89aa55d8ac': 'trial',
-                 '23a17930700f44bfa527818bd41765ef': 'community',
-                 'bcefc16468f344829a739512b96624df': 'admin',
-                 '24b85c710a1a4868935451a5ed9e4ecd': 'member'}
-        role = self.get_role_user_domain(user)
+        keystone = self.osclients.get_keystoneclientv3()
+        role_id = keystone.role_assignments.list(user=user, domain=domain)[0].role
+        role = keystone.roles.get(role_id["id"])
         return role.name

@@ -46,21 +46,28 @@ class CommunityUsers:
         self.protected = set()
 
     def generate_community_users_regions(self):
+        """
+        It generates a file with the community users and the regions
+        where they have access.
+        :return: nothing
+        """
         users = ExpiredUsers('', '', '')
 
         community_users = users.get_community_users()
 
-        user_manager = UserManager()
+        self._get_regions_users(community_users, "community_users_regions.txt")
 
-        with open('community_users_regions.txt', 'w') as users_to_delete:
-            for user in community_users:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
-                regions = user_manager.get_regions(user)
-                if regions:
-                    users_to_delete.write(regions)
-                else:
-                    users_to_delete.write("Projects is not enabled")
-                users_to_delete.write("\n")
+    def generate_expired_community_users_regions(self):
+        """
+        It generates a file with the expired community users and the regions
+        where they have access.
+        :return: nothing
+        """
+        users = ExpiredUsers('', '', '')
+
+        community_users = users.get_list_expired_community_users()
+
+        self._get_regions_users(community_users, "expired_community_users_regions.txt")
 
     def generate_community_users_resources(self):
         """
@@ -111,8 +118,22 @@ class CommunityUsers:
                             users_to_delete.write("Projects is not enabled")
                 users_to_delete.write("\n")
 
+    def _get_regions_users(self, community_users, file):
+        user_manager = UserManager()
+
+        with open(file, 'w') as users_to_delete:
+            for user in community_users:
+                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
+                regions = user_manager.get_regions(user)
+                if regions:
+                    users_to_delete.write(regions)
+                else:
+                    users_to_delete.write("Projects is not enabled")
+                users_to_delete.write("\n")
 
 if __name__ == '__main__':
     users = CommunityUsers()
     users.generate_community_users_regions()
+    users.generate_expired_community_users_regions()
     users.generate_community_users_resources()
+    users.generate_expired_community_users_resources()
