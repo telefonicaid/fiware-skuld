@@ -27,9 +27,7 @@ import os.path
 
 from fiwareskuld.expired_users import ExpiredUsers
 from fiwareskuld.utils import osclients
-from fiwareskuld.conf import settings
 from fiwareskuld.utils import log
-from fiwareskuld.utils import rotated_files
 from fiwareskuld.users_management import UserManager
 from fiwareskuld.conf import settings
 
@@ -71,7 +69,7 @@ class CommunityUsers:
 
     def generate_community_users_resources(self):
         """
-        It generate a file with the community expired users.
+        It generates a file with the community expired users.
         :return: nothing
         """
         users = ExpiredUsers('', '', '')
@@ -82,7 +80,7 @@ class CommunityUsers:
 
     def generate_expired_community_users_resources(self):
         """
-        It generate a file with the community expired users resources.
+        It generates a file with the community expired users resources.
         :return: nothing
         """
         users = ExpiredUsers('', '', '')
@@ -96,18 +94,15 @@ class CommunityUsers:
 
         with open(file, 'w') as users_to_delete:
             for user in users:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
+                users_to_delete.write(user.id + "," + user.name + "," + user.community_started_at + ",")
                 regions = user_manager.get_regions(user)
-                if regions and "PiraeusU,Hannover,Spain2,Karlsk" in regions:
-                    users_to_delete.write("Projects is not enabled\n")
+                if regions and "PiraeusU;Hannover;Spain2;Karlsk" in regions:
+                    users_to_delete.write("All regions\n")
                     continue
                 resources = user_manager.get_user_resources_regions(user)
 
                 for resource in resources:
                     if type(resources) is dict:
-                        if "SophiaAntipolis2" in resource:
-                            users_to_delete.write("Region SophiaAntipolis2")
-                            continue
                         if resources[resource]:
                             if "vms" in resources[resource]:
                                 users_to_delete.write("Region " + resource + " vms: " +
@@ -123,7 +118,7 @@ class CommunityUsers:
 
         with open(file, 'w') as users_to_delete:
             for user in community_users:
-                users_to_delete.write(user.id + " " + user.name + " " + user.community_started_at + " ")
+                users_to_delete.write(user.id + "," + user.name + "," + user.community_started_at + ",")
                 regions = user_manager.get_regions(user)
                 if regions:
                     users_to_delete.write(regions)

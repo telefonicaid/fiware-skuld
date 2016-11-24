@@ -23,6 +23,7 @@
 # contact with opensource@tid.es
 #
 import os.path
+import sys
 
 from fiwareskuld.expired_users import ExpiredUsers
 from fiwareskuld.utils import osclients
@@ -105,6 +106,16 @@ class UsersExpired:
 
 
 if __name__ == '__main__':
+    logger = log.init_logs('phase0')
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase0_generateuserlist {role}, where role is " \
+              "trial or community"
+        exit()
     expired = UsersExpired()
-    expired.save_community_lists(cron_daily=False)
-    expired.save_trial_lists(cron_daily=False)
+    if "trial" in sys.argv[1]:
+        expired.save_trial_lists(cron_daily=False)
+    elif "community" in sys.argv[1]:
+        expired.save_community_lists(cron_daily=False)
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

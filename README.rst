@@ -192,7 +192,6 @@ be set:
 * TRUSTEE_PASSWORD = The password of the account use to impersonate the users.
   This parameter may be omitted: if TRUSTEE_PASSWORD environment variable
   exits, it replaces this parameter.
-* MAX_NUMBER_OF_DAYS =
 * LOGGING_PATH. Default value, ``/var/log/fiware-skuld``, requires
   permission to write on ``/var/log``
 * KEYSTONE_ENDPOINT. The Keystone endpoint.
@@ -240,10 +239,10 @@ The procedure works by invoking the scripts corresponding to different phases:
 
 -phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
     trial and community users and the users to notify because their resources are
-    expiring in the next days (e.g. 7 days or less). The output of the script are
-    the files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
+    expired in the next days (e.g. 7 days or less). The files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
     for trial users and ``community_users_to_delete.txt`` and
-    ``community_users_to_notify.txt``. This script requires the admin credential.
+    ``community_users_to_notify.txt`` are the script outputs. This script requires the admin credential.
+
  -phase0: ``phase0_generate_community_userlist_resources.py``. This script generate
     the list of community users together with the regions where they have access in
     the file ``community_users_regions.txt``, also it provides the regions for the

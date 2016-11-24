@@ -172,6 +172,7 @@ class Queries(object):
         """Return the type of the user: trial, basic,
 
         :param user: the user id
+        :param domain: the domain
         :return: a string describing the type of user
         """
         keystone = self.osclients.get_keystoneclientv3()

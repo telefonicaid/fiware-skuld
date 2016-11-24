@@ -28,7 +28,6 @@ from fiwareskuld.utils import log
 from fiwareskuld.users_management import UserManager
 import os
 
-__author__ = 'chema'
 
 logger = log.init_logs('phase2')
 

@@ -31,6 +31,7 @@ from requests.packages.urllib3.exceptions import InsecurePlatformWarning
 from fiwareskuld.utils import queries
 from fiwareskuld.utils import log
 from fiwareskuld.conf.settings import TRIAL_ROLE_ID, BASIC_ROLE_ID, HORIZON_ENDPOINT
+import sys
 
 __author__ = 'chema'
 
@@ -50,7 +51,7 @@ class ChangeCategory():
     def change_user_keystone(self, user_id):
         """Change the user from trial to basic
         We use this on our testing environment
-        :param user_id:
+        :param user_id: the user id
         :return: nothing
         """
         path = '/domains/default/users/{0}/roles/{1}'
@@ -64,7 +65,7 @@ class ChangeCategory():
     def change_user_via_idm(self, user_id, type):
         """Change the user from trial to basic
         This method must be used in production.
-        :param user_id:
+        :param user_id: the user id
         :return: nothing
         """
         if q.get_type_fiware_user(user_id) != type:
@@ -85,10 +86,18 @@ class ChangeCategory():
             raise Exception('Server error')
 
     def change_to_basic_for_trial_users(self):
+        """
+        It changes the role from trial to basic.
+        :return: nothing
+        """
         users = open('trial_users_to_delete.txt')
         self._change_to_basic(users, "trial")
 
     def change_to_basic_for_community_users(self):
+        """
+        It changes the role from community to basic.
+        :return: nothing
+        """
         users = open('community_users_to_delete.txt')
         self._change_to_basic(users, "community")
 
@@ -106,6 +115,16 @@ class ChangeCategory():
 
 
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase0_change_category {role}, where role is " \
+              "trial or community"
+        exit()
+
     change_category = ChangeCategory()
-    change_category.change_to_basic_for_community_users()
-    change_category.change_to_basic_for_trial_users()
+    if "trial" in sys.argv[1]:
+        change_category.change_to_basic_for_trial_users()
+    elif "community" in sys.argv[1]:
+        change_category.change_to_basic_for_community_users()
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

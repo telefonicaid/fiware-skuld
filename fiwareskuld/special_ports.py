@@ -21,7 +21,7 @@ class SpecialPortRemover(object):
         self.neutron = self.map.osclients.get_neutronclient()
 
     def _get_tenants_to_delete(self, users):
-        """Returns a set with the cloud project ids of the specified users
+        """It returns a set with the cloud project ids of the specified users
 
         :param users: the users to delete
         :return: a set with the project ids of the users
@@ -31,7 +31,7 @@ class SpecialPortRemover(object):
 
     def _get_router_ports_tenants(self, tenants):
         """
-        return a list with the special ports to delete
+        It returns a list with the special ports to delete
         :param tenants:
         :return: a list of port objects
         """
@@ -46,7 +46,7 @@ class SpecialPortRemover(object):
 
     def delete_special_ports(self, users_id):
         """
-        delete the users' ports that are interfaces in routers of a
+        It deletes the users' ports that are interfaces in routers of a
         different tenant; these ports can not be deleted without an admin
         credential.
         :return: nothing

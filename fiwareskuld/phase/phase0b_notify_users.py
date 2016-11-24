@@ -106,7 +106,7 @@ class Notifier(object):
 
     def notify_trial_users(self):
         """
-        It notify the trial users that they are going to be expired.
+        It notifies the trial users that they are going to be expired.
         :return: nothing
         """
         list_trial_users = self._get_list('trial_users_to_notify.txt')
@@ -115,7 +115,7 @@ class Notifier(object):
 
     def notify_community_users(self):
         """
-        It notify the community users that they are going to be expired.
+        It notifies the community users that they are going to be expired.
         :return: nothing
         """
         list_community_users = self._get_list('community_users_to_notify.txt')
@@ -123,7 +123,17 @@ class Notifier(object):
             self.notify_users(list_community_users)
 
 if __name__ == '__main__':
-    logger = log.init_logs('phase0c')
+    logger = log.init_logs('phase0b')
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase0_notify_users {role}, where role is " \
+              "trial or community"
+        exit()
+
     notifier = Notifier()
-    notifier.notify_trial_users()
-    notifier.notify_community_users()
+    if "trial" in sys.argv[1]:
+        notifier.notify_trial_users()
+    elif "community" in sys.argv[1]:
+        notifier.notify_community_users()
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

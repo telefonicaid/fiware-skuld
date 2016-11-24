@@ -79,6 +79,15 @@ class SpecialPortsRemover(object):
 
 if __name__ == '__main__':
     logger = log.init_logs('phase2c_deletespecialports')
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase2c_deletespecialports.py {role}, where role is " \
+              "trial or community"
+        exit()
     remover = SpecialPortsRemover()
-    remover.delete_special_ports_community()
-    remover.delete_special_ports_trial()
+    if "trial" in sys.argv[1]:
+        remover.delete_special_ports_trial()
+    elif "community" in sys.argv[1]:
+        remover.delete_special_ports_community()
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

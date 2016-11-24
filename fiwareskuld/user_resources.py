@@ -134,7 +134,7 @@ class UserResources(object):
 
     def change_region(self, region):
         """
-        change the region. All the clients need to be updated, but the
+        It changes the region. All the clients need to be updated, but the
         session does not.
         :param region: the name of the region
         :return: nothing.
@@ -352,13 +352,14 @@ class UserResources(object):
         return self.regions_available
 
     def get_vms_in_dict(self):
-        """return a dictionary of sets with the ids of the user's resources
+        """It returns a dictionary of sets with the ids of the user's VMs.
         :return: a dictionary with the user's resources
         """
         return set(self.nova.get_tenant_vms())
 
     def get_vms_regions_in_dict(self):
-        """return a dictionary of sets with the ids of the user's resources
+        """It returns a dictionary of sets with the the user's VMs in the different
+        regions.
         :return: a dictionary with the user's resources
         """
         vms_regions = {}
@@ -368,7 +369,7 @@ class UserResources(object):
         return vms_regions
 
     def get_resources_dict(self):
-        """return a dictionary of sets with the ids of the user's resources
+        """It returns a dictionary of sets with the ids of the user's resources
         :return: a dictionary with the user's resources
         """
         resources = dict()

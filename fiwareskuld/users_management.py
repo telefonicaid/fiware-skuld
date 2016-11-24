@@ -388,7 +388,7 @@ class UserManager(object):
         user_resources = self._get_user_resources(user)
         if user_resources:
             for region in user_resources.regions_available:
-                regions_str = regions_str + "," + region
+                regions_str = regions_str + ";" + region
             return regions_str
         return None
 
