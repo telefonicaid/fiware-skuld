@@ -401,7 +401,7 @@ class UserResources(object):
             if self.swift:
                 resources['objects'] = set(self.swift.get_tenant_objects())
         except Exception as e:
-            print "Error to obtain the data " + e.message
+            print("Error to obtain the data " + e.message)
 
         return resources
 

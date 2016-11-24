@@ -418,6 +418,11 @@ class UserManager(object):
         return user_resources.get_resources_dict()
 
     def get_image(self, user):
+        """
+        It obtains the first image which belongs to the user.
+        :param user: the user
+        :return: the image id.
+        """
         user_resources = self._get_user_resources(user)
         return user_resources.glance.get_images()[0].id
 
@@ -425,7 +430,7 @@ class UserManager(object):
         """
         It stops the vm for the user
         :param user: the user
-        :return: nothing.
+        :return: the vms.
         """
         user_resources = self._get_user_resources(user)
         vms = user_resources.get_vms_in_dict()
@@ -440,7 +445,7 @@ class UserManager(object):
         """
         It stops the vm for the user
         :param user: the user
-        :return: nothing.
+        :return: the vms.
         """
         user_resources = self._get_user_resources(user)
 
