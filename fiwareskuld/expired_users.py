@@ -151,10 +151,8 @@ class ExpiredUsers:
                 # a week or less.
                 yellowList.append(user)
 
-        logger.info("Number of expired Users found: %d",
-                    len(finalList))
-        logger.info("Number of Users to expire in the following days: %d",
-                    len(yellowList))
+        logger.info("Number of {0} expired Users found: {0}".format(role, len(finalList)))
+        logger.info("Number of {0} users to expire in the following days: {0}".format(role, len(yellowList)))
 
         return yellowList, finalList
 
