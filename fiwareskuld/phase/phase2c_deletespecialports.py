@@ -46,7 +46,7 @@ class SpecialPortsRemover(object):
         try:
             users = open(file)
         except Exception:
-            self.logger.error('The users_to_delete.txt file must exists')
+            self.logger.error('The {0} file must exists'.format(file))
             sys.exit(-1)
 
         list_users = list()

@@ -242,6 +242,7 @@ The procedure works by invoking the scripts corresponding to different phases:
     expired in the next days (e.g. 7 days or less). The files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
     for trial users and ``community_users_to_delete.txt`` and
     ``community_users_to_notify.txt`` are the script outputs. This script requires the admin credential.
+    This script is used in the following way: phase0_generateuserlist {role}, where role is trial or community.
 
  -phase0: ``phase0_generate_community_userlist_resources.py``. This script generate
     the list of community users together with the regions where they have access in
@@ -253,7 +254,8 @@ The procedure works by invoking the scripts corresponding to different phases:
      the file ``trial_users_to_notify.txt`` or ``community_users_to_notify.txt``).
      The purpose of this scripts is to give
      some time to users to react before their resources are deleted. This script
-     requires the admin credential.
+     requires the admin credential. This script requires the admin credential.
+    This script is used in the following way: phase0b_notify_users {role}, where role is trial or community.
 
 -phase0c: ``phase0c_change_category.py``. Change the type of user from trial or
       community to basic. This script requires the admin credential. It reads the file
@@ -261,7 +263,8 @@ The procedure works by invoking the scripts corresponding to different phases:
       type basic cannot access the cloud portal anymore (however, the resources
       created are still available).
       Please, note that this script must no be executed for each region, but
-      only once.
+      only once. This script requires the admin credential.
+    This script is used in the following way: phase0c_change_category {role}, where role is trial or community.
 
 -phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
      the file ``users_list.txt``. It sets a new random password for each user

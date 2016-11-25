@@ -72,17 +72,21 @@ def generate_trust_ids(users_to_delete):
 
 if __name__ == '__main__':
     logger = log.init_logs('phase1')
-    if len(sys.argv) == 2:
-        name = sys.argv[1]
-    else:
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase1_generate_trust_ids.py {role}, where role is " \
+              "trial or community"
+        exit()
+    if "trial" in sys.argv[1]:
+        name = 'trial_users_to_delete.txt'
+    elif "community" in sys.argv[1]:
         name = 'community_users_to_delete.txt'
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()
 
     try:
         users_to_delete = open(name)
+        generate_trust_ids(users_to_delete)
     except Exception:
         m = 'Failed reading the file ' + name
         logger.error(m)
-
-    generate_trust_ids(users_to_delete)
-else:
-    logger = logging.getLogger(__name__)
