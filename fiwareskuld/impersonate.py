@@ -91,6 +91,7 @@ class TrustFactory:
             time.time() + self.trustid_validity, True)
         # data['remaining_uses'] = 1
         request = {'trust': data}
+
         (resp, body_resp) = self.keystone.trusts.client.post(
             'OS-TRUST/trusts_for_admin', body=request)
         if resp.ok:

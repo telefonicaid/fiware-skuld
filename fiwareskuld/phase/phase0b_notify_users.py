@@ -90,22 +90,50 @@ class Notifier(object):
         with open(filename, 'wf') as f:
             pickle.dump(user_ids, f, protocol=-1)
 
+    def _get_list(self, file):
+        try:
+            users = open(file)
+        except Exception:
+            logger.error('The users_to_notify.txt file must exists')
+            sys.exit(-1)
+
+        list_users = list()
+        for line in users.readlines():
+            user_id = line.strip()
+            if user_id == '':
+                continue
+            list_users.append(user_id)
+
+    def notify_trial_users(self):
+        """
+        It notifies the trial users that they are going to be expired.
+        :return: nothing
+        """
+        list_trial_users = self._get_list('trial_users_to_notify.txt')
+        if list_trial_users:
+            self.notify_users(list_trial_users)
+
+    def notify_community_users(self):
+        """
+        It notifies the community users that they are going to be expired.
+        :return: nothing
+        """
+        list_community_users = self._get_list('community_users_to_notify.txt')
+        if list_community_users:
+            self.notify_users(list_community_users)
 
 if __name__ == '__main__':
-    logger = log.init_logs('phase0c')
-    try:
-        users = open('users_to_notify.txt')
-    except Exception:
-        logger.error('The users_to_notify.txt file must exists')
-        sys.exit(-1)
+    logger = log.init_logs('phase0b')
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase0_notify_users {role}, where role is " \
+              "trial or community"
+        exit()
 
-    list_users = list()
-    for line in users.readlines():
-        user_id = line.strip()
-        if user_id == '':
-            continue
-        list_users.append(user_id)
-
-    if list_users:
-        notifier = Notifier()
-        notifier.notify_users(list_users)
+    notifier = Notifier()
+    if "trial" in sys.argv[1]:
+        notifier.notify_trial_users()
+    elif "community" in sys.argv[1]:
+        notifier.notify_community_users()
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

@@ -22,65 +22,100 @@
 # For those usages not covered by the Apache version 2.0 License please
 # contact with opensource@tid.es
 #
-from fiwareskuld.conf import settings
-from os import environ as env
+import os.path
+import sys
 
 from fiwareskuld.expired_users import ExpiredUsers
-from fiwareskuld.utils.osclients import OpenStackClients
-from fiwareskuld import utils
+from fiwareskuld.utils import osclients
+from fiwareskuld.utils import log
+from fiwareskuld.utils import rotated_files
+from fiwareskuld.conf import settings
+
+logger = log.init_logs('phase0')
 
 
-logger = utils.log.init_logs('phase0')
+class UsersExpired:
+    def __init__(self):
+        """Constructor. Create a keystone client"""
+        clients = osclients.OpenStackClients()
+        clients.override_endpoint(
+            'identity', clients.region, 'admin', settings.KEYSTONE_ENDPOINT)
+        self.keystoneclient = clients.get_keystoneclientv3()
+        self.protected = set()
+        self.expiredusers = ExpiredUsers('', '', '')
 
-__author__ = 'chema'
+    def save_community_lists(self, cron_daily=False):
+        (notify_list, delete_list) = self.expiredusers.get_yellow_red_community_users()
+        self._save_lists(notify_list, delete_list, "community", cron_daily)
+
+    def save_trial_lists(self, cron_daily=False):
+        (notify_list, delete_list) = self.expiredusers.get_yellow_red_trial_users()
+        self._save_lists(notify_list, delete_list, "trial", cron_daily)
+
+    def _save_lists(self, notify_list, delete_list, start_file, cron_daily=False):
+        """Create files users_to_delete.txt and users_to_notify.txt with the
+        users expired and users that will expire in a week or less.
+
+        If settings.STOP_BEFORE_DELETE !=0 and cron_daily=True, it also creates
+        users_to_delete_phase3.txt (in this case, users_to_delete.txt is for
+        the phase2). To create the file users_to_delete_phase3.txt, the files
+        users_to_delete.txt are rotated in each daily execution; when the file
+        reaches the settings.STOP_BEFORE_DELETE rotation, the file is renamed
+        to users_to_delete_phase3.txt.
+
+        if settings.STOP_BEFORE_DELETE ==0 and cron_daily=True, file
+        users_to_delete.txt is renamed to users_to_delete_phase3.txt.
+
+        :param cron_daily: this code is invoked from a cron daily script.
+          if implies the creation of file users_to_delete_phase3.txt
+        :return: nothing
+        """
+        with open("{0}_users_to_notify.txt".format(start_file), 'w') as users_to_notify:
+            for user in notify_list:
+                users_to_notify.write(user.id + "\n")
+
+        if cron_daily:
+            if settings.STOP_BEFORE_DELETE == 0:
+                name = "{0}_users_to_delete_phase3.txt".format(start_file)
+                with open(name, 'w') as users_to_delete_p3:
+                    for user in delete_list:
+                        users_to_delete_p3.write(user.id + ',' + user.name + '\n')
+            else:
+                name = "{0}_users_to_delete.txt".format(start_file)
+                phase3_name = "{0}_users_to_delete_phase3.txt".format(start_file)
+                basic_users = self.get_basic_users_ids()
+                rotated_files.rotate_files(
+                    name, settings.STOP_BEFORE_DELETE, phase3_name)
+                # Remove from list the users that are not basic
+                # (i.e.) users who has changed to community or again to trial
+                if os.path.exists(phase3_name):
+                    with open(phase3_name, 'r') as phase3:
+                        filtered = list(u for u in phase3 if u in basic_users)
+                    with open(phase3_name, 'w') as phase3:
+                        for user in filtered:
+                            phase3.write(user.id + ',' + user.name + '\n')
+
+                with open(name, 'w') as users_to_delete:
+                    for user in delete_list:
+                        users_to_delete.write(user.id + '\n')
+
+        else:
+            with open("{0}_users_to_delete.txt".format(start_file), 'w') as users_to_delete:
+                for user in delete_list:
+                    users_to_delete.write(user.id + '\n')
 
 
-def is_user_protected(usertocheck):
-    """
-    Return true if the user must not be deleted, because their address has a
-    domain in setting.DONT_DELETE_DOMAINS, and print a warning.
-    :param usertocheck: user to check
-    :return: true if the user must not be deleted
-    """
-    domain = usertocheck.name.partition('@')[2]
-    if domain in settings.DONT_DELETE_DOMAINS:
-        logger.warning(
-            'User with name %(name)s should not be deleted due to its domain',
-            {'name': usertocheck.name})
-        return True
+if __name__ == '__main__':
+    logger = log.init_logs('phase0')
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase0_generateuserlist {role}, where role is " \
+              "trial or community"
+        exit()
+    expired = UsersExpired()
+    if "trial" in sys.argv[1]:
+        expired.save_trial_lists(cron_daily=False)
+    elif "community" in sys.argv[1]:
+        expired.save_community_lists(cron_daily=False)
     else:
-        return False
-
-logger.debug('Getting expired users')
-(next_to_expire, expired_users) = ExpiredUsers(
-    username=env['OS_USERNAME'], password=env['OS_PASSWORD'],
-    tenant=env['OS_TENANT_NAME']).get_yellow_red_users()
-
-osclients = OpenStackClients()
-
-# Use an alternative URL that allow direct access to the keystone admin
-# endpoint, because the registered one uses an internal IP address.
-
-osclients.override_endpoint(
-    'identity', osclients.region, 'admin', settings.KEYSTONE_ENDPOINT)
-
-keystone = osclients.get_keystoneclientv3()
-
-
-# build users map
-logger.debug('Building user map')
-users_by_id = dict()
-for user in keystone.users.list():
-    users_by_id[user.id] = user
-
-with open('users_to_delete.txt', 'w') as fich_delete:
-    logger.debug('Generating user delete list')
-    for user_id in expired_users:
-        if not is_user_protected(users_by_id[user_id]):
-            fich_delete.write(user_id + "\n")
-
-with open('users_to_notify.txt', 'w') as fich_notify:
-    logger.debug('Generating user notification list')
-    for user_id in next_to_expire:
-        if not is_user_protected(users_by_id[user_id]):
-            fich_notify.write(user_id + "\n")
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

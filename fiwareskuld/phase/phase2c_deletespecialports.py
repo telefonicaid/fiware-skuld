@@ -25,36 +25,28 @@
 import sys
 import logging
 
-from fiwareskuld.openstackmap import OpenStackMap
+from fiwareskuld.special_ports import SpecialPortRemover
 from fiwareskuld.utils import log
 
-__author__ = 'chema'
 
-
-class SpecialPortRemover(object):
+class SpecialPortsRemover(object):
     """Class to delete ports associated to routers not owned by the port
     owner. To delete these ports, an admin credential is needed"""
 
     def __init__(self):
         """constructor"""
         self.logger = logging.getLogger(__name__)
-        OpenStackMap.load_filters = False
-        osmap = OpenStackMap(objects_strategy=OpenStackMap.NO_CACHE_OBJECTS,
-                             auto_load=False)
-        osmap.load_keystone()
-        osmap.load_neutron()
-        self.map = osmap
-        self.neutron = self.map.osclients.get_neutronclient()
+        self.special_port = SpecialPortRemover()
 
-    def _get_users_to_delete(self):
+    def get_users_from_file(self, file):
         """
         Read the file with the users to delete and returns a list
         :return: a list with the ids of the users to delete
         """
         try:
-            users = open('users_to_delete.txt')
+            users = open(file)
         except Exception:
-            self.logger.error('The users_to_notify.txt file must exists')
+            self.logger.error('The {0} file must exists'.format(file))
             sys.exit(-1)
 
         list_users = list()
@@ -65,62 +57,37 @@ class SpecialPortRemover(object):
             list_users.append(user_id)
         return list_users
 
-    def _get_tenants_to_delete(self, users):
-        """Returns a set with the cloud project ids of the specified users
-
-        :param users: the users to delete
-        :return: a set with the project ids of the users
-        """
-        users = self._get_users_to_delete()
-        tenants = set(self.map.users[user].cloud_project_id for user in users)
-        return tenants
-
-    def _get_router_ports_tenants(self, tenants):
-        """
-        return a list with the special ports to delete
-        :param tenants:
-        :return: a list of port objects
-        """
-        ports = list()
-        for port in self.map.ports.values():
-            if port.tenant_id in tenants and \
-                    port.device_owner.startswith('network:router_interface'):
-                router = self.map.routers[port.device_id]
-                if router.tenant_id != port.tenant_id:
-                    ports.append(port)
-        return ports
-
-    def delete_special_ports(self):
+    def delete_special_ports_community(self):
         """
         delete the users' ports that are interfaces in routers of a
         different tenant; these ports can not be deleted without an admin
-        credential.
+        credential for community users.
         :return: nothing
         """
-        users = self._get_users_to_delete()
-        tenants = self._get_tenants_to_delete(users)
-        ports = self._get_router_ports_tenants(tenants)
+        users_id = self.get_users_from_file("community_users_to_delete.txt")
+        self.special_port.delete_special_ports(users_id)
 
-        deleted = 0
-        count = 0
-        for port in ports:
-            try:
-                subnet = port['fixed_ips'][0]['subnet_id']
-                body = {'subnet_id': subnet}
-                msg = 'Removing port {0} ({1}/{2})'
-                count += 1
-                self.logger.info(msg.format(port.id, count, len(ports)))
-                self.neutron.remove_interface_router(
-                    router=port['device_id'], body=body)
-                deleted += 1
-            except Exception, e:
-                self.logger.error('Error deleting port' + port.id + 'Reason: ' + str(e))
-        if len(ports):
-            print('Deleted {0}/{1} ports'.format(deleted, len(ports)))
-        else:
-            print('There were not any ports to delete')
+    def delete_special_ports_trial(self):
+        """
+        delete the users' ports that are interfaces in routers of a
+        different tenant; these ports can not be deleted without an admin
+        credential for trial users.
+        :return: nothing
+        """
+        users_id = self.get_users_from_file("trial_users_to_delete.txt")
+        self.special_port.delete_special_ports(users_id)
 
 if __name__ == '__main__':
     logger = log.init_logs('phase2c_deletespecialports')
-    remover = SpecialPortRemover()
-    remover.delete_special_ports()
+    if len(sys.argv) != 2:
+        print "This script is used in the following way: phase2c_deletespecialports.py {role}, where role is " \
+              "trial or community"
+        exit()
+    remover = SpecialPortsRemover()
+    if "trial" in sys.argv[1]:
+        remover.delete_special_ports_trial()
+    elif "community" in sys.argv[1]:
+        remover.delete_special_ports_community()
+    else:
+        print "Invalid role {0}".format(sys.argv[1])
+        exit()

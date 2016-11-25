@@ -131,6 +131,7 @@ class ExpiredUsers:
         yellowList = []
         # Extract the list of user_ids
         for user in users:
+
             notify = 0
             role = self.get_role_trial_or_community(user)
             if not role:
@@ -150,10 +151,8 @@ class ExpiredUsers:
                 # a week or less.
                 yellowList.append(user)
 
-        logger.info("Number of expired Trial Users found: %d",
-                    len(finalList))
-        logger.info("Number of Trial Users to expire in the following days: %d",
-                    len(yellowList))
+        logger.info("Number of {0} expired Users found: {0}".format(role, len(finalList)))
+        logger.info("Number of {0} users to expire in the following days: {0}".format(role, len(yellowList)))
 
         return yellowList, finalList
 

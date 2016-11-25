@@ -75,6 +75,7 @@ class NovaResources(object):
             if vm.status == 'ACTIVE':
                 vm.stop()
                 count += 1
+            print("Stopping VM: " + str(vm.id))
         return count
 
     def delete_tenant_vms(self):

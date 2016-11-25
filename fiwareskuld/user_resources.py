@@ -35,6 +35,8 @@ from cinder_resources import CinderResources
 from neutron_resources import NeutronResources
 from blueprint_resources import BluePrintResources
 from swift_resources import SwiftResources
+from fiwareskuld.utils.queries import Queries
+import cPickle as pickle
 
 
 class UserResources(object):
@@ -132,7 +134,7 @@ class UserResources(object):
 
     def change_region(self, region):
         """
-        change the region. All the clients need to be updated, but the
+        It changes the region. All the clients need to be updated, but the
         session does not.
         :param region: the name of the region
         :return: nothing.
@@ -153,7 +155,8 @@ class UserResources(object):
             # The region does not support swift
             self.swift = None
 
-        self.cinder.on_region_changed()
+        if self.cinder:
+            self.cinder.on_region_changed()
 
         try:
             if self.blueprints:
@@ -339,38 +342,66 @@ class UserResources(object):
         """Make private all the tenant public images"""
         if self.glance:
             self.glance.unshare_images()
+            self.detect_images_in_use()
+
+    def get_regions_user(self):
+        """
+        It obtains the regions for the user
+        :return: a string with the regions.
+        """
+        return self.regions_available
+
+    def get_vms_in_dict(self):
+        """It returns a dictionary of sets with the ids of the user's VMs.
+        :return: a dictionary with the user's resources
+        """
+        return set(self.nova.get_tenant_vms())
+
+    def get_vms_regions_in_dict(self):
+        """It returns a dictionary of sets with the the user's VMs in the different
+        regions.
+        :return: a dictionary with the user's resources
+        """
+        vms_regions = {}
+        for region in self.get_regions_user():
+            self.change_region(region)
+            vms_regions[region] = set(self.nova.get_tenant_vms())
+        return vms_regions
 
     def get_resources_dict(self):
-        """return a dictionary of sets with the ids of the user's resources
+        """It returns a dictionary of sets with the ids of the user's resources
         :return: a dictionary with the user's resources
         """
         resources = dict()
+        try:
 
-        if self.blueprints:
-            resources['blueprints'] = set(self.blueprints.get_tenant_blueprints())
-            resources['templates'] = set(self.blueprints.get_tenant_templates())
+            if self.blueprints:
+                resources['blueprints'] = set(self.blueprints.get_tenant_blueprints())
+                resources['templates'] = set(self.blueprints.get_tenant_templates())
 
-        resources['keys'] = set(self.nova.get_user_keypairs())
-        resources['vms'] = set(self.nova.get_tenant_vms())
-        resources['security_groups'] = set(self.nova.get_tenant_security_groups())
+            resources['keys'] = set(self.nova.get_user_keypairs())
+            resources['vms'] = set(self.nova.get_tenant_vms())
+            resources['security_groups'] = set(self.nova.get_tenant_security_groups())
 
-        resources['images'] = self.glance.get_tenant_images()
+            resources['images'] = self.glance.get_tenant_images()
 
-        if self.cinder:
-            resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
-            resources['volumes'] = set(self.cinder.get_tenant_volumes())
-            resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
+            if self.neutron:
+                resources['floatingips'] = set(self.neutron.get_tenant_floatingips())
+                resources['networks'] = set(self.neutron.get_tenant_networks())
+                resources['nsecuritygroups'] = set(self.neutron.get_tenant_securitygroups())
+                resources['routers'] = set(self.neutron.get_tenant_routers())
+                resources['subnets'] = set(self.neutron.get_tenant_subnets())
+                resources['ports'] = set(self.neutron.get_tenant_ports())
 
-        if self.neutron:
-            resources['floatingips'] = set(self.neutron.get_tenant_floatingips())
-            resources['networks'] = set(self.neutron.get_tenant_networks())
-            resources['nsecuritygroups'] = set(self.neutron.get_tenant_securitygroups())
-            resources['routers'] = set(self.neutron.get_tenant_routers())
-            resources['subnets'] = set(self.neutron.get_tenant_subnets())
-            resources['ports'] = set(self.neutron.get_tenant_ports())
+            if self.cinder:
+                resources['volumesnapshots'] = set(self.cinder.get_tenant_volume_snapshots())
+                resources['volumes'] = set(self.cinder.get_tenant_volumes())
+                resources['backupvolumes'] = set(self.cinder.get_tenant_backup_volumes())
 
-        if self.swift:
-            resources['objects'] = set(self.swift.get_tenant_objects())
+            if self.swift:
+                resources['objects'] = set(self.swift.get_tenant_objects())
+        except Exception as e:
+            print("Error to obtain the data " + e.message)
 
         return resources
 
@@ -429,3 +460,15 @@ class UserResources(object):
             self.logger.info('Freeing trust-id of user ' + self.user_id)
             trust = impersonate.TrustFactory(self.clients)
             trust.delete_trust(self.trust_id)
+
+    def detect_images_in_use(self):
+        """
+        It detects if they are images in use.
+        :return: the image set.
+        """
+        q = Queries()
+
+        image_set = q.get_imageset_othertenants()
+        with open('imagesinuse.pickle', 'wb') as f:
+            pickle.dump(image_set, f, protocol=-1)
+        return image_set

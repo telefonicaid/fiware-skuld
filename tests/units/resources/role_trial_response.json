@@ -1,0 +1,15 @@
+{
+	"links": {
+		"self": "http://cloud.host.fi-ware.org:4731/v3/role",
+		"previous": null,
+		"next": null
+	},
+	"role": {
+		"is_default": true,
+		"id": "trial_id",
+		"links": {
+			"self": "http://cloud.host.fi-ware.org:4731/v3/roles/trial_id"
+		},
+		"name": "trial"
+	}
+}

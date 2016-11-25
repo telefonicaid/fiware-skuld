@@ -26,7 +26,7 @@
 __author__ = 'fla'
 
 LOGGING_PATH = u'/var/log/fiware-skuld'
-KEYSTONE_ENDPOINT = "http:/{KEYSTONE_IP}:5000/"
+KEYSTONE_ENDPOINT = "http://{KEYSTONE_ENDPOINT}/"
 HORIZON_ENDPOINT = "https://{HORIZON_ENDPOINT}/"
 TRUSTEE = "idm"
 TRUSTEE_PASSWORD = ""
