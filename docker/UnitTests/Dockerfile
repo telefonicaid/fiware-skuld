@@ -1,5 +1,5 @@
 FROM ubuntu
-ENV GIT_REV story/CLAUDIA-6188_community_users
+ENV GIT_REV develop
 RUN apt-get update &&  apt-get -y install python-pip python-dev \
   libmysqlclient-dev libpq-dev \
   libxml2-dev libxslt1-dev git \
