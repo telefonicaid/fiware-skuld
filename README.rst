@@ -53,30 +53,7 @@ by impersonating the users themselves. This is the only way to delete the key pa
 for other resources has the advantage that it is impossible to delete the resources of other
 users because the lack of permissions.
 
-The scripts can be invoked in two ways:
-
-* automatically, as a cron daily script
-* manually
-
-The automatic way: cron script
-------------------------------
-
-This is the recommended use of the script. Every day, the script notifies the
-users close to expire (only once), and change the account type and delete the
-resources of the users already expired.
-
-The notification, a remainder of the expiration day, is sent to users that will
-expire before a configurable number of days (by default it is a week). The script
-saves the list of users already notified to avoid sending the same email again
-in the following days.
-
-Before deleting the resources, the user account type is changed from trial to
-basic.
-
-Optionally, the cron script also stops all the VMs and unshares the images of
-the users instead of deleting the resources. The idea is to let several days
-of reaction before actually freeing the resources. The cron script checks that
-users to delete after the grace period are still of type "basic".
+The scripts can be invoked manually. The previous scripts were made to be run in a different way.
 
 The manual way
 --------------
@@ -135,6 +112,7 @@ or with yum in CentOS):
 - Python 2.7
 - pip
 - virtualenv
+- jq
 
 Installation
 ------------
@@ -237,93 +215,37 @@ user need full control, here is a description of the process.
 
 The procedure works by invoking the scripts corresponding to different phases:
 
--phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
-    trial and community users and the users to notify because their resources are
-    expired in the next days (e.g. 7 days or less). The files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
-    for trial users and ``community_users_to_delete.txt`` and
-    ``community_users_to_notify.txt`` are the script outputs. This script requires the admin credential.
-    This script is used in the following way: phase0_generateuserlist {role}, where role is trial or community.
+There were a few steps to identify the users which are not only deprecated but obsoleted since the concept of "basic user" which used to be there does no longer exist. So, the scripts phase0_xxx should not be used execpt in old versions of the platform. Instead we could get the information of old users from [SkuldForAll](SkuldForAll/README.md)
 
- -phase0: ``phase0_generate_community_userlist_resources.py``. This script generate
-    the list of community users together with the regions where they have access in
-    the file ``community_users_regions.txt``, also it provides the regions for the
-    expired community users in the file `expired_community_users_regions.txt``.
+-phase0: ``phase0_generateuserlist.py``. This is an obsoleted script to generate the list of expired trial and community users and the users to notify because their resources are expired in the next days (e.g. 7 days or less). The files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt`` for trial users and ``community_users_to_delete.txt`` and ``community_users_to_notify.txt`` are the script outputs. This script requires the admin credential.  This script is used in the following way: phase0_generateuserlist {role}, where role is trial or community.
 
--phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
-     user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``trial_users_to_notify.txt`` or ``community_users_to_notify.txt``).
-     The purpose of this scripts is to give
-     some time to users to react before their resources are deleted. This script
-     requires the admin credential. This script requires the admin credential.
-    This script is used in the following way: phase0b_notify_users {role}, where role is trial or community.
+ -phase0: ``phase0_generate_community_userlist_resources.py``. This is an obsoleted script to generate the list of community users together with the regions where they have access in the file ``community_users_regions.txt``, also it provides the regions for the expired community users in the file `expired_community_users_regions.txt`.
 
--phase0c: ``phase0c_change_category.py``. Change the type of user from trial or
-      community to basic. This script requires the admin credential. It reads the file
-      ``trial_users_to_delete.txt`` or ``community_users_to_delete.txt`. Users of
-      type basic cannot access the cloud portal anymore (however, the resources
-      created are still available).
-      Please, note that this script must no be executed for each region, but
-      only once. This script requires the admin credential.
-    This script is used in the following way: phase0c_change_category {role}, where role is trial or community.
+-phase0b: ``phase0b_notify_users.py``. This is an obsoleted script that sends an email to each expired user whose resources is going to be deleted (i.e. to each user listed in the file ``trial_users_to_notify.txt`` or ``community_users_to_notify.txt``).  The purpose of this scripts is to give some time to users to react before their resources are deleted. This script requires the admin credential. This script requires the admin credential.  This script is used in the following way: phase0b_notify_users {role}, where role is trial or community.
 
--phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
-     the file ``users_list.txt``. It sets a new random password for each user
-     and generates the file ``users_credentials.txt`` with the user, password
-     and tenant for each user. This script also requires the admin credential.
-     The handicap of this alternative is that if users are not deleted at the
-     end, then they need to recover the password, unless a backup of the
-     password database is restored manually (unfortunately this operation is
-     not possible via API).
+-phase0c: ``phase0c_change_category.py``. This is an obsoleted script to change the type of user from trial or community to basic. This script requires the admin credential. It reads the file ``trial_users_to_delete.txt`` or ``community_users_to_delete.txt``. Users of type basic cannot access the cloud portal anymore (however, the resources created are still available).  Please, note that this script must no be executed for each region, but only once. This script requires the admin credential.  This script is used in the following way: phase0c_change_category {role}, where role is trial or community.
 
--phase1, alternative 2: ``phase1_generate_trust_ids.py``. This script has as
-     input the file ``users_to_delete.txt``. It generates a trust_id for each user
-     and generates the file ``users_trusted_ids.txt``. The idea is to use this
-     token to impersonate the user without touching their password. The
-     disadvantage is that it requires a change in the keystone server, to allow
-     admin user to generate the trust_ids, because usually only the own user to
-     impersonate is allowed to create these tokens.
-     The generated *trust ids* by default are only valid during ten hours; after
-     that time this script must be executed again to generate new tokens.
+-new phase1: ``phase1_generate_trust_ids_new.sh`` takes as first parameter a file with user emails (usually the input `sorted_trial_users.txt` or `sorted_community_users.txt` from [SkuldForAll](SkuldForAll/README.md) scripts) and their corresponding users_to_delete_phase3.txt. This script connects using ssh to the host where the script `impersonate.sh` is (typically on keystone host). Generating trusted_ids can be done like this:
 
--phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
-     stops the servers of the users and makes private their shared images. The idea
-     is to grant a grace period to users to detect that their resources are not
-     available before they are beyond redemption. This script does not require
-     the admin account, because it applies the user' credential from
-     ``users_credentials.txt`` or the trust ids from ``users_trusted_ids.txt``.
-     If users trusted_ids, TRUSTEE_PASSWORD environment variable must be
-     defined.
+    ./phase1_generate_trust_ids_new.sh users_to_delete.txt 2>&1 | tee trusted_ids.txt 
 
--phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to
-     detect images owned by the user, in use by other tenants. Theoretically
-     deleting a image used  by a server doesn't break the server, but if you prefer to
-     avoid deleting that images, invoke this script before phase3. The script
-     purge_images.py may be invoked after, to delete the images with has no VM
-     anymore. This script requires the admin credential. It generates the file
-     imagesinuse.pickle.
+-phase1, old alternative 1: ``phase1_resetpasswords.py``. This is an obsoleted script that has as input the file ``users_list.txt``. It sets a new random password for each user and generates the file ``users_credentials.txt`` with the user, password and tenant for each user. This script also requires the admin credential.  The handicap of this alternative is that if users are not deleted at the end, then they need to recover the password, unless a backup of the password database is restored manually (unfortunately this operation is not possible via API).
 
--phase2c: ``phase2c_deletespecialports.py``. This script can be needed if
-     a user subnet was added to the router of other tenant by an administrator
-     (e.g. to connect to a external network). In this case, a port is created
-     that only can be deleted removing the interface by an administrator.
-     Therefore, this script is invoked by an administrator and deletes ports
-     than the phase3 script will not be able to delete because the phase3 script
-     do not use admin credentials.
-
--phase3: ``phase3_delete.py``. This is the point of no return. Resources are
-     removed and cannot be recovered. This script does not require the admin
-     credential, because it applies either the user's credential from
-     ``users_credentials.txt`` or the trusted ids from ``users_trusted_ids.txt``.
-     If using *trust ids*, the script phase1_generate_trust_ids.py must be
-     invoked again before this script, because the phase2 script delete the
-     *trust id* after using it. In addition, TRUSTEE_PASSWORD environment
-     variable must be defined.
+-phase1, old alternative 2: ``phase1_generate_trust_ids.py``. This is an obsoleted script that has as input the file ``users_to_delete.txt``. It generates a trust_id for each user and generates the file ``users_trusted_ids.txt``. The idea is to use this token to impersonate the user without touching their password. The disadvantage is that it requires a change in the keystone server, to allow admin user to generate the trust_ids, because usually only the own user to impersonate is allowed to create these tokens.  The generated *trust ids* by default are only valid during ten hours; after that time this script must be executed again to generate new tokens.
 
 
-It is very important to note that phase2 and phase3 use the output of previous
-phases scripts without checking again if the user is still a basic user. Therefore
-if the scripts are not executed in the same day, it is convenience to recheck
-if some users has been upgraded.
+-phase2: Must be redefined since this is a good idea. The way it can be done is stopping everything for the user and remove the region for the user with the script [user_delete_region.sh](https://github.com/jicarretero/NewFiwareKeystone/blob/master/README.md#user_delete_regionsh). Once the user can't use the region, we could stop the VMs and we could start a quarantine on the user.
+
+-phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It stops the servers of the users and makes private their shared images. The idea is to grant a grace period to users to detect that their resources are not available before they are beyond redemption. This script does not require the admin account, because it applies the user' credential from ``users_credentials.txt`` or the trust ids from ``users_trusted_ids.txt``.  If users trusted_ids, TRUSTEE_PASSWORD environment variable must be defined.
+
+-phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to detect images owned by the user, in use by other tenants. Theoretically deleting a image used  by a server doesn't break the server, but if you prefer to avoid deleting that images, invoke this script before phase3. The script purge_images.py may be invoked after, to delete the images with has no VM anymore. This script requires the admin credential. It generates the file imagesinuse.pickle.
+
+-phase2c: ``phase2c_deletespecialports.py``. This script can be needed if a user subnet was added to the router of other tenant by an administrator (e.g. to connect to a external network). In this case, a port is created that only can be deleted removing the interface by an administrator.  Therefore, this script is invoked by an administrator and deletes ports than the phase3 script will not be able to delete because the phase3 script do not use admin credentials.
+
+-phase3: ``phase3_delete.py``. This is the point of no return. Resources are removed and cannot be recovered. This script does not require the admin credential, because it applies either the user's credential from ``users_credentials.txt`` or the trusted ids from ``users_trusted_ids.txt``.  If using *trust ids*, the script phase1_generate_trust_ids.py must be invoked again before this script, because the phase2 script delete the *trust id* after using it. In addition, TRUSTEE_PASSWORD environment variable must be defined.
+
+
+It is very important to note that phase2 and phase3 use the output of previous phases scripts without checking again if the user is still a basic user. Therefore if the scripts are not executed in the same day, it is convenience to recheck if some users has been upgraded.  
 
 For example, in the meantime between user notification and running phase0c,
 phase0 should be invoked again and use only the intersection between the old

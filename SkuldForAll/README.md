@@ -7,7 +7,7 @@ These are a set of Scripts thought to replace phase_0 of [Skuld](../README.rst)
 This means that these scripts are thought to find out the users that should be removed from a region after their account has been expired.
 
 ## Prerequistes
-You'll need **python-openstackclient** installed so the scripts can properly work. The script uses python 2.7.
+You'll need **python-openstackclient** installed so the scripts can properly work. The script uses python 2.7. It is also highly recommended to install [jq](https://stedolan.github.io/jq/)
 
 It is interesting to configure the file **fiware-users.ini** whith the appropiate values for the region before running the scripts.
 
@@ -79,9 +79,14 @@ From that file, we can get the users we want to remove or anything just analyzin
 
 - **Select Trial users to be removed**
 
-    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Trial") | .name' /tmp/skulded.json
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Trial" and .enabled==true) | .name' /tmp/skulded.json | sort > sorted_trial_users.txt
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Trial") | .id + "," + .name' ./skulded.json > users_to_delete_phase3.txt
+
 
 - **Select Community users to be removed**
 
-    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Community") | .name' /tmp/skulded.json
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Community" and .enabled==true) | .name' /tmp/skulded.json| sort > sorted_community_users.txt
 
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Community") | .id + "," + .name' ./skulded.json > users_to_delete_phase3.txt
