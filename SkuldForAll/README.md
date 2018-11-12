@@ -1,8 +1,13 @@
 # SkuldForAll
 [![License badge](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+## Introduction
+These are a set of Scripts thought to replace phase_0 of [Skuld](../README.rst) 
+
+This means that these scripts are thought to find out the users that should be removed from a region after their account has been expired.
+
 ## Prerequistes
-You'll need **python-openstackclient** installed so the script can properly work. The script uses python 2.7.
+You'll need **python-openstackclient** installed so the scripts can properly work. The script uses python 2.7.
 
 It is interesting to configure the file **fiware-users.ini** whith the appropiate values for the region before running the scripts.
 
