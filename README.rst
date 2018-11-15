@@ -304,6 +304,7 @@ can't restart the VMs. This is done with NewFiwareKeystone_ scripts:
 
 
 Phase3
+******
 
 It is recommended to wait for some days before definetely remove the user resources.
 
