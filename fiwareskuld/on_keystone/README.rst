@@ -1,5 +1,6 @@
+=====================
 Script impersonate.sh
-======================
+=====================
 
 This script takes the user (Trustor User) as parameter and creates a trust_id for the user shown in the script:
 
