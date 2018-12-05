@@ -131,8 +131,10 @@ Now the system is ready to be used. For future sessions, only the step2 is requi
 Configuration
 -------------
 
-The only configuration file is *settings/settings.py*. The following options may
-be set:
+The only configuration file, for most scripts is *settings/settings.py*. However, SkuldForAll_ also needs
+to be configured.
+
+The following options may be set in *settings/settings.py*:
 
 * TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
   privileges. The value is a username (e.g. trustee@example.com). If
