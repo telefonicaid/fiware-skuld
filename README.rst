@@ -1,4 +1,5 @@
 .. _Top:
+
 =============================
 FIWARE Trial Users Management
 =============================
@@ -10,11 +11,15 @@ FIWARE Trial Users Management
 Introduction
 ============
 
-
-
 This project is a scripts sets developed to free the allocated resources by the
 expired Trial Users in any FIWARE Lab node and finally change the user type
 from Trial User to Basic User.
+
+However, since a migration to a standard Horizon and a standard Keystone was made in order
+to replace Keyrock and the FIWARE Cloud Portal, there's no sense in talking about Basic
+user in FIWARE Cloud. Thus, some of these scripts doesn't work anymore with the new version
+of FIWARE Skuld
+
 
 This project is part of FIWARE_.
 
@@ -24,7 +29,7 @@ Top_
 Description
 ===========
 
-The purpose of these scripts are the recovering of the trial users that are expired,
+The purpose of these scripts were recovering of the trial users that are expired,
 free the associated resources and change the user type from trial to basic.
 
 Most of the user resources are not really associated with users but with tenants;
@@ -44,7 +49,7 @@ The resources that these scripts can free, fall in following categories:
 
 Optionally, images created by the user but in use by other tenants, may be preserved.
 
-The deletion of the resources follow and order, for example snapshot volumes must be removed
+The deletion of the resources follow an order, for example snapshot volumes must be removed
 before volumes, or blueprint instances before templates. The code try to minimize pauses
 executing first all the deletion from the same priority for each user.
 
@@ -53,38 +58,10 @@ by impersonating the users themselves. This is the only way to delete the key pa
 for other resources has the advantage that it is impossible to delete the resources of other
 users because the lack of permissions.
 
-The scripts can be invoked in two ways:
-
-* automatically, as a cron daily script
-* manually
-
-The automatic way: cron script
-------------------------------
-
-This is the recommended use of the script. Every day, the script notifies the
-users close to expire (only once), and change the account type and delete the
-resources of the users already expired.
-
-The notification, a remainder of the expiration day, is sent to users that will
-expire before a configurable number of days (by default it is a week). The script
-saves the list of users already notified to avoid sending the same email again
-in the following days.
-
-Before deleting the resources, the user account type is changed from trial to
-basic.
-
-Optionally, the cron script also stops all the VMs and unshares the images of
-the users instead of deleting the resources. The idea is to let several days
-of reaction before actually freeing the resources. The cron script checks that
-users to delete after the grace period are still of type "basic".
+The scripts can only be invoked manually
 
 The manual way
 --------------
-
-This alternative is provided because it may be useful in some situations.
-Specifically, it is recommended to regularize a system with several users
-expired some weeks ago. Here the notification system integrated in the cron
-script will not work, because the users are already expired, not next to expire.
 
 Using the manual method implies running several scripts in a determined order.
 It is the choice of the administrator who invokes the scripts when users are
@@ -148,43 +125,16 @@ installation.
 3) Install the requirements running *pip install -r requirements.txt
    --allow-all-external*
 
-Now the system is ready to use. For future sessions, only the step2 is required.
-
-Cron script
-***********
-
-The scripts can be invoked manually when full control is needed, but the easy
-way is creating a daily cron script.
-
-Supposing that the project scripts are located in */root/fiware-skulds*, the
-following file can be created as */etc/cron.daily/fiware-skuld*
-
-.. code::
-
-  #!/bin/bash
-
-  export OS_USERNAME=<admin_user>
-  export OS_TENANT_NAME=<admin_tenant>
-  export OS_PASSWORD=<passwrod_admin>
-  export OS_AUTH_URL=<keytone_url>
-
-  export TRUSTEE_USER=<trustee_user>
-  export TRUSTEE_PASSWORD=<trustee_password>
-  /root/fiware-skulds/cron-script.sh
-
-It is recommended to make this file only readable by the root user, because it
-contains passwords:
-
-.. code::
-
-   chmod 700 /etc/cron.daily/fiware-skuld
+Now the system is ready to be used. For future sessions, only the step2 is required.
 
 
 Configuration
 -------------
 
-The only configuration file is *settings/settings.py*. The following options may
-be set:
+The only configuration file, for most scripts is *settings/settings.py*. However, SkuldForAll_ also needs
+to be configured.
+
+The following options may be set in *settings/settings.py*:
 
 * TRUSTEE =  The account to use to impersonate the users. It MUST NOT have admin
   privileges. The value is a username (e.g. trustee@example.com). If
@@ -237,55 +187,92 @@ user need full control, here is a description of the process.
 
 The procedure works by invoking the scripts corresponding to different phases:
 
--phase0: ``phase0_generateuserlist.py``. This script generate the list of expired
-    trial and community users and the users to notify because their resources are
-    expired in the next days (e.g. 7 days or less). The files ``trial_users_to_delete.txt`` and  ``trial_users_to_notify.txt``
-    for trial users and ``community_users_to_delete.txt`` and
-    ``community_users_to_notify.txt`` are the script outputs. This script requires the admin credential.
-    This script is used in the following way: phase0_generateuserlist {role}, where role is trial or community.
+Phase0
+******
 
- -phase0: ``phase0_generate_community_userlist_resources.py``. This script generate
-    the list of community users together with the regions where they have access in
-    the file ``community_users_regions.txt``, also it provides the regions for the
-    expired community users in the file `expired_community_users_regions.txt``.
+This phase is there to get the users to be notified and deleted. There were a few scripts
+here which did the work, whoever, since the changes in old versions, these scripts does not
+work anymore. An older version of is needed.
 
--phase0b: ``phase0b_notify_users.py``. The script sends an email to each expired
-     user whose resources is going to be deleted (i.e. to each user listed in
-     the file ``trial_users_to_notify.txt`` or ``community_users_to_notify.txt``).
-     The purpose of this scripts is to give
-     some time to users to react before their resources are deleted. This script
-     requires the admin credential. This script requires the admin credential.
-    This script is used in the following way: phase0b_notify_users {role}, where role is trial or community.
+The scripts in this phase stopped working when the new Keystone was installed replacing Keyrock. So, a set of new scripts in SkuldForAll_ has been added in order to replace the old ones.
 
--phase0c: ``phase0c_change_category.py``. Change the type of user from trial or
-      community to basic. This script requires the admin credential. It reads the file
-      ``trial_users_to_delete.txt`` or ``community_users_to_delete.txt`. Users of
-      type basic cannot access the cloud portal anymore (however, the resources
-      created are still available).
-      Please, note that this script must no be executed for each region, but
-      only once. This script requires the admin credential.
-    This script is used in the following way: phase0c_change_category {role}, where role is trial or community.
+Basially, the way to use these scripts is:
 
--phase1, alternative 1: ``phase1_resetpasswords.py``. This script has as input
-     the file ``users_list.txt``. It sets a new random password for each user
-     and generates the file ``users_credentials.txt`` with the user, password
-     and tenant for each user. This script also requires the admin credential.
-     The handicap of this alternative is that if users are not deleted at the
-     end, then they need to recover the password, unless a backup of the
-     password database is restored manually (unfortunately this operation is
-     not possible via API).
+* Configuring the file ``fiware-users.ini``
+* Using the scripts the following way:
 
--phase1, alternative 2: ``phase1_generate_trust_ids.py``. This script has as
-     input the file ``users_to_delete.txt``. It generates a trust_id for each user
-     and generates the file ``users_trusted_ids.txt``. The idea is to use this
-     token to impersonate the user without touching their password. The
-     disadvantage is that it requires a change in the keystone server, to allow
-     admin user to generate the trust_ids, because usually only the own user to
-     impersonate is allowed to create these tokens.
-     The generated *trust ids* by default are only valid during ten hours; after
-     that time this script must be executed again to generate new tokens.
+To get the information out of Openstack about the users and resources:
 
--phase2: ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
+.. code:: bash
+
+    ./interesting_info.py > /tmp/all.json
+
+To get the info prepared in a better way:
+
+.. code:: bash
+
+    ./get_outdate_people.py json > /tmp/outdated_people.json
+
+To decide what can be deleted or not:
+
+.. code:: bash
+
+    ./skulded.py > /tmp/skulded.json
+
+This last script takes into account a ``whitelist.txt`` file. It will perform a match between 
+the information in ``outdated_people.json`` and its content so, the users/domains that matches
+are not marked to be deleted.
+
+To get the information in a convenient way for the scripts in phase1 and phase3, text files 
+must be extracted out of these json files. **jq** is the perfect tool to do this:
+
+- **Select Trial users to be removed**
+
+.. code:: bash
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Trial" and .enabled==true) | .name' /tmp/skulded.json | sort > sorted_trial_users.txt
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Trial") | .id + "," + .name' ./skulded.json > users_to_delete_phase3.txt
+
+
+- **Select Community users to be removed**
+
+.. code:: bash
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Community" and .enabled==true) | .name' /tmp/skulded.json| sort > sorted_community_users.txt
+
+
+    jq -r '.users | to_entries[].value | select(.removable==true and .type=="Community") | .id + "," + .name' ./skulded.json > users_to_delete_phase3.txt
+
+
+Phase1
+******
+
+* ``phase1_generate_trust_ids_new.sh``: This new script is is based on the output of the files 
+  ``sorted_trial_users.txt`` and the output of ``users_to_delete_phase3.txt``. In order to 
+  work this script need ssh access to the VM where Keystone is installed so it can remotely 
+  invoke the script impersonate.sh_
+  
+  The impersonte.sh_ script updates the Keystone database to get Trustees for the one 
+  Trustee user on behalf of the user who is going to be removed.
+  
+  The tipical use of this Script is this way:
+
+.. code:: bash
+ 
+ # For Trial users.
+ phase1_generate_trust_ids_new.sh sorted_trial_users.txt > users_trusted_ids.txt
+
+.. code:: bash
+ 
+ # For Community users.
+ phase1_generate_trust_ids_new.sh sorted_trial_users.txt > users_trusted_ids.txt
+
+
+Phase2
+******
+
+* ``phase2_stopvms.py``. This optional script does not delete anything, yet. It
      stops the servers of the users and makes private their shared images. The idea
      is to grant a grace period to users to detect that their resources are not
      available before they are beyond redemption. This script does not require
@@ -294,7 +281,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      If users trusted_ids, TRUSTEE_PASSWORD environment variable must be
      defined.
 
--phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to
+* phase2b: ``phase2b_detectimagesinuse.py``. This is an optional script, to
      detect images owned by the user, in use by other tenants. Theoretically
      deleting a image used  by a server doesn't break the server, but if you prefer to
      avoid deleting that images, invoke this script before phase3. The script
@@ -302,7 +289,7 @@ The procedure works by invoking the scripts corresponding to different phases:
      anymore. This script requires the admin credential. It generates the file
      imagesinuse.pickle.
 
--phase2c: ``phase2c_deletespecialports.py``. This script can be needed if
+* phase2c: ``phase2c_deletespecialports.py``. This script can be needed if
      a user subnet was added to the router of other tenant by an administrator
      (e.g. to connect to a external network). In this case, a port is created
      that only can be deleted removing the interface by an administrator.
@@ -310,7 +297,32 @@ The procedure works by invoking the scripts corresponding to different phases:
      than the phase3 script will not be able to delete because the phase3 script
      do not use admin credentials.
 
--phase3: ``phase3_delete.py``. This is the point of no return. Resources are
+After phase2, it can be usefull to remove the assignment for the user to a region, so they 
+can't restart the VMs. This is done with NewFiwareKeystone_ scripts:
+
+.. code:: bash
+
+   user_delete_region.sh <user_mail> <region>
+
+
+Phase3
+******
+
+It is recommended to wait for some days before definetely remove the user resources.
+
+If in phase 2 the assignments of the user to the region has been done, then we might need
+to re-assign the users to the region in order to be able to do the definitive deletion of
+resources. The user must be reenabled and re-assigned the region using openstack CLI and 
+NewFiwareKeystone_ scripts:
+
+
+.. code:: bash
+
+   openstack user set --enable <user_mail>
+   user_add_region.sh <user_mail> <region>
+
+
+- phase3: ``phase3_delete.py``. This is the point of no return. Resources are
      removed and cannot be recovered. This script does not require the admin
      credential, because it applies either the user's credential from
      ``users_credentials.txt`` or the trusted ids from ``users_trusted_ids.txt``.
@@ -592,3 +604,7 @@ License
 .. _FIWARE: http://www.fiware.org/
 .. _stackoverflow: http://stackoverflow.com/questions/ask
 .. _`FIWARE Q&A`: https://ask.fiware.org
+.. _SkuldForAll: ./SkuldForAll/README.rst
+.. _impersonate.sh: ./fiwareskuld/on_keystone/README.rst
+.. _NewFiwareKeystone: https://github.com/jicarretero/NewFiwareKeystone
+
