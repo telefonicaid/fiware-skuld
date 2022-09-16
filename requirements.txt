@@ -22,7 +22,7 @@ oslo.context==2.5.0
 oslo.i18n==3.7.0
 oslo.log==3.10.0
 oslo.serialization==2.9.0
-oslo.utils==3.13.0
+oslo.utils==4.10.1
 
 requests!=2.9.0,>=2.8.1 # Apache-2.0
 
